@@ -1,0 +1,40 @@
+Tempo de cada frame
+--------------------
+[STANDING]
+
+s1: 0.50s
+s2: 0.15s
+s3: 0.30s
+s2: 0.15s
+(repeat)
+
+[ATTACK]
+a1: 0.10s
+a2: 0.10s 
+a3: 0.10s
+a4: 0.10s
+a5: 0.10s
+a6: 0.10s
+a7: 0.10s
+(repeat)
+
+[STANDING TO ATTACK TO STANDING]
+(pra ver como as animações se encaixam uma na outra)
+s1: 0.50s
+s2: 0.15s
+s3: 0.30s
+s2: 0.15s
+s1: 0.50s
+a1: 0.10s
+a2: 0.10s 
+a3: 0.10s
+a4: 0.10s
+a5: 0.10s
+a6: 0.10s
+a7: 0.10s
+a1: 0.10s
+s1: 0.50s
+s2: 0.15s
+s3: 0.30s
+s2: 0.15s
+
