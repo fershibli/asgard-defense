@@ -14,33 +14,12 @@ class quadradoControlavel(object):
     def blitOn(self,screen):
         screen.fill((0,0,0),pygame.Rect(self.x*self.size,self.y*self.size,self.size,self.size))
     def keyControls(self,event,mapa):
-        if self.right:
-            if mapa[self.y][self.x+1]==0: self.x+=1
-        if self.left:
-            if mapa[self.y][self.x-1]==0: self.x-=1
-        if self.down:
-            if mapa[self.y+1][self.x]==0: self.y+=1
-        if self.up:
-            if mapa[self.y-1][self.x]==0: self.y-=1
-        
-        if event.type==KEYDOWN:
-            if event.key==K_RIGHT:
-                self.right=True
-            if event.key==K_LEFT:
-                self.left=True
-            if event.key==K_UP:
-                self.up=True
-            if event.key==K_DOWN:
-                self.down=True
-        if event.type==KEYUP:
-            if event.key==K_RIGHT:
-                self.right=False
-            if event.key==K_LEFT:
-                self.left=False
-            if event.key==K_UP:
-                self.up=False
-            if event.key==K_DOWN:
-                self.down=False
+        if event.type==MOUSEMOTION:
+            x,y=event.pos
+            self.x=int(x/self.size)
+            self.y=int(y/self.size)
+        if event.type==MOUSEBUTTONUP:
+            if mapa[self.y][self.x]==1: mapa[self.y][self.x]=4
 
 class mapaLimitavel(object):
     def __init__(self):
@@ -60,6 +39,7 @@ class mapaLimitavel(object):
                 if self.mapa[y][x]==2: cor=(0,0,255)
                 if self.mapa[y][x]==3: cor=(255,0,0)
                 if self.mapa[y][x]==1: cor=(0,200,100)
+                if self.mapa[y][x]==4: cor=(100,100,50)
                 screen.fill(cor,pygame.Rect(x*self.size,y*self.size,self.size,self.size))
         self.selecao.blitOn(screen)
     def keyControls(self,event):
