@@ -7,10 +7,7 @@ class quadradoControlavel(object):
         self.x=1
         self.y=1
         self.size=size
-        self.right=False
-        self.left=False
-        self.up=False
-        self.down=False
+        self.buttonup=False
     def blitOn(self,screen):
         screen.fill((0,0,0),pygame.Rect(self.x*self.size,self.y*self.size,self.size,self.size))
     def keyControls(self,event,mapa):
@@ -18,8 +15,12 @@ class quadradoControlavel(object):
             x,y=event.pos
             self.x=int(x/self.size)
             self.y=int(y/self.size)
-        if event.type==MOUSEBUTTONUP:
-            if mapa[self.y][self.x]==1: mapa[self.y][self.x]=4
+            if self.y>len(mapa)-1: self.y=len(mapa)-1
+            if self.x>len(mapa[self.y])-1: self.x=len(mapa[self.y])-1
+        
+        if event.type==MOUSEBUTTONDOWN:
+            if event.button==1:
+                if mapa[self.y][self.x]==1: mapa[self.y][self.x]=4
 
 class mapaLimitavel(object):
     def __init__(self):
