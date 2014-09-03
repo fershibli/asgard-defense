@@ -17,13 +17,14 @@ class animacaoSprite(object):
     def getNextImage(self):
         global frame_atual
         if frame_atual%self.step==0:
-            if int(((self.x+1)*self.size[0])/self.sheet.get_width())==1 or self.x==0:
+            if int(((self.x+1)*self.size[0])/self.sheet.get_width())>=1 or (self.x+1)<=0:
                 if self.rewind:
                     self.next=self.next*(-1)
                 else:
                     self.x=0
-            if int(((self.x+1)*self.size[0])/self.sheet.get_width())<1 and self.x>=0:
+            else:
                 self.x+=self.next
+            
         return self.sheet.subsurface((self.x*self.size[0],self.y*self.size[1]),self.size)
 class blocoTabuleiro(object):
     def __init__(self,numid,cor):
@@ -36,11 +37,12 @@ class quadradoControlavel(object):
     def __init__(self,size):
         self.x=1
         self.y=1
+        self.sprite=animacaoSprite(pygame.image.load("selecao.png"),(40,40),3,False)
         self.size=size
         self.buttonup=False
         self.dentro=True
     def blitOn(self,screen):
-        screen.fill((0,0,0),pygame.Rect(self.x*self.size,self.y*self.size,self.size,self.size))
+        screen.blit(self.sprite.getNextImage(),(self.x*self.size,self.y*self.size))
     def keyControls(self,event,mapa,alingment):
         if event.type==MOUSEMOTION:
             x,y=event.pos
@@ -51,7 +53,7 @@ class quadradoControlavel(object):
             self.dentro=True
             if self.y>alnY+len(mapa)-1 or self.x>alnX+len(mapa[self.y])-1 or self.y<alnY or self.x<alnX:
                 self.dentro=False
-            
+
             if self.y>alnY+len(mapa)-1: # ta dando erro nesse IF
                 self.y=alnY+len(mapa)-1 # nao esqueca da copia desse IF no IF acima quando corrigir
             if self.y<alnY:
@@ -62,30 +64,33 @@ class quadradoControlavel(object):
                 self.x=alnX
         if event.type==MOUSEBUTTONDOWN:
             if event.button==1:
-                if mapa[self.y][self.x].numID==1:
-                    mapa[self.y][self.x].addPeca(animacaoSprite(pygame.image.load("viking_a_spritesheet.png"),(60,50),3,False))
+                if mapa[self.y][self.x].numID==1 or mapa[self.y][self.x].numID==2:
+                    mapa[self.y][self.x].addPeca(animacaoSprite(pygame.image.load("inimigo01sheet2.png"),(20,20),5,False))
 
 class mapaLimitavel(object):
     def __init__(self):
         self.alingment=(0,0)
-        self.mapa=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                   [2,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,3],
-                   [2,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,3],
+        self.mapa=[[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                   [2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2],
+                   [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
+                   [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
                    [1,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1],
-                   [1,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1],
+                   [1,2,2,2,2,2,2,0,0,1,1,0,0,2,2,2,2,2,2,1],
                    [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
                    [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
                    [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1],
-                   [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1],
+                   [1,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,1],
                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
         for y in range(len(self.mapa)):
             for x in range(len(self.mapa[y])):
-                if self.mapa[y][x]==0: cor=(0,255,0)
-                if self.mapa[y][x]==2: cor=(0,0,255)
-                if self.mapa[y][x]==3: cor=(255,0,0)
-                if self.mapa[y][x]==1: cor=(0,200,100)
+                cor=(34,57,65)
+                if self.mapa[y][x]==0: cor=pygame.image.load("mapacaminho4.png")#(0,255,0)
+                if self.mapa[y][x]==3: cor=pygame.image.load("mapaentrada.png")#(0,0,255)
+                if self.mapa[y][x]==4: cor=(255,0,0)
+                if self.mapa[y][x]==1: cor=pygame.image.load("mapagrama4.png")#(0,200,100)
+                if self.mapa[y][x]==2: cor=pygame.image.load("mapagramawterra3.png")#(0,200,100)
                 self.mapa[y][x]=blocoTabuleiro(self.mapa[y][x],cor)
         self.size=40
         self.selecao=quadradoControlavel(self.size)
@@ -93,7 +98,10 @@ class mapaLimitavel(object):
         for y in range(len(self.mapa)):
             for x in range(len(self.mapa[y])):
                 #sprite=False
-                screen.fill(self.mapa[y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
+                try:
+                    screen.blit(self.mapa[y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
+                except:
+                    screen.fill(self.mapa[y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
         for y in range(len(self.mapa)):
             for x in range(len(self.mapa[y])):
                 if self.mapa[y][x].peca!=None:
@@ -119,9 +127,10 @@ class controlesExtras(object):
                 self.tela.storedlink=None
                 self.tela.running=False
         return None
-
-tela_inicial = pyTreeBee.dynamicScreen((800,600),30,(255,255,255),mapaLimitavel())
+tela_vazia = pyTreeBee.dynamicScreen((600,400),60,(255,200,200))
+tela_inicial = pyTreeBee.dynamicScreen((800,600),30,(78,133,154),mapaLimitavel(),pyTreeBee.linkedButton(tela_vazia,pygame.font.SysFont(None,20),["Tela da Maria"],pygame.Rect(700,500,90,90),0,0))
 tela_inicial.addItem(controlesExtras(tela_inicial))
+pygame.mouse.set_visible(False)
 #tela_inicial.setFULLSCREEN()
 pyTreeBee.treeBeeStart(tela_inicial)
 
