@@ -1,7 +1,25 @@
 # -*- coding: cp1252 -*-
 import pyTreeBee,pygame,sys,os
 from pygame.locals import*
+'''
+Testes de compilação:
+    teste na versão 006 com a versão recente do pyTreeBee:
+        compilação : OK
+    inimigoAlvo e torreGuerreiro removidos:
+        erro de compilação permanece
+    comandos setVisible do mouse removidos:
+        erro de compilação permanece
+    matriz3D retrocedida e depois expandida por append:
+        erro de compilação permanece
+    matriz3D retrocedida a uma array com endereçamentos de memoria para outras duas matrizes comuns:
+        erro de compilação permanece
+    camadas de matriz removidas:
+        erro de compilação permanece
+    removido o ciclo duplo de desenho na tela:
+        erro de compilação permanece
+    
 
+'''
 frame_atual=0
 class animacaoSprite(object):
     def __init__(self,spritesheet,spritesize,stepnextsprite,rewind):
@@ -13,7 +31,7 @@ class animacaoSprite(object):
         self.rewind=rewind
         self.next=1
     def setLine(self, line):
-        if line>0 and line<int(self.sheet.get_height()/self.y): self.y=line
+        if line>=0 and line<int(self.sheet.get_height()/self.size[1]): self.y=line
     def getNextImage(self):
         global frame_atual
         if frame_atual%self.step==0:
@@ -26,18 +44,19 @@ class animacaoSprite(object):
                 self.x+=self.next
             
         return self.sheet.subsurface((self.x*self.size[0],self.y*self.size[1]),self.size)
+
 class blocoTabuleiro(object):
     def __init__(self,numid,cor):
         self.numID=numid
         self.cor=cor
-        self.peca=None
-    def addPeca(self,peca):
-        self.peca=peca
+        self.piece=None
+    def addPiece(self,piece):
+        self.piece=piece
 class quadradoControlavel(object):
     def __init__(self,size):
         self.x=1
         self.y=1
-        self.sprite=animacaoSprite(pygame.image.load("selecao.png"),(40,40),3,False)
+        self.sprite=animacaoSprite(pygame.image.load("selecao.png"),(40,40),6,False)
         self.size=size
         self.buttonup=False
         self.dentro=True
@@ -65,12 +84,15 @@ class quadradoControlavel(object):
         if event.type==MOUSEBUTTONDOWN:
             if event.button==1:
                 if mapa[self.y][self.x].numID==1 or mapa[self.y][self.x].numID==2:
-                    mapa[self.y][self.x].addPeca(animacaoSprite(pygame.image.load("inimigo01sheet2.png"),(20,20),5,False))
+                    if self.dentro:
+                        mapa[self.y][self.x].addPiece(animacaoSprite(pygame.image.load("viking_a_spritesheet.png"),(60,50),10,False))
+            
+        
 
 class mapaLimitavel(object):
     def __init__(self):
         self.alingment=(0,0)
-        self.mapa=[[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+        self.mapa=[[8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
                    [2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2],
                    [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
                    [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
@@ -82,16 +104,19 @@ class mapaLimitavel(object):
                    [1,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,1],
                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+                   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]#13
         for y in range(len(self.mapa)):
             for x in range(len(self.mapa[y])):
-                cor=(34,57,65)
+                if self.mapa[y][x]==8: cor=(34,57,65)
                 if self.mapa[y][x]==0: cor=pygame.image.load("mapacaminho4.png")#(0,255,0)
                 if self.mapa[y][x]==3: cor=pygame.image.load("mapaentrada.png")#(0,0,255)
-                if self.mapa[y][x]==4: cor=(255,0,0)
+                if self.mapa[y][x]==4: cor=pygame.transform.flip(pygame.image.load("mapaentrada.png"),True,False)#cor=(255,0,0)
                 if self.mapa[y][x]==1: cor=pygame.image.load("mapagrama4.png")#(0,200,100)
                 if self.mapa[y][x]==2: cor=pygame.image.load("mapagramawterra3.png")#(0,200,100)
-                self.mapa[y][x]=blocoTabuleiro(self.mapa[y][x],cor)
+                try:
+                    self.mapa[y][x]=blocoTabuleiro(self.mapa[y][x],cor)
+                except:
+                    pass
         self.size=40
         self.selecao=quadradoControlavel(self.size)
     def blitOn(self,screen):
@@ -102,12 +127,13 @@ class mapaLimitavel(object):
                     screen.blit(self.mapa[y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
                     screen.fill(self.mapa[y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
-        for y in range(len(self.mapa)):
-            for x in range(len(self.mapa[y])):
-                if self.mapa[y][x].peca!=None:
-                    alinhaspriteX=(self.size/2)-(self.mapa[y][x].peca.size[0]/2)
-                    screen.blit(self.mapa[y][x].peca.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
-                    #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
+                try:
+                    if self.mapa[y][x].piece!=None:
+                        alinhaspriteX=(self.size/2)-(self.mapa[y][x].piece.size[0]/2)
+                        screen.blit(self.mapa[y][x].piece.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
+                        #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
+                except:
+                    pass
 
         self.selecao.blitOn(screen)
         
@@ -127,10 +153,17 @@ class controlesExtras(object):
                 self.tela.storedlink=None
                 self.tela.running=False
         return None
-tela_vazia = pyTreeBee.dynamicScreen((600,400),60,(255,200,200))
-tela_inicial = pyTreeBee.dynamicScreen((800,600),30,(78,133,154),mapaLimitavel(),pyTreeBee.linkedButton(tela_vazia,pygame.font.SysFont(None,20),["Tela da Maria"],pygame.Rect(700,500,90,90),0,0))
-tela_inicial.addItem(controlesExtras(tela_inicial))
-pygame.mouse.set_visible(False)
-#tela_inicial.setFULLSCREEN()
+
+
+fase_1 = pyTreeBee.dynamicScreen((800,600),60,(78,133,154),mapaLimitavel())
+fase_1.addItem(controlesExtras(fase_1))
+
+
+botao_1=pyTreeBee.linkedButton(fase_1,pygame.font.SysFont(None,20),["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,"logo_fase1.png")
+botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
+selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,pygame.font.SysFont(None,50),["   ASGARD DEFENSE","Clique aqui para jogar"],pygame.Rect(0,0,800,600),250,250))
+selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,pygame.font.SysFont(None,20),["Voltar"],pygame.Rect(740,570,50,20),0,0))
+fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,pygame.font.SysFont(None,20),["Voltar"],pygame.Rect(740,570,50,20),0,0))
 pyTreeBee.treeBeeStart(tela_inicial)
 
