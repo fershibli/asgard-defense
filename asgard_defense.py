@@ -1,25 +1,7 @@
 # -*- coding: cp1252 -*-
 import pyTreeBee,pygame,sys,os
 from pygame.locals import*
-'''
-Testes de compilação:
-    teste na versão 006 com a versão recente do pyTreeBee:
-        compilação : OK
-    inimigoAlvo e torreGuerreiro removidos:
-        erro de compilação permanece
-    comandos setVisible do mouse removidos:
-        erro de compilação permanece
-    matriz3D retrocedida e depois expandida por append:
-        erro de compilação permanece
-    matriz3D retrocedida a uma array com endereçamentos de memoria para outras duas matrizes comuns:
-        erro de compilação permanece
-    camadas de matriz removidas:
-        erro de compilação permanece
-    removido o ciclo duplo de desenho na tela:
-        erro de compilação permanece
-    
 
-'''
 frame_atual=0
 class animacaoSprite(object):
     def __init__(self,spritesheet,spritesize,stepnextsprite,rewind):
@@ -44,6 +26,59 @@ class animacaoSprite(object):
                 self.x+=self.next
             
         return self.sheet.subsurface((self.x*self.size[0],self.y*self.size[1]),self.size)
+
+
+class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,1,
+    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , sentidox,sentidoy):
+        self.sprite=animacaoSprite(sprite,size,nextsprite,rewind)
+        self.pos=[x,y]
+        self.pixelpos=[0,0]
+        self.atk=atk
+        self.vel=vel
+        self.hp=hp
+        self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
+        self.parede=(0,0)
+    def encontraParede(self,mapa):
+        if mapa[0][y][x+1]!=0: self.parede=[1,0]
+        elif mapa[0][y][x-1]!=0: self.parede[-1,0]
+        if mapa[0][y+1][x]!=0: self.parede=[0,1]
+        elif mapa[0][y-1][x]!=0: self.parede=[0,-1]
+    def movimentoPadrao(self,mapa):
+        if mapa[0][y+self.parede[1]][x+self.parede[0]]==0:
+            self.sentido=self.parede
+        
+        self.encontraParede(mapa)
+        
+        if mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].numID==0:
+            if self.pixelpos[0]>=self.mapa.size or self.pixelpos[1]>=self.mapa.size:
+                #muda de tile
+                mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = self.mapa[0][self.pos[1]][self.pos[0]].piece
+                self.mapa[0][self.pos[1]][self.pos[0]].piece=None
+                self.pos[0]+=self.sentido[0]
+                self.pos[1]+=self.sentido[1]
+                if self.pixelpos[0]>=self.mapa.size: self.pixelpos[0]-=self.mapa.size
+                if self.pixelpos[1]>=self.mapa.size: self.pixelpos[1]-=self.mapa.size
+            
+        
+    
+
+class torreGuerreiro(object):
+    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,rng):
+        self.sprite=animacaoSprite(sprite,size,nextsprite,rewind)
+        self.atk=atk
+        self.vel=vel
+        self.rng=rng
+        self.aim=None
+    def changeSprite(self):
+        if self.aim!=None and self.sprite.y!=0:
+            self.sprite.setLine(0)
+        elif self.sprite.y!=1:
+            self.sprite.setLine(1)
+    def localizaInimigo(self,mapa):pass #if inimigo==self.rng: self.aim=inimigo
+    def atacaInimigo(self):
+        global frame_atual
+        if frame_atual%self.vel==0:
+            self.aim.hp-=self.atk
 
 class blocoTabuleiro(object):
     def __init__(self,numid,cor):
@@ -70,67 +105,106 @@ class quadradoControlavel(object):
             alnX=int(alingment[0]/self.size)
             alnY=int(alingment[1]/self.size)
             self.dentro=True
-            if self.y>alnY+len(mapa)-1 or self.x>alnX+len(mapa[self.y])-1 or self.y<alnY or self.x<alnX:
+            if self.y>alnY+len(mapa[0])-1 or self.x>alnX+len(mapa[0][self.y])-1 or self.y<alnY or self.x<alnX:
                 self.dentro=False
 
-            if self.y>alnY+len(mapa)-1: # ta dando erro nesse IF
-                self.y=alnY+len(mapa)-1 # nao esqueca da copia desse IF no IF acima quando corrigir
+            if self.y>alnY+len(mapa[0])-1: # ta dando erro nesse IF
+                self.y=alnY+len(mapa[0])-1 # nao esqueca da copia desse IF no IF acima quando corrigir
             if self.y<alnY:
                 self.y=alnY
-            if self.x>alnX+len(mapa[self.y])-1:
-                self.x=alnX+len(mapa[self.y])-1
+            if self.x>alnX+len(mapa[0][self.y])-1:
+                self.x=alnX+len(mapa[0][self.y])-1
             if self.x<alnX:
                 self.x=alnX
         if event.type==MOUSEBUTTONDOWN:
             if event.button==1:
-                if mapa[self.y][self.x].numID==1 or mapa[self.y][self.x].numID==2:
+                if mapa[0][self.y][self.x].numID==1 or mapa[0][self.y][self.x].numID==2:
                     if self.dentro:
-                        mapa[self.y][self.x].addPiece(animacaoSprite(pygame.image.load("viking_a_spritesheet.png"),(60,50),10,False))
+                        mapa[1][self.y][self.x].addPiece(animacaoSprite(pygame.image.load("viking_a_spritesheet.png"),(60,50),10,False))
+        if self.dentro:
+            try:
+                pygame.mouse.set_visible(False)
+            except:
+                print "can't set invisible"
+        else:
+            try:
+                pygame.mouse.set_visible(True)
+            except:
+                print "can't set visible"
             
         
 
 class mapaLimitavel(object):
     def __init__(self):
         self.alingment=(0,0)
-        self.mapa=[[8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-                   [2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2],
-                   [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
-                   [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
-                   [1,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1],
-                   [1,2,2,2,2,2,2,0,0,1,1,0,0,2,2,2,2,2,2,1],
-                   [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
-                   [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
-                   [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1],
-                   [1,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,1],
-                   [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                   [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]#13
-        for y in range(len(self.mapa)):
-            for x in range(len(self.mapa[y])):
-                if self.mapa[y][x]==8: cor=(34,57,65)
-                if self.mapa[y][x]==0: cor=pygame.image.load("mapacaminho4.png")#(0,255,0)
-                if self.mapa[y][x]==3: cor=pygame.image.load("mapaentrada.png")#(0,0,255)
-                if self.mapa[y][x]==4: cor=pygame.transform.flip(pygame.image.load("mapaentrada.png"),True,False)#cor=(255,0,0)
-                if self.mapa[y][x]==1: cor=pygame.image.load("mapagrama4.png")#(0,200,100)
-                if self.mapa[y][x]==2: cor=pygame.image.load("mapagramawterra3.png")#(0,200,100)
-                try:
-                    self.mapa[y][x]=blocoTabuleiro(self.mapa[y][x],cor)
-                except:
-                    pass
+        self.mapa=[[[8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
+                    [2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2],
+                    [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
+                    [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
+                    [1,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1],
+                    [1,2,2,2,2,2,2,0,0,1,1,0,0,2,2,2,2,2,2,1],
+                    [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1],
+                    [1,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],#13
+                   [[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]],
+                   [[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]]]
+        for z in range(len(self.mapa)):
+            for y in range(len(self.mapa[z])):
+                for x in range(len(self.mapa[z][y])):
+                    if self.mapa[z][y][x]==8: cor=(34,57,65)
+                    if self.mapa[z][y][x]==0: cor=pygame.image.load("mapacaminho4.png")#(0,255,0)
+                    if self.mapa[z][y][x]==3: cor=pygame.image.load("mapaentrada.png")#(0,0,255)
+                    if self.mapa[z][y][x]==4: cor=pygame.transform.flip(pygame.image.load("mapaentrada.png"),True,False)#cor=(255,0,0)
+                    if self.mapa[z][y][x]==1: cor=pygame.image.load("mapagrama4.png")#(0,200,100)
+                    if self.mapa[z][y][x]==2: cor=pygame.image.load("mapagramawterra3.png")#(0,200,100)
+                    try:
+                        self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],cor)
+                    except:
+                        pass
         self.size=40
         self.selecao=quadradoControlavel(self.size)
     def blitOn(self,screen):
-        for y in range(len(self.mapa)):
-            for x in range(len(self.mapa[y])):
+        for y in range(len(self.mapa[0])):
+            for x in range(len(self.mapa[0][y])):
                 #sprite=False
                 try:
-                    screen.blit(self.mapa[y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
+                    screen.blit(self.mapa[0][y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
-                    screen.fill(self.mapa[y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
+                    screen.fill(self.mapa[0][y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
+        for y in range(len(self.mapa[1])):
+            for x in range(len(self.mapa[1][y])):
                 try:
-                    if self.mapa[y][x].piece!=None:
-                        alinhaspriteX=(self.size/2)-(self.mapa[y][x].piece.size[0]/2)
-                        screen.blit(self.mapa[y][x].piece.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
+                    if self.mapa[1][y][x].piece!=None:
+                        alinhaspriteX=(self.size/2)-(self.mapa[1][y][x].piece.size[0]/2)
+                        screen.blit(self.mapa[1][y][x].piece.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
                         #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
                     pass
