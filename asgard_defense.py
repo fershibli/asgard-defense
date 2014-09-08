@@ -1,8 +1,17 @@
 # -*- coding: cp1252 -*-
-import pyTreeBee,pygame,sys,os
+import pyTreeBee,pygame,sys,os,math
 from pygame.locals import*
 
 frame_atual=0
+
+class blocoTabuleiro(object):
+    def __init__(self,numid,cor):
+        self.numID=numid
+        self.cor=cor
+        self.piece=None
+    def addPiece(self,piece):
+        self.piece=piece
+
 class animacaoSprite(object):
     def __init__(self,spritesheet,spritesize,stepnextsprite,rewind):
         self.sheet=spritesheet
@@ -38,55 +47,63 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.hp=hp
         self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
         self.parede=(0,0)
-    def encontraParede(self,mapa):
-        if mapa[0][y][x+1]!=0: self.parede=[1,0]
-        elif mapa[0][y][x-1]!=0: self.parede[-1,0]
-        if mapa[0][y+1][x]!=0: self.parede=[0,1]
-        elif mapa[0][y-1][x]!=0: self.parede=[0,-1]
-    def movimentoPadrao(self,mapa):
-        if mapa[0][y+self.parede[1]][x+self.parede[0]]==0:
+    def movimentoPadrao(self,mapa,size):
+        
+        if mapa[0][self.pos[1]][self.pos[0]+1]!=0: self.parede = [1,0]
+        elif mapa[0][self.pos[1]][self.pos[0]-1]!=0: self.parede = [-1,0]
+        if mapa[0][self.pos[1]+1][self.pos[0]]!=0: self.parede = [0,1]
+        elif mapa[0][self.pos[1]-1][self.pos[0]]!=0: self.parede = [0,-1]
+
+        if mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]]==0:
             self.sentido=self.parede
         
-        self.encontraParede(mapa)
-        
         if mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].numID==0:
-            if self.pixelpos[0]>=self.mapa.size or self.pixelpos[1]>=self.mapa.size:
+            if self.pixelpos[0]>=size or self.pixelpos[1]>=size:
                 #muda de tile
-                mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = self.mapa[0][self.pos[1]][self.pos[0]].piece
-                self.mapa[0][self.pos[1]][self.pos[0]].piece=None
+                mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = mapa[0][self.pos[1]][self.pos[0]].piece
+                mapa[0][self.pos[1]][self.pos[0]].piece=None
                 self.pos[0]+=self.sentido[0]
                 self.pos[1]+=self.sentido[1]
-                if self.pixelpos[0]>=self.mapa.size: self.pixelpos[0]-=self.mapa.size
-                if self.pixelpos[1]>=self.mapa.size: self.pixelpos[1]-=self.mapa.size
+                if self.pixelpos[0]>=size: self.pixelpos[0]-=size
+                if self.pixelpos[1]>=size: self.pixelpos[1]-=size
             
         
     
 
 class torreGuerreiro(object):
-    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,rng):
+    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,rng, x,y):
         self.sprite=animacaoSprite(sprite,size,nextsprite,rewind)
         self.atk=atk
         self.vel=vel
         self.rng=rng
         self.aim=None
-    def changeSprite(self):
-        if self.aim!=None and self.sprite.y!=0:
-            self.sprite.setLine(0)
-        elif self.sprite.y!=1:
-            self.sprite.setLine(1)
-    def localizaInimigo(self,mapa):pass #if inimigo==self.rng: self.aim=inimigo
-    def atacaInimigo(self):
+        self.x=x
+        self.y=y
+    def getNextImage(self): self.sprite.getNextImage()
+    def fightControls(self,mapa):
         global frame_atual
-        if frame_atual%self.vel==0:
-            self.aim.hp-=self.atk
-
-class blocoTabuleiro(object):
-    def __init__(self,numid,cor):
-        self.numID=numid
-        self.cor=cor
-        self.piece=None
-    def addPiece(self,piece):
-        self.piece=piece
+        if self.aim==None:
+            for i in range(-self.rng,1+self.rng):
+                for e in range(-self.rng,1+self.rng):
+                    try:
+                        mapa[0][self.y+e][self.x+i].cor=(255,0,0)
+                    except:
+                        pass
+                    try:
+                        if mapa[0][self.y+e][self.x+i].piece!=None:
+                            if self.sprite.y!=1: self.sprite.setLine(1)
+                            self.aim=mapa[0][self.y+e][self.x+i]
+                    except:
+                        pass
+        else:            
+            if frame_atual%self.vel==0:
+                self.aim.piece.hp-=self.atk
+                if self.aim.piece.hp<=0:
+                    print self.aim.piece.hp
+                    self.aim.addPiece(None)
+                    self.aim=None
+                    if self.sprite.y!=0: self.sprite.setLine(0)
+        
 class quadradoControlavel(object):
     def __init__(self,size):
         self.x=1
@@ -120,7 +137,7 @@ class quadradoControlavel(object):
             if event.button==1:
                 if mapa[0][self.y][self.x].numID==1 or mapa[0][self.y][self.x].numID==2:
                     if self.dentro:
-                        mapa[1][self.y][self.x].addPiece(animacaoSprite(pygame.image.load("viking_a_spritesheet.png"),(60,50),10,False))
+                        mapa[1][self.y][self.x].addPiece(torreGuerreiro(pygame.image.load("viking_spritesheet.png"),(60,50),10,False,2,2,2,self.x,self.y))
         if self.dentro:
             try:
                 pygame.mouse.set_visible(False)
@@ -187,13 +204,19 @@ class mapaLimitavel(object):
                     if self.mapa[z][y][x]==2: cor=pygame.image.load("mapagramawterra3.png")#(0,200,100)
                     try:
                         self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],cor)
+                        if y==3 and x==2:
+                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,100,2,3,-1,1)
+                            #print bloco
                     except:
                         pass
         self.size=40
         self.selecao=quadradoControlavel(self.size)
     def blitOn(self,screen):
+                                
         for y in range(len(self.mapa[0])):
             for x in range(len(self.mapa[0][y])):
+                if self.mapa[0][y][x].piece!=None:
+                    self.mapa[0][y][x].piece.movimentoPadrao(self.mapa,self.size)
                 #sprite=False
                 try:
                     screen.blit(self.mapa[0][y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
@@ -201,13 +224,21 @@ class mapaLimitavel(object):
                     screen.fill(self.mapa[0][y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
         for y in range(len(self.mapa[1])):
             for x in range(len(self.mapa[1][y])):
+                if self.mapa[1][y][x].piece!=None:
+                    self.mapa[1][y][x].piece.fightControls(self.mapa)
+                try:
+                    if self.mapa[0][y][x].piece!=None:
+                        alinhaspriteX=(self.size/2)-(self.mapa[0][y][x].piece.sprite.size[0]/2)
+                        screen.blit(self.mapa[0][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]+alinhaspriteX,self.alingment[1]+(y*self.size)+self.mapa[0][y][x].piece.pixelpos[1]))
+                except:
+                    print "erro desenhar inimigo"
                 try:
                     if self.mapa[1][y][x].piece!=None:
-                        alinhaspriteX=(self.size/2)-(self.mapa[1][y][x].piece.size[0]/2)
-                        screen.blit(self.mapa[1][y][x].piece.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
+                        alinhaspriteX=(self.size/2)-(self.mapa[1][y][x].piece.sprite.size[0]/2)
+                        screen.blit(self.mapa[1][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
                         #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
-                    pass
+                    print "erro desenhar torre"
 
         self.selecao.blitOn(screen)
         
@@ -218,6 +249,9 @@ class mapaLimitavel(object):
 class controlesExtras(object):
     def __init__(self,tela):
         self.tela=tela
+        self.rng=2
+        self.x=9
+        self.y=9
     def blitOn(self,screen):
         global frame_atual
         frame_atual+=1
@@ -226,6 +260,12 @@ class controlesExtras(object):
             if event.key==K_ESCAPE:
                 self.tela.storedlink=None
                 self.tela.running=False
+            if event.key==K_SPACE:
+                for i in range(-self.rng,1+self.rng):
+                    for e in range(-self.rng,1+self.rng):
+                        self.tela.itens[0].mapa[0][self.x+i][self.y+e].cor=(255,0,0)
+                
+                self.tela.itens[0].mapa[0][self.x][self.y].cor=(0,0,255)
         return None
 
 
