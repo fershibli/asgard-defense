@@ -45,19 +45,18 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.atk=atk
         self.vel=vel
         self.hp=hp
+        self.hpmax=0;self.hpmax+=hp
         self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
-        self.parede=(0,0)
+        self.parede=[0,0]
     def movimentoPadrao(self,mapa,size):
-        
+        if mapa[0][self.pos[1]-1][self.pos[0]]!=0: self.parede = [0,-1]
         if mapa[0][self.pos[1]][self.pos[0]+1]!=0: self.parede = [1,0]
-        elif mapa[0][self.pos[1]][self.pos[0]-1]!=0: self.parede = [-1,0]
+        if mapa[0][self.pos[1]][self.pos[0]-1]!=0: self.parede = [-1,0]
         if mapa[0][self.pos[1]+1][self.pos[0]]!=0: self.parede = [0,1]
-        elif mapa[0][self.pos[1]-1][self.pos[0]]!=0: self.parede = [0,-1]
 
-        if mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]]==0:
-            self.sentido=self.parede
-        
-        if mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].numID==0:
+        next_tile=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
+        if next_tile.numID==0 and next_tile.piece==None:
+            
             if self.pixelpos[0]>=size or self.pixelpos[1]>=size:
                 #muda de tile
                 mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = mapa[0][self.pos[1]][self.pos[0]].piece
@@ -66,6 +65,16 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
                 self.pos[1]+=self.sentido[1]
                 if self.pixelpos[0]>=size: self.pixelpos[0]-=size
                 if self.pixelpos[1]>=size: self.pixelpos[1]-=size
+            else:
+                if self.sentido[0]==1: self.pixelpos[0]+=self.vel
+                elif self.sentido[0]==-1: self.pixelpos[0]-=self.vel
+                elif self.sentido[1]==1: self.pixelpos[1]+=self.vel
+                elif self.sentido[1]==-1: self.pixelpos[1]-=self.vel
+        else:
+            if mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]].numID!=0:
+                self.parede=[self.parede[1],self.parede[0]]
+            else:
+                self.sentido=self.parede
             
         
     
@@ -85,10 +94,12 @@ class torreGuerreiro(object):
         if self.aim==None:
             for i in range(-self.rng,1+self.rng):
                 for e in range(-self.rng,1+self.rng):
+                    '''
                     try:
                         mapa[0][self.y+e][self.x+i].cor=(255,0,0)
                     except:
                         pass
+                    '''
                     try:
                         if mapa[0][self.y+e][self.x+i].piece!=None:
                             if self.sprite.y!=1: self.sprite.setLine(1)
@@ -97,12 +108,15 @@ class torreGuerreiro(object):
                         pass
         else:            
             if frame_atual%self.vel==0:
-                self.aim.piece.hp-=self.atk
-                if self.aim.piece.hp<=0:
-                    print self.aim.piece.hp
-                    self.aim.addPiece(None)
+                try:
+                    self.aim.piece.hp-=self.atk
+                    if self.aim.piece.hp<=0:
+                        self.aim.addPiece(None)
+                        self.aim=None
+                        if self.sprite.y!=0: self.sprite.setLine(0)
+                except:
                     self.aim=None
-                    if self.sprite.y!=0: self.sprite.setLine(0)
+                    self.sprite.setLine(0)
         
 class quadradoControlavel(object):
     def __init__(self,size):
@@ -204,9 +218,8 @@ class mapaLimitavel(object):
                     if self.mapa[z][y][x]==2: cor=pygame.image.load("mapagramawterra3.png")#(0,200,100)
                     try:
                         self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],cor)
-                        if y==3 and x==2:
-                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,100,2,3,-1,1)
-                            #print bloco
+                        if y==3 and x==3:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,1000,x,y,1,0)
+                        if y==2 and x==2:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,2000,x,y,1,0)
                     except:
                         pass
         self.size=40
@@ -230,6 +243,11 @@ class mapaLimitavel(object):
                     if self.mapa[0][y][x].piece!=None:
                         alinhaspriteX=(self.size/2)-(self.mapa[0][y][x].piece.sprite.size[0]/2)
                         screen.blit(self.mapa[0][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]+alinhaspriteX,self.alingment[1]+(y*self.size)+self.mapa[0][y][x].piece.pixelpos[1]))
+                        screen.fill((255,0,0),pygame.Rect(self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0],self.alingment[1]+((1+y)*self.size)-5+self.mapa[0][y][x].piece.pixelpos[1],self.size,5))
+                        
+                        life=self.size-((self.mapa[0][y][x].piece.hpmax-self.mapa[0][y][x].piece.hp)*self.size/self.mapa[0][y][x].piece.hpmax)
+
+                        screen.fill((255,255,255),pygame.Rect(self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0],self.alingment[1]+((1+y)*self.size)-5+self.mapa[0][y][x].piece.pixelpos[1],life,5))
                 except:
                     print "erro desenhar inimigo"
                 try:
