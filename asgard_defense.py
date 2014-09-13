@@ -26,11 +26,16 @@ class animacaoSprite(object):
     def getNextImage(self):
         global frame_atual
         if frame_atual%self.step==0:
-            if int(((self.x+1)*self.size[0])/self.sheet.get_width())>=1 or (self.x+1)<=0:
+            if int(((self.x+1)*self.size[0])/self.sheet.get_width())>=1 or (self.x+1)<=(-self.next+1)/2:
                 if self.rewind:
-                    self.next=self.next*(-1)
+                    self.next=(-1)
+                    self.x=int(self.sheet.get_width()/self.size[0])-2
+                    self.rewind=False
                 else:
-                    self.x=0
+                    self.x=(-self.next+1)/2
+                    if self.next==(-1):
+                        self.next=1
+                        self.rewind=True
             else:
                 self.x+=self.next
             
@@ -48,15 +53,18 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.hpmax=0;self.hpmax+=hp
         self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
         self.parede=[0,0]
-    def movimentoPadrao(self,mapa,size):
-        if mapa[0][self.pos[1]-1][self.pos[0]]!=0: self.parede = [0,-1]
-        if mapa[0][self.pos[1]][self.pos[0]+1]!=0: self.parede = [1,0]
-        if mapa[0][self.pos[1]][self.pos[0]-1]!=0: self.parede = [-1,0]
-        if mapa[0][self.pos[1]+1][self.pos[0]]!=0: self.parede = [0,1]
-
+    def movimentoPadrao(self,mapa,size):'''
+        if mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]]==0:
+            self.sentido=self.parede
+        if mapa[0][self.pos[1]+1][self.pos[0]].numID!=0: self.parede = [0,1];mapa[0][self.pos[1]+1][self.pos[0]].cor=(0,255,0)
+        if mapa[0][self.pos[1]-1][self.pos[0]].numID!=0: self.parede = [0,-1];mapa[0][self.pos[1]-1][self.pos[0]].cor=(0,255,0)
+        if mapa[0][self.pos[1]][self.pos[0]+1].numID!=0: self.parede = [1,0];mapa[0][self.pos[1]][self.pos[0]+1].cor=(0,255,0)
+        if mapa[0][self.pos[1]][self.pos[0]-1].numID!=0: self.parede = [-1,0];mapa[0][self.pos[1]][self.pos[0]-1].cor=(0,255,0)
+        
+        #mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]].cor=(255,0,0)
+        
         next_tile=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
         if next_tile.numID==0 and next_tile.piece==None:
-            
             if self.pixelpos[0]>=size or self.pixelpos[1]>=size:
                 #muda de tile
                 mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = mapa[0][self.pos[1]][self.pos[0]].piece
@@ -67,15 +75,14 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
                 if self.pixelpos[1]>=size: self.pixelpos[1]-=size
             else:
                 if self.sentido[0]==1: self.pixelpos[0]+=self.vel
-                elif self.sentido[0]==-1: self.pixelpos[0]-=self.vel
-                elif self.sentido[1]==1: self.pixelpos[1]+=self.vel
-                elif self.sentido[1]==-1: self.pixelpos[1]-=self.vel
+                if self.sentido[0]==-1: self.pixelpos[0]-=self.vel
+                if self.sentido[1]==1: self.pixelpos[1]+=self.vel
+                if self.sentido[1]==-1: self.pixelpos[1]-=self.vel
         else:
-            if mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]].numID!=0:
-                self.parede=[self.parede[1],self.parede[0]]
-            else:
-                self.sentido=self.parede
-            
+            if mapa[0][self.pos[1]+1][self.pos[0]].numID==0 and self.sentido!=[0,-1]: self.sentido = [0,1]
+            if mapa[0][self.pos[1]-1][self.pos[0]].numID==0 and self.sentido!=[0,1]: self.sentido = [0,-1]
+            if mapa[0][self.pos[1]][self.pos[0]+1].numID==0 and self.sentido!=[-1,0]: self.sentido = [1,0]
+            if mapa[0][self.pos[1]][self.pos[0]-1].numID==0 and self.sentido!=[1,0]: self.sentido = [-1,0]'''
         
     
 
@@ -122,7 +129,7 @@ class quadradoControlavel(object):
     def __init__(self,size):
         self.x=1
         self.y=1
-        self.sprite=animacaoSprite(pygame.image.load("selecao.png"),(40,40),6,False)
+        self.sprite=animacaoSprite(pygame.image.load("selecao.png"),(40,40),6,True)
         self.size=size
         self.buttonup=False
         self.dentro=True
@@ -151,7 +158,7 @@ class quadradoControlavel(object):
             if event.button==1:
                 if mapa[0][self.y][self.x].numID==1 or mapa[0][self.y][self.x].numID==2:
                     if self.dentro:
-                        mapa[1][self.y][self.x].addPiece(torreGuerreiro(pygame.image.load("viking_spritesheet.png"),(60,50),10,False,2,2,2,self.x,self.y))
+                        mapa[1][self.y][self.x].addPiece(torreGuerreiro(pygame.image.load("viking_spritesheet.png"),(60,50),10,True,2,2,2,self.x,self.y))
         if self.dentro:
             try:
                 pygame.mouse.set_visible(False)
