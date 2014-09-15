@@ -3,7 +3,7 @@ import pyTreeBee,pygame,sys,os,math
 from pygame.locals import*
 
 frame_atual=0
-
+arial12=pygame.font.SysFont("Arial",12)
 class blocoTabuleiro(object):
     def __init__(self,numid,cor):
         self.numID=numid
@@ -13,7 +13,7 @@ class blocoTabuleiro(object):
         self.piece=piece
 
 class animacaoSprite(object):
-    def __init__(self,spritesheet,spritesize,stepnextsprite,rewind):
+    def __init__(self,spritesheet,spritesize,stepnextsprite,rewind,pos=(0,0)):
         self.sheet=spritesheet
         self.size=spritesize
         self.x=0
@@ -21,6 +21,7 @@ class animacaoSprite(object):
         self.step=stepnextsprite
         self.rewind=rewind
         self.next=1
+        self.pos=pos
     def setLine(self, line):
         if line>=0 and line<int(self.sheet.get_height()/self.size[1]): self.y=line
     def getNextImage(self):
@@ -40,6 +41,9 @@ class animacaoSprite(object):
                 self.x+=self.next
             
         return self.sheet.subsurface((self.x*self.size[0],self.y*self.size[1]),self.size)
+    def blitOn(self,screen):
+        screen.blit(self.getNextImage(),self.pos)
+    def keyControls(self,event):pass
 
 
 class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,1,
@@ -129,10 +133,14 @@ class quadradoControlavel(object):
     def __init__(self,size):
         self.x=1
         self.y=1
-        self.sprite=animacaoSprite(pygame.image.load("selecao.png"),(40,40),6,True)
+        self.sprite=animacaoSprite(pygame.image.load("selecao2.png"),(40,40),9,True)
         self.size=size
         self.buttonup=False
         self.dentro=True
+        self.torre=pygame.image.load("viking_spritesheet.png")
+        self.inimigo=pygame.image.load("inimigo01sheet2.png")
+        self.botaodireito=False
+        self.botaoesquerdo=False
     def blitOn(self,screen):
         screen.blit(self.sprite.getNextImage(),(self.x*self.size,self.y*self.size))
     def keyControls(self,event,mapa,alingment):
@@ -154,11 +162,26 @@ class quadradoControlavel(object):
                 self.x=alnX+len(mapa[0][self.y])-1
             if self.x<alnX:
                 self.x=alnX
+        if self.botaoesquerdo:
+            if self.dentro:
+                if mapa[0][self.y][self.x].numID==1 or mapa[0][self.y][self.x].numID==2:                
+                    mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.torre,(60,50),6,False,2,2,2,self.x,self.y))
+                if mapa[0][self.y][self.x].numID==0:
+                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,1000,self.x,self.y,1,0))
+        if self.botaodireito:
+            if mapa[0][self.y][self.x].numID==0:
+                if self.dentro:
+                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,100000,self.x,self.y,1,0))
         if event.type==MOUSEBUTTONDOWN:
             if event.button==1:
-                if mapa[0][self.y][self.x].numID==1 or mapa[0][self.y][self.x].numID==2:
-                    if self.dentro:
-                        mapa[1][self.y][self.x].addPiece(torreGuerreiro(pygame.image.load("viking_spritesheet.png"),(60,50),10,True,2,2,2,self.x,self.y))
+                self.botaoesquerdo=True
+            if event.button==3:
+                self.botaodireito=True
+        if event.type==MOUSEBUTTONUP:
+            if event.button==1:
+                self.botaoesquerdo=False
+            if event.button==3:
+                self.botaodireito=False
         if self.dentro:
             try:
                 pygame.mouse.set_visible(False)
@@ -214,19 +237,21 @@ class mapaLimitavel(object):
                     [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
                     [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
                     [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]]]
+        imagens=[pygame.image.load("mapacaminho4.png"),pygame.image.load("mapaentrada.png"),pygame.image.load("mapagrama4.png"),pygame.image.load("mapagramawterra3.png")]
+        imagens.append(pygame.transform.flip(imagens[1],True,False))
         for z in range(len(self.mapa)):
             for y in range(len(self.mapa[z])):
                 for x in range(len(self.mapa[z][y])):
                     if self.mapa[z][y][x]==8: cor=(34,57,65)
-                    if self.mapa[z][y][x]==0: cor=pygame.image.load("mapacaminho4.png")#(0,255,0)
-                    if self.mapa[z][y][x]==3: cor=pygame.image.load("mapaentrada.png")#(0,0,255)
-                    if self.mapa[z][y][x]==4: cor=pygame.transform.flip(pygame.image.load("mapaentrada.png"),True,False)#cor=(255,0,0)
-                    if self.mapa[z][y][x]==1: cor=pygame.image.load("mapagrama4.png")#(0,200,100)
-                    if self.mapa[z][y][x]==2: cor=pygame.image.load("mapagramawterra3.png")#(0,200,100)
+                    if self.mapa[z][y][x]==0: cor=imagens[0]
+                    if self.mapa[z][y][x]==3: cor=imagens[1]
+                    if self.mapa[z][y][x]==4: cor=imagens[4]
+                    if self.mapa[z][y][x]==1: cor=imagens[2]
+                    if self.mapa[z][y][x]==2: cor=imagens[3]
                     try:
                         self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],cor)
-                        if y==3 and x==3:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,1000,x,y,1,0)
-                        if y==2 and x==2:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,2000,x,y,1,0)
+                        if y==3 and x==3:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,1000,x,y,1,0)
+                        if y==2 and x==2:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,2000,x,y,1,0)
                     except:
                         pass
         self.size=40
@@ -250,11 +275,11 @@ class mapaLimitavel(object):
                     if self.mapa[0][y][x].piece!=None:
                         alinhaspriteX=(self.size/2)-(self.mapa[0][y][x].piece.sprite.size[0]/2)
                         screen.blit(self.mapa[0][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]+alinhaspriteX,self.alingment[1]+(y*self.size)+self.mapa[0][y][x].piece.pixelpos[1]))
-                        screen.fill((255,0,0),pygame.Rect(self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0],self.alingment[1]+((1+y)*self.size)-5+self.mapa[0][y][x].piece.pixelpos[1],self.size,5))
+                        screen.fill((255,0,0),pygame.Rect(self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]+2,self.alingment[1]+((1+y)*self.size)-5+self.mapa[0][y][x].piece.pixelpos[1],self.size-4,5))
                         
                         life=self.size-((self.mapa[0][y][x].piece.hpmax-self.mapa[0][y][x].piece.hp)*self.size/self.mapa[0][y][x].piece.hpmax)
 
-                        screen.fill((255,255,255),pygame.Rect(self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0],self.alingment[1]+((1+y)*self.size)-5+self.mapa[0][y][x].piece.pixelpos[1],life,5))
+                        screen.fill((255,255,255),pygame.Rect(self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]+2,self.alingment[1]+((1+y)*self.size)-5+self.mapa[0][y][x].piece.pixelpos[1],life-4,5))
                 except:
                     print "erro desenhar inimigo"
                 try:
@@ -298,11 +323,24 @@ fase_1 = pyTreeBee.dynamicScreen((800,600),60,(78,133,154),mapaLimitavel())
 fase_1.addItem(controlesExtras(fase_1))
 
 
-botao_1=pyTreeBee.linkedButton(fase_1,pygame.font.SysFont(None,20),["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,"logo_fase1.png")
+botao_1=pyTreeBee.linkedButton(fase_1,arial12,["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png"))
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,pygame.font.SysFont(None,50),["   ASGARD DEFENSE","Clique aqui para jogar"],pygame.Rect(0,0,800,600),250,250))
-selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,pygame.font.SysFont(None,20),["Voltar"],pygame.Rect(740,570,50,20),0,0))
-fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,pygame.font.SysFont(None,20),["Voltar"],pygame.Rect(740,570,50,20),0,0))
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,arial12,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png")))
+selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial12,["Voltar"],pygame.Rect(740,570,50,20),0,0))
+fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial12,["Voltar"],pygame.Rect(740,570,50,20),0,0))
+'''
+tela_inicial.addItem(controlesExtras(tela_inicial))
+wakkanigga=pygame.image.load("viking_a_spritesheet.png")
+
+mod=0
+tela_inicial.addItem(animacaoSprite(wakkanigga,(60,50),4,True,(200,260)))
+for soda in range(8):
+    for sprite in range(12):
+        if sprite==0 and soda==4: mod=80;wakkanigga=pygame.image.load("viking_s_spritesheet.png")
+        tela_inicial.addItem(animacaoSprite(wakkanigga,(60,50),24-soda,False,(40+(sprite*60),50+mod+(soda*50))))
+
+'''
 pyTreeBee.treeBeeStart(tela_inicial)
+
 
