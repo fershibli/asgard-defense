@@ -1,7 +1,7 @@
 # -*- coding: cp1252 -*-
 import pyTreeBee,pygame,sys,os,math
 from pygame.locals import*
-
+temporarydisplay=pygame.display.set_mode((800,600))
 frame_atual=0
 arial12=pygame.font.SysFont("Arial",12)
 class blocoTabuleiro(object):
@@ -237,7 +237,7 @@ class mapaLimitavel(object):
                     [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
                     [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
                     [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]]]
-        imagens=[pygame.image.load("mapacaminho4.png"),pygame.image.load("mapaentrada.png"),pygame.image.load("mapagrama4.png"),pygame.image.load("mapagramawterra3.png")]
+        imagens=[pygame.image.load("mapacaminho4.png").convert(),pygame.image.load("mapaentrada.png").convert(),pygame.image.load("mapagrama4.png").convert(),pygame.image.load("mapagramawterra3.png").convert()]
         imagens.append(pygame.transform.flip(imagens[1],True,False))
         for z in range(len(self.mapa)):
             for y in range(len(self.mapa[z])):
@@ -274,12 +274,16 @@ class mapaLimitavel(object):
                 try:
                     if self.mapa[0][y][x].piece!=None:
                         alinhaspriteX=(self.size/2)-(self.mapa[0][y][x].piece.sprite.size[0]/2)
-                        screen.blit(self.mapa[0][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]+alinhaspriteX,self.alingment[1]+(y*self.size)+self.mapa[0][y][x].piece.pixelpos[1]))
-                        screen.fill((255,0,0),pygame.Rect(self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]+2,self.alingment[1]+((1+y)*self.size)-5+self.mapa[0][y][x].piece.pixelpos[1],self.size-4,5))
+                        posx=self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]
+                        posy=self.alingment[1]+((1+y)*self.size)-10+self.mapa[0][y][x].piece.pixelpos[1]
+                        screen.blit(self.mapa[0][y][x].piece.sprite.getNextImage(), (posx+alinhaspriteX,self.alingment[1]+(y*self.size)+self.mapa[0][y][x].piece.pixelpos[1]))
+
+                        screen.fill((0,0,0),pygame.Rect(posx+2,posy,self.size-4,8))
+                        screen.fill((255,0,0),pygame.Rect(posx+4,posy+2,self.size-8,4))
                         
                         life=self.size-((self.mapa[0][y][x].piece.hpmax-self.mapa[0][y][x].piece.hp)*self.size/self.mapa[0][y][x].piece.hpmax)
 
-                        screen.fill((255,255,255),pygame.Rect(self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]+2,self.alingment[1]+((1+y)*self.size)-5+self.mapa[0][y][x].piece.pixelpos[1],life-4,5))
+                        screen.fill((255,255,255),pygame.Rect(posx+4,posy+2,life-8,4))
                 except:
                     print "erro desenhar inimigo"
                 try:
@@ -323,10 +327,10 @@ fase_1 = pyTreeBee.dynamicScreen((800,600),60,(78,133,154),mapaLimitavel())
 fase_1.addItem(controlesExtras(fase_1))
 
 
-botao_1=pyTreeBee.linkedButton(fase_1,arial12,["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png"))
+botao_1=pyTreeBee.linkedButton(fase_1,arial12,["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,arial12,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png")))
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,arial12,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert()))
 selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial12,["Voltar"],pygame.Rect(740,570,50,20),0,0))
 fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial12,["Voltar"],pygame.Rect(740,570,50,20),0,0))
 '''
