@@ -1,9 +1,9 @@
 # -*- coding: cp1252 -*-
-import pyTreeBee,pygame,sys,os,math
+import pyTreeBee,pygame,sys,os
 from pygame.locals import*
 temporarydisplay=pygame.display.set_mode((800,600))
 frame_atual=0
-arial12=pygame.font.SysFont("Arial",12)
+arial=pygame.font.SysFont("Arial",12)
 class blocoTabuleiro(object):
     def __init__(self,numid,cor):
         self.numID=numid
@@ -57,18 +57,31 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.hpmax=0;self.hpmax+=hp
         self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
         self.parede=[0,0]
-    def movimentoPadrao(self,mapa,size):'''
-        if mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]]==0:
-            self.sentido=self.parede
-        if mapa[0][self.pos[1]+1][self.pos[0]].numID!=0: self.parede = [0,1];mapa[0][self.pos[1]+1][self.pos[0]].cor=(0,255,0)
-        if mapa[0][self.pos[1]-1][self.pos[0]].numID!=0: self.parede = [0,-1];mapa[0][self.pos[1]-1][self.pos[0]].cor=(0,255,0)
-        if mapa[0][self.pos[1]][self.pos[0]+1].numID!=0: self.parede = [1,0];mapa[0][self.pos[1]][self.pos[0]+1].cor=(0,255,0)
-        if mapa[0][self.pos[1]][self.pos[0]-1].numID!=0: self.parede = [-1,0];mapa[0][self.pos[1]][self.pos[0]-1].cor=(0,255,0)
-        
-        #mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]].cor=(255,0,0)
-        
+        self.colidiu=False
+    def movimentoPadrao(self,mapa,size):pass
+    def movimentoPadrao2(self,mapa,size):
         next_tile=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
-        if next_tile.numID==0 and next_tile.piece==None:
+        if self.colidiu:
+            if mapa[0][self.pos[1]+1][self.pos[0]].numID==0 and mapa[0][self.pos[1]+1][self.pos[0]].piece==None: self.sentido=[0,1]
+            elif mapa[0][self.pos[1]][self.pos[0]-1].numID==0 and mapa[0][self.pos[1]][self.pos[0]-1].piece==None: self.sentido=[-1,0]
+            elif mapa[0][self.pos[1]][self.pos[0]+1].numID==0 and mapa[0][self.pos[1]][self.pos[0]+1].piece==None: self.sentido=[1,0]
+            elif mapa[0][self.pos[1]-1][self.pos[0]].numID==0 and mapa[0][self.pos[1]-1][self.pos[0]].piece==None: self.sentido=[0,-1]
+            '''
+            self.sentido=[0,1]
+            if next_tile.numID!=0:
+                self.sentido=[0,-1]
+                if next_tile.numID!=0:
+                    self.sentido=[1,0]
+                    if next_tile.numID!=0:
+                        self.sentido=[-1,0]
+                        if next_tile.numID!=0:
+                            self.sentido=[0,0]
+            self.colidiu=False
+            '''
+        
+        
+        
+        if next_tile.numID==0 and next_tile.piece==None and mapa[0][self.pos[1]][self.pos[0]].numID==0:
             if self.pixelpos[0]>=size or self.pixelpos[1]>=size:
                 #muda de tile
                 mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = mapa[0][self.pos[1]][self.pos[0]].piece
@@ -83,10 +96,14 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
                 if self.sentido[1]==1: self.pixelpos[1]+=self.vel
                 if self.sentido[1]==-1: self.pixelpos[1]-=self.vel
         else:
-            if mapa[0][self.pos[1]+1][self.pos[0]].numID==0 and self.sentido!=[0,-1]: self.sentido = [0,1]
-            if mapa[0][self.pos[1]-1][self.pos[0]].numID==0 and self.sentido!=[0,1]: self.sentido = [0,-1]
-            if mapa[0][self.pos[1]][self.pos[0]+1].numID==0 and self.sentido!=[-1,0]: self.sentido = [1,0]
-            if mapa[0][self.pos[1]][self.pos[0]-1].numID==0 and self.sentido!=[1,0]: self.sentido = [-1,0]'''
+            self.colidiu=True
+            '''
+            if mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]]==0:
+                self.sentido=self.parede
+            elif mapa[0][self.pos[1]+1][self.pos[0]].numID!=0: self.parede = [0,1]
+            elif mapa[0][self.pos[1]-1][self.pos[0]].numID!=0: self.parede = [0,-1]
+            elif mapa[0][self.pos[1]][self.pos[0]+1].numID!=0: self.parede = [1,0]
+            elif mapa[0][self.pos[1]][self.pos[0]-1].numID!=0: self.parede = [-1,0]'''
         
     
 
@@ -327,12 +344,12 @@ fase_1 = pyTreeBee.dynamicScreen((800,600),60,(78,133,154),mapaLimitavel())
 fase_1.addItem(controlesExtras(fase_1))
 
 
-botao_1=pyTreeBee.linkedButton(fase_1,arial12,["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,arial12,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert()))
-selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial12,["Voltar"],pygame.Rect(740,570,50,20),0,0))
-fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial12,["Voltar"],pygame.Rect(740,570,50,20),0,0))
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,arial,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert()))
+selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
+fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
 '''
 tela_inicial.addItem(controlesExtras(tela_inicial))
 wakkanigga=pygame.image.load("viking_a_spritesheet.png")
