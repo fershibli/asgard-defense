@@ -47,7 +47,7 @@ class animacaoSprite(object):
 
 
 class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,1,
-    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , sentidox,sentidoy):
+    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , movimento):
         self.sprite=animacaoSprite(sprite,size,nextsprite,rewind)
         self.pos=[x,y]
         self.pixelpos=[0,0]
@@ -55,10 +55,41 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.vel=vel
         self.hp=hp
         self.hpmax=0;self.hpmax+=hp
-        self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
+        #self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
         self.parede=[0,0]
         self.colidiu=False
-    def movimentoPadrao(self,mapa,size):pass
+        self.movimento=movimento
+        self.vectorpos=0
+        self.vectorstep=1
+        self.rewind=True
+        self.repeat=False
+    def movimentoPadrao(self,mapa,size):
+        next_tile=mapa[0][self.pos[1]+self.movimento[self.vectorpos][1]][self.pos[0]+self.movimento[self.vectorpos][0]]
+        if len(self.movimento)>0:
+            if self.vectorpos<len(self.movimento)-1 and self.vectorpos>=(1-self.vectorstep)/2:
+                if abs(self.pixelpos[0])>=size or abs(self.pixelpos[1])>=size:
+                    #muda de tile
+                    next_tile.piece = mapa[0][self.pos[1]][self.pos[0]].piece
+                    #next_tile.cor=(255,0,0)
+                    mapa[0][self.pos[1]][self.pos[0]].piece=None
+                    self.pos[0]+=self.movimento[self.vectorpos][0]
+                    self.pos[1]+=self.movimento[self.vectorpos][1]
+                    self.vectorpos+=self.vectorstep
+                    if self.pixelpos[0]>=size:
+                        self.pixelpos[0]-=size
+                    if self.pixelpos[1]>=size:
+                        self.pixelpos[1]-=size
+                        
+                    if self.pixelpos[0]<=-size:
+                        self.pixelpos[0]+=size
+                    if self.pixelpos[1]<=-size:
+                        self.pixelpos[1]+=size
+                else:
+                    self.pixelpos[0]+=self.vel*self.movimento[self.vectorpos][0]
+                    self.pixelpos[1]+=self.vel*self.movimento[self.vectorpos][1]
+            else:
+                if self.rewind: self.vectorstep*=-1
+                elif self.repeat: self.vectorpos=0
     def movimentoPadrao2(self,mapa,size):
         next_tile=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
         if self.colidiu:
@@ -183,12 +214,10 @@ class quadradoControlavel(object):
             if self.dentro:
                 if mapa[0][self.y][self.x].numID==1 or mapa[0][self.y][self.x].numID==2:                
                     mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.torre,(60,50),6,False,2,2,2,self.x,self.y))
-                if mapa[0][self.y][self.x].numID==0:
-                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,1000,self.x,self.y,1,0))
         if self.botaodireito:
             if mapa[0][self.y][self.x].numID==0:
                 if self.dentro:
-                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,100000,self.x,self.y,1,0))
+                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,1000,self.x,self.y,None))
         if event.type==MOUSEBUTTONDOWN:
             if event.button==1:
                 self.botaoesquerdo=True
@@ -267,8 +296,17 @@ class mapaLimitavel(object):
                     if self.mapa[z][y][x]==2: cor=imagens[3]
                     try:
                         self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],cor)
-                        if y==3 and x==3:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,1000,x,y,1,0)
-                        if y==2 and x==2:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,2000,x,y,1,0)
+                        if y==3 and x==1:
+                            mov1=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
+                                  (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
+                                  (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
+                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,mov1)
+                        if y==2 and x==1:
+                            mov2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
+                                  (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
+                                  (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
+                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,mov2)
+                        #if y==2 and x==2:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,2000,x,y,1,0)
                     except:
                         pass
         self.size=40
