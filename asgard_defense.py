@@ -47,7 +47,7 @@ class animacaoSprite(object):
 
 
 class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,1,
-    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , movimento):
+    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , movimento, sentidox,sentidoy):
         self.sprite=animacaoSprite(sprite,size,nextsprite,rewind)
         self.pos=[x,y]
         self.pixelpos=[0,0]
@@ -55,7 +55,7 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.vel=vel
         self.hp=hp
         self.hpmax=0;self.hpmax+=hp
-        #self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
+        self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
         self.parede=[0,0]
         self.colidiu=False
         self.movimento=movimento
@@ -64,8 +64,8 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.rewind=True
         self.repeat=False
     def movimentoPadrao(self,mapa,size):
-        next_tile=mapa[0][self.pos[1]+self.movimento[self.vectorpos][1]][self.pos[0]+self.movimento[self.vectorpos][0]]
-        if len(self.movimento)>0:
+        if len(self.movimento)>0:#segue movimento definido
+            next_tile=mapa[0][self.pos[1]+self.movimento[self.vectorpos][1]][self.pos[0]+self.movimento[self.vectorpos][0]]
             if self.vectorpos<len(self.movimento)-1 and self.vectorpos>=(1-self.vectorstep)/2:
                 if abs(self.pixelpos[0])>=size or abs(self.pixelpos[1])>=size:
                     #muda de tile
@@ -90,6 +90,49 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
             else:
                 if self.rewind: self.vectorstep*=-1
                 elif self.repeat: self.vectorpos=0
+        else:#segue paredes
+            next_tile=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
+            if self.colidiu:
+                if mapa[0][self.pos[1]+1][self.pos[0]].numID==0 and mapa[0][self.pos[1]+1][self.pos[0]].piece==None: self.sentido=[0,1]
+                elif mapa[0][self.pos[1]][self.pos[0]-1].numID==0 and mapa[0][self.pos[1]][self.pos[0]-1].piece==None: self.sentido=[-1,0]
+                elif mapa[0][self.pos[1]][self.pos[0]+1].numID==0 and mapa[0][self.pos[1]][self.pos[0]+1].piece==None: self.sentido=[1,0]
+                elif mapa[0][self.pos[1]-1][self.pos[0]].numID==0 and mapa[0][self.pos[1]-1][self.pos[0]].piece==None: self.sentido=[0,-1]
+                '''
+                self.sentido=[0,1]
+                if next_tile.numID!=0:
+                    self.sentido=[0,-1]
+                    if next_tile.numID!=0:
+                        self.sentido=[1,0]
+                        if next_tile.numID!=0:
+                            self.sentido=[-1,0]
+                            if next_tile.numID!=0:
+                                self.sentido=[0,0]
+                self.colidiu=False
+                '''
+            
+            
+            
+            if next_tile.numID==0 and next_tile.piece==None and mapa[0][self.pos[1]][self.pos[0]].numID==0:
+                if abs(self.pixelpos[0])>=size or abs(self.pixelpos[1])>=size:
+                    #muda de tile
+                    mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = mapa[0][self.pos[1]][self.pos[0]].piece
+                    mapa[0][self.pos[1]][self.pos[0]].piece=None
+                    self.pos[0]+=self.sentido[0]
+                    self.pos[1]+=self.sentido[1]
+                    if self.pixelpos[0]>=size:
+                        self.pixelpos[0]-=size
+                    if self.pixelpos[1]>=size:
+                        self.pixelpos[1]-=size
+                        
+                    if self.pixelpos[0]<=-size:
+                        self.pixelpos[0]+=size
+                    if self.pixelpos[1]<=-size:
+                        self.pixelpos[1]+=size
+                else:
+                    self.pixelpos[0]+=self.vel*self.sentido[0]
+                    self.pixelpos[1]+=self.vel*self.sentido[1]
+            else:
+                self.colidiu=True
     def movimentoPadrao2(self,mapa,size):
         next_tile=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
         if self.colidiu:
@@ -300,12 +343,12 @@ class mapaLimitavel(object):
                             mov1=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
                                   (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
                                   (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,mov1)
+                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,[],1,0)
                         if y==2 and x==1:
                             mov2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
                                   (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
                                   (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,mov2)
+                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,[],1,0)
                         #if y==2 and x==2:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,2000,x,y,1,0)
                     except:
                         pass
