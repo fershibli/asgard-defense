@@ -61,10 +61,13 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.movimento=movimento
         self.vectorpos=0
         self.vectorstep=1
-        self.rewind=True
+        self.rewind=False
         self.repeat=False
     def movimentoPadrao(self,mapa,size):
-        if len(self.movimento)>0:#segue movimento definido
+        if len(self.movimento)>0:
+
+            #segue movimento definido
+            
             next_tile=mapa[0][self.pos[1]+self.movimento[self.vectorpos][1]][self.pos[0]+self.movimento[self.vectorpos][0]]
             if self.vectorpos<len(self.movimento)-1 and self.vectorpos>=(1-self.vectorstep)/2:
                 if abs(self.pixelpos[0])>=size or abs(self.pixelpos[1])>=size:
@@ -90,94 +93,8 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
             else:
                 if self.rewind: self.vectorstep*=-1
                 elif self.repeat: self.vectorpos=0
-        else:#segue paredes
-            next_tile=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
-            if self.colidiu:
-                if mapa[0][self.pos[1]+1][self.pos[0]].numID==0 and mapa[0][self.pos[1]+1][self.pos[0]].piece==None: self.sentido=[0,1]
-                elif mapa[0][self.pos[1]][self.pos[0]-1].numID==0 and mapa[0][self.pos[1]][self.pos[0]-1].piece==None: self.sentido=[-1,0]
-                elif mapa[0][self.pos[1]][self.pos[0]+1].numID==0 and mapa[0][self.pos[1]][self.pos[0]+1].piece==None: self.sentido=[1,0]
-                elif mapa[0][self.pos[1]-1][self.pos[0]].numID==0 and mapa[0][self.pos[1]-1][self.pos[0]].piece==None: self.sentido=[0,-1]
-                '''
-                self.sentido=[0,1]
-                if next_tile.numID!=0:
-                    self.sentido=[0,-1]
-                    if next_tile.numID!=0:
-                        self.sentido=[1,0]
-                        if next_tile.numID!=0:
-                            self.sentido=[-1,0]
-                            if next_tile.numID!=0:
-                                self.sentido=[0,0]
-                self.colidiu=False
-                '''
-            
-            
-            
-            if next_tile.numID==0 and next_tile.piece==None and mapa[0][self.pos[1]][self.pos[0]].numID==0:
-                if abs(self.pixelpos[0])>=size or abs(self.pixelpos[1])>=size:
-                    #muda de tile
-                    mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = mapa[0][self.pos[1]][self.pos[0]].piece
-                    mapa[0][self.pos[1]][self.pos[0]].piece=None
-                    self.pos[0]+=self.sentido[0]
-                    self.pos[1]+=self.sentido[1]
-                    if self.pixelpos[0]>=size:
-                        self.pixelpos[0]-=size
-                    if self.pixelpos[1]>=size:
-                        self.pixelpos[1]-=size
-                        
-                    if self.pixelpos[0]<=-size:
-                        self.pixelpos[0]+=size
-                    if self.pixelpos[1]<=-size:
-                        self.pixelpos[1]+=size
-                else:
-                    self.pixelpos[0]+=self.vel*self.sentido[0]
-                    self.pixelpos[1]+=self.vel*self.sentido[1]
-            else:
-                self.colidiu=True
-    def movimentoPadrao2(self,mapa,size):
-        next_tile=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
-        if self.colidiu:
-            if mapa[0][self.pos[1]+1][self.pos[0]].numID==0 and mapa[0][self.pos[1]+1][self.pos[0]].piece==None: self.sentido=[0,1]
-            elif mapa[0][self.pos[1]][self.pos[0]-1].numID==0 and mapa[0][self.pos[1]][self.pos[0]-1].piece==None: self.sentido=[-1,0]
-            elif mapa[0][self.pos[1]][self.pos[0]+1].numID==0 and mapa[0][self.pos[1]][self.pos[0]+1].piece==None: self.sentido=[1,0]
-            elif mapa[0][self.pos[1]-1][self.pos[0]].numID==0 and mapa[0][self.pos[1]-1][self.pos[0]].piece==None: self.sentido=[0,-1]
-            '''
-            self.sentido=[0,1]
-            if next_tile.numID!=0:
-                self.sentido=[0,-1]
-                if next_tile.numID!=0:
-                    self.sentido=[1,0]
-                    if next_tile.numID!=0:
-                        self.sentido=[-1,0]
-                        if next_tile.numID!=0:
-                            self.sentido=[0,0]
-            self.colidiu=False
-            '''
-        
-        
-        
-        if next_tile.numID==0 and next_tile.piece==None and mapa[0][self.pos[1]][self.pos[0]].numID==0:
-            if self.pixelpos[0]>=size or self.pixelpos[1]>=size:
-                #muda de tile
-                mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]].piece = mapa[0][self.pos[1]][self.pos[0]].piece
-                mapa[0][self.pos[1]][self.pos[0]].piece=None
-                self.pos[0]+=self.sentido[0]
-                self.pos[1]+=self.sentido[1]
-                if self.pixelpos[0]>=size: self.pixelpos[0]-=size
-                if self.pixelpos[1]>=size: self.pixelpos[1]-=size
-            else:
-                if self.sentido[0]==1: self.pixelpos[0]+=self.vel
-                if self.sentido[0]==-1: self.pixelpos[0]-=self.vel
-                if self.sentido[1]==1: self.pixelpos[1]+=self.vel
-                if self.sentido[1]==-1: self.pixelpos[1]-=self.vel
-        else:
-            self.colidiu=True
-            '''
-            if mapa[0][self.pos[1]+self.parede[1]][self.pos[0]+self.parede[0]]==0:
-                self.sentido=self.parede
-            elif mapa[0][self.pos[1]+1][self.pos[0]].numID!=0: self.parede = [0,1]
-            elif mapa[0][self.pos[1]-1][self.pos[0]].numID!=0: self.parede = [0,-1]
-            elif mapa[0][self.pos[1]][self.pos[0]+1].numID!=0: self.parede = [1,0]
-            elif mapa[0][self.pos[1]][self.pos[0]-1].numID!=0: self.parede = [-1,0]'''
+        else:pass
+            ###segue paredes###
         
     
 
@@ -260,7 +177,7 @@ class quadradoControlavel(object):
         if self.botaodireito:
             if mapa[0][self.y][self.x].numID==0:
                 if self.dentro:
-                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,1000,self.x,self.y,None))
+                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,1000,self.x,self.y,[],1,0))
         if event.type==MOUSEBUTTONDOWN:
             if event.button==1:
                 self.botaoesquerdo=True
@@ -282,8 +199,54 @@ class quadradoControlavel(object):
             except:
                 print "can't set visible"
             
-        
+class sugaInimigo(object):
+    def __init__(self,pos, sentido=None):
+        self.pos=pos
+        self.sentido=sentido
+    def fightControls(self,mapa):
+        if self.sentido==None:
+            for x in range(-1,2):
+                for y in range(-1,2):
+                    around=mapa[0][self.pos[1]+y][self.pos[0]+x]
+                    if around.piece!=None:
+                        around.piece=None
+        else:
+            point=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
+            if point.piece!=None:
+                point.piece=None
+                
 
+class spawnInimigo(object):
+    def __init__(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades):
+        self.spawntime=time
+        self.spawn=where
+        self.pos=pos
+        
+        self.movimento=movimento
+
+        self.sprite=sprites
+        self.size=tamanhos
+        self.next=nextsprites
+        self.rewind=rewinds
+        self.atk=forcas
+        self.vel=velocidades
+        self.hp=vidas
+        self.sentido=sentidos
+        self.quantidade=[0,quantidades]
+        self.contador=0
+    def fightControls(self,mapa):
+        global frame_atual
+        if frame_atual%self.spawntime==0:
+            if self.contador<len(self.sprite):
+                if self.quantidade[0]<self.quantidade[1][self.contador]:
+                    sc=self.contador# (self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , movimento, sentidox,sentidoy)
+                    inimigo=inimigoAlvo(self.sprite[self.contador],self.size[sc],self.next[sc], self.rewind[sc], self.atk[sc],self.vel[sc],self.hp[sc], (self.pos[0]+self.spawn[0]), (self.pos[1]+self.spawn[1]), self.movimento[sc], self.sentido[sc][0], self.sentido[sc][1])
+                    mapa[0][self.pos[1]+self.spawn[1]][self.pos[0]+self.spawn[0]].piece=inimigo
+                    self.quantidade[0]+=1
+                else:
+                    self.contador+=1
+                    self.quantidade[0]=0
+                
 class mapaLimitavel(object):
     def __init__(self):
         self.alingment=(0,0)
@@ -331,6 +294,7 @@ class mapaLimitavel(object):
         for z in range(len(self.mapa)):
             for y in range(len(self.mapa[z])):
                 for x in range(len(self.mapa[z][y])):
+                    if self.mapa[z][y][x]==9: cor=None
                     if self.mapa[z][y][x]==8: cor=(34,57,65)
                     if self.mapa[z][y][x]==0: cor=imagens[0]
                     if self.mapa[z][y][x]==3: cor=imagens[1]
@@ -339,17 +303,34 @@ class mapaLimitavel(object):
                     if self.mapa[z][y][x]==2: cor=imagens[3]
                     try:
                         self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],cor)
-                        if y==3 and x==1:
+                        if self.mapa[0][y][x].numID==4 and z==2:
+                            self.mapa[1][y][x].piece = sugaInimigo((x,y),(-1,0))
+                        if self.mapa[0][y][x].numID==3 and z==2:
+                            if y==3: mov0=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
+                                           (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
+                                           (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
+                            else: mov0=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
+                                        (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
+                                        (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
+                            try: #spawnInimigo(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades):
+                                enemyimg=[pygame.image.load("inimigo01sheet2.png")]
+                                enemyobj=spawnInimigo( (x,y) , 60 , (1,0) , enemyimg , [(20,20)] , [20] , [False] , [1] , [1] , [1000] , [mov0] , [(1,0)] , [10] )
+                                self.mapa[1][y][x].piece = enemyobj
+                            except:
+                                pass
+                        '''
+                        if z==0 and y==3 and x==1:
                             mov1=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
                                   (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
                                   (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,[],1,0)
-                        if y==2 and x==1:
+                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,mov1,1,0)
+                        if z==0 and y==2 and x==1:
                             mov2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
                                   (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
                                   (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,[],1,0)
+                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,mov2,1,0)
                         #if y==2 and x==2:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,2000,x,y,1,0)
+                        '''
                     except:
                         pass
         self.size=40
@@ -383,14 +364,14 @@ class mapaLimitavel(object):
 
                         screen.fill((255,255,255),pygame.Rect(posx+4,posy+2,life-8,4))
                 except:
-                    print "erro desenhar inimigo"
+                    pass #print "erro desenhar inimigo"
                 try:
                     if self.mapa[1][y][x].piece!=None:
                         alinhaspriteX=(self.size/2)-(self.mapa[1][y][x].piece.sprite.size[0]/2)
                         screen.blit(self.mapa[1][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
                         #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
-                    print "erro desenhar torre"
+                    pass #print "erro desenhar torre"
 
         self.selecao.blitOn(screen)
         
