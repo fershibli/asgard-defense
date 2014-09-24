@@ -1,6 +1,7 @@
 # -*- coding: cp1252 -*-
 import pyTreeBee,pygame,sys,os
 from pygame.locals import*
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (15, 40)
 temporarydisplay=pygame.display.set_mode((800,600))
 frame_atual=0
 arial=pygame.font.SysFont("Arial",12)
@@ -141,7 +142,7 @@ class quadradoControlavel(object):
     def __init__(self,size):
         self.x=1
         self.y=1
-        self.sprite=animacaoSprite(pygame.image.load("selecao2.png"),(40,40),9,True)
+        self.sprite=animacaoSprite(pygame.image.load("selecao3.png"),(40,40),9,True)
         self.size=size
         self.buttonup=False
         self.dentro=True
@@ -172,8 +173,8 @@ class quadradoControlavel(object):
                 self.x=alnX
         if self.botaoesquerdo:
             if self.dentro:
-                if mapa[0][self.y][self.x].numID==1 or mapa[0][self.y][self.x].numID==2:                
-                    mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.torre,(60,50),6,False,2,2,2,self.x,self.y))
+                if mapa[1][self.y][self.x].numID>=3 and mapa[1][self.y][self.x].numID<=11:
+                    mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.torre,(60,50),6,False,30,30,1,self.x,self.y))
         if self.botaodireito:
             if mapa[0][self.y][self.x].numID==0:
                 if self.dentro:
@@ -248,64 +249,20 @@ class spawnInimigo(object):
                     self.quantidade[0]=0
                 
 class mapaLimitavel(object):
-    def __init__(self):
+    def __init__(self, mapa,imagens,size):
         self.alingment=(0,0)
-        self.mapa=[[[8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-                    [2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2],
-                    [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
-                    [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,4],
-                    [1,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1],
-                    [1,2,2,2,2,2,2,0,0,1,1,0,0,2,2,2,2,2,2,1],
-                    [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1],
-                    [1,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],#13
-                   [[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]],
-                   [[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-                    [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]]]
-        imagens=[pygame.image.load("mapacaminho4.png").convert(),pygame.image.load("mapaentrada.png").convert(),pygame.image.load("mapagrama4.png").convert(),pygame.image.load("mapagramawterra3.png").convert()]
-        imagens.append(pygame.transform.flip(imagens[1],True,False))
+        self.mapa=mapa
         for z in range(len(self.mapa)):
             for y in range(len(self.mapa[z])):
                 for x in range(len(self.mapa[z][y])):
-                    if self.mapa[z][y][x]==9: cor=None
-                    if self.mapa[z][y][x]==8: cor=(34,57,65)
-                    if self.mapa[z][y][x]==0: cor=imagens[0]
-                    if self.mapa[z][y][x]==3: cor=imagens[1]
-                    if self.mapa[z][y][x]==4: cor=imagens[4]
-                    if self.mapa[z][y][x]==1: cor=imagens[2]
-                    if self.mapa[z][y][x]==2: cor=imagens[3]
                     try:
-                        self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],cor)
-                        if self.mapa[0][y][x].numID==4 and z==2:
+                        if self.mapa[z][y][x]<len(imagens) and self.mapa[z][y][x]>=0:
+                            self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],imagens[self.mapa[z][y][x]])
+                        else:
+                            self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],None)
+                        if self.mapa[0][y][x].numID==2 and z==2:
                             self.mapa[1][y][x].piece = sugaInimigo((x,y),(-1,0))
-                        if self.mapa[0][y][x].numID==3 and z==2:
+                        if self.mapa[0][y][x].numID==1 and z==2:
                             if y==3: mov0=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
                                            (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
                                            (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
@@ -314,42 +271,32 @@ class mapaLimitavel(object):
                                         (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
                             try: #spawnInimigo(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades):
                                 enemyimg=[pygame.image.load("inimigo01sheet2.png")]
-                                enemyobj=spawnInimigo( (x,y) , 60 , (1,0) , enemyimg , [(20,20)] , [20] , [False] , [1] , [1] , [1000] , [mov0] , [(1,0)] , [10] )
+                                enemyobj=spawnInimigo( (x,y) , 5 , (1,0) , enemyimg , [(20,20)] , [10] , [True] , [1] , [10] , [1000] , [mov0] , [(1,0)] , [1000] )
                                 self.mapa[1][y][x].piece = enemyobj
                             except:
                                 pass
-                        '''
-                        if z==0 and y==3 and x==1:
-                            mov1=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
-                                  (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
-                                  (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,mov1,1,0)
-                        if z==0 and y==2 and x==1:
-                            mov2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
-                                  (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
-                                  (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-                            self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,5000,x,y,mov2,1,0)
-                        #if y==2 and x==2:self.mapa[0][y][x].piece=inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),20,False,1,1,2000,x,y,1,0)
-                        '''
                     except:
                         pass
-        self.size=40
+        self.size=size
         self.selecao=quadradoControlavel(self.size)
     def blitOn(self,screen):
-                                
-        for y in range(len(self.mapa[0])):
-            for x in range(len(self.mapa[0][y])):
-                if self.mapa[0][y][x].piece!=None:
-                    self.mapa[0][y][x].piece.movimentoPadrao(self.mapa,self.size)
-                #sprite=False
-                try:
-                    screen.blit(self.mapa[0][y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
-                except:
-                    screen.fill(self.mapa[0][y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
+        for z in range(len(self.mapa)):                                
+            for y in range(len(self.mapa[z])):
+                for x in range(len(self.mapa[z][y])):
+                    if self.mapa[z][y][x].piece!=None:
+                        try:
+                            self.mapa[z][y][x].piece.movimentoPadrao(self.mapa,self.size)
+                        except:
+                            self.mapa[z][y][x].piece.fightControls(self.mapa)
+                    #sprite=False
+                    try:
+                        screen.blit(self.mapa[z][y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
+                    except:
+                        try:
+                            screen.fill(self.mapa[z][y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
+                        except:pass
         for y in range(len(self.mapa[1])):
             for x in range(len(self.mapa[1][y])):
-                if self.mapa[1][y][x].piece!=None:
-                    self.mapa[1][y][x].piece.fightControls(self.mapa)
                 try:
                     if self.mapa[0][y][x].piece!=None:
                         alinhaspriteX=(self.size/2)-(self.mapa[0][y][x].piece.sprite.size[0]/2)
@@ -401,29 +348,96 @@ class controlesExtras(object):
                 self.tela.itens[0].mapa[0][self.x][self.y].cor=(0,0,255)
         return None
 
+class animaFundo(object):
+    def __init__(self,link,tempo_imagens, vetor_imagens):
+        self.link=link
+        self.time=tempo_imagens
+        self.images=vetor_imagens
+        self.step=0
+    def keyControls(self,event):
+        reply=None
+        if self.step>=len(vetor_imagens):
+            print self.link
+            reply=self.link
+        return reply
+    def blitOn(self,scr):
+        if frame_atual%self.time==0:
+            if self.step<len(self.images)-1:
+                self.step+=1
+        scr.blit(self.images[self.step],(0,0))
 
-fase_1 = pyTreeBee.dynamicScreen((800,600),60,(78,133,154),mapaLimitavel())
+class fadeOutFundoAnimado(object):
+    def __init__(self,link,tempo_imagens, vetor_imagens):
+        self.fadeOut=animaFundo(link,tempo_imagens,vetor_imagens)
+    def linkReply(self,scr):
+        global frame_atual
+        scr.addItem(self.fadeOut)
+        return scr
+
+mapa_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [ 1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+              [ 1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+              [-1,-1,-1,-1,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1,-1,-1,-1,-1],
+              [-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1],
+              [-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1],
+              [-1, 0, 0, 0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 0, 0, 0,-1],
+              [-1, 0, 0, 0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 0, 0, 0,-1],
+              [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1],
+              [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]],#13
+             [[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [ 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [ 6, 6, 6, 6, 6, 6, 9,-1,-1, 4,10,-1,-1, 3, 6, 6, 6, 6, 6, 6],
+              [ 7, 8, 8, 8, 8, 8,11,-1,-1, 4,10,-1,-1, 5, 8, 8, 8, 8, 8, 7],
+              [10,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1, 4],
+              [10,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1, 4],
+              [10,-1,-1, 3, 6, 6, 6, 6, 6, 7, 7, 6, 6, 6, 6, 6, 9,-1,-1, 4],
+              [10,-1,-1, 5, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,11,-1,-1, 4],
+              [10,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 4],
+              [10,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 4],
+              [ 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
+             [[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]]]
+tile_grama=pygame.image.load("tileset_grama.png").convert()
+tiles_fase_1=[pygame.image.load("mapacaminho5.png").convert(),pygame.image.load("mapaentrada2.png").convert(),pygame.image.load("mapasaida.png").convert()]#,tile_grama.subsurface((40,40),(40,40)),tile_grama.subsurface((40,80),(40,40)),tile_grama.subsurface((0,80),(40,40)),tile_grama.subsurface((80,80),(40,40)),tile_grama.subsurface((80,0),(40,40)),tile_grama.subsurface((0,0),(40,40)),tile_grama.subsurface((40,40),(0,40)),tile_grama.subsurface((40,0),(40,40)),tile_grama.subsurface(
+for w in range(3):
+    for h in range(3):
+        tiles_fase_1.append(tile_grama.subsurface((w*40,h*40),(40,40)))
+tiles_fase_1.append((34,57,65))
+fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapaLimitavel(mapa_fase_1, tiles_fase_1,40))
 fase_1.addItem(controlesExtras(fase_1))
 
 
 botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,arial,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert()))
+#botao_start=pyTreeBee.linkedButton(fadeOutFundoAnimado(selecao_fase,6,[pygame.image.load("Abertura copy1.png").convert(),pygame.image.load("Abertura copy2.png").convert(),pygame.image.load("Abertura copy3.png").convert()]),arial,[""],pygame.Rect(0,0,800,600),250,250)
+botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert())
+#botao_start.setAll_BarSize(0)
+#botao_start.setAll_BarColor((-1,-1,-1))
+#botao_start.setAll_Background((300,300,300))
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_start)
+    #fadeOutFundoAnimado(selecao_fase,6,[pygame.image.load("Abertura copy1.png").convert(),pygame.image.load("Abertura copy2.png").convert(),pygame.image.load("Abertura copy3.png").convert()])
+    
+#tela_inicial.addItem(controlesExtras(tela_inicial))
+#tela_inicial.setImage(pygame.image.load("Abertura copy.png"),(0,0))
 selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
 fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
-'''
-tela_inicial.addItem(controlesExtras(tela_inicial))
-wakkanigga=pygame.image.load("viking_a_spritesheet.png")
-
-mod=0
-tela_inicial.addItem(animacaoSprite(wakkanigga,(60,50),4,True,(200,260)))
-for soda in range(8):
-    for sprite in range(12):
-        if sprite==0 and soda==4: mod=80;wakkanigga=pygame.image.load("viking_s_spritesheet.png")
-        tela_inicial.addItem(animacaoSprite(wakkanigga,(60,50),24-soda,False,(40+(sprite*60),50+mod+(soda*50))))
-
-'''
 pyTreeBee.treeBeeStart(tela_inicial)
 
 
