@@ -1,6 +1,7 @@
 # -*- coding: cp1252 -*-
 import pyTreeBee,pygame,sys,os
 from pygame.locals import*
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (15, 40)
 temporarydisplay=pygame.display.set_mode((800,600))
 frame_atual=0
 arial=pygame.font.SysFont("Arial",12)
@@ -68,13 +69,13 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
 
             #segue movimento definido
             
-            next_tile=mapa[0][0][self.pos[1]+self.movimento[self.vectorpos][1]][self.pos[0]+self.movimento[self.vectorpos][0]]
+            next_tile=mapa[0][self.pos[1]+self.movimento[self.vectorpos][1]][self.pos[0]+self.movimento[self.vectorpos][0]]
             if self.vectorpos<len(self.movimento)-1 and self.vectorpos>=(1-self.vectorstep)/2:
                 if abs(self.pixelpos[0])>=size or abs(self.pixelpos[1])>=size:
                     #muda de tile
-                    next_tile.piece = mapa[0][0][self.pos[1]][self.pos[0]].piece
+                    next_tile.piece = mapa[0][self.pos[1]][self.pos[0]].piece
                     #next_tile.cor=(255,0,0)
-                    mapa[0][0][self.pos[1]][self.pos[0]].piece=None
+                    mapa[0][self.pos[1]][self.pos[0]].piece=None
                     self.pos[0]+=self.movimento[self.vectorpos][0]
                     self.pos[1]+=self.movimento[self.vectorpos][1]
                     self.vectorpos+=self.vectorstep
@@ -120,17 +121,17 @@ class torreGuerreiro(object):
                         pass
                     '''
                     try:
-                        if mapa[0][0][self.y+e][self.x+i].piece!=None:
+                        if mapa[0][self.y+e][self.x+i].piece!=None:
                             if self.sprite.y!=1: self.sprite.setLine(1)
-                            self.aim=mapa[0][0][self.y+e][self.x+i]
+                            self.aim=mapa[0][self.y+e][self.x+i]
                     except:
                         pass
         else:            
             if frame_atual%self.vel==0:
                 try:
-                    mapa[1][self.aim.piece[1]].hp-=self.atk
-                    if mapa[1][self.aim.piece[1]].hp<=0:
-                        mapa[1][self.aim.piece]=None
+                    self.aim.piece.hp-=self.atk
+                    if self.aim.piece.hp<=0:
+                        self.aim.addPiece(None)
                         self.aim=None
                         if self.sprite.y!=0: self.sprite.setLine(0)
                 except:
@@ -159,26 +160,25 @@ class quadradoControlavel(object):
             alnX=int(alingment[0]/self.size)
             alnY=int(alingment[1]/self.size)
             self.dentro=True
-            if self.y>alnY+len(mapa[0][0])-1 or self.x>alnX+len(mapa[0][0][self.y])-1 or self.y<alnY or self.x<alnX:
+            if self.y>alnY+len(mapa[0])-1 or self.x>alnX+len(mapa[0][self.y])-1 or self.y<alnY or self.x<alnX:
                 self.dentro=False
 
-            if self.y>alnY+len(mapa[0][0])-1: # ta dando erro nesse IF
-                self.y=alnY+len(mapa[0][0])-1 # nao esqueca da copia desse IF no IF acima quando corrigir
+            if self.y>alnY+len(mapa[0])-1: # ta dando erro nesse IF
+                self.y=alnY+len(mapa[0])-1 # nao esqueca da copia desse IF no IF acima quando corrigir
             if self.y<alnY:
                 self.y=alnY
-            if self.x>alnX+len(mapa[0][0][self.y])-1:
-                self.x=alnX+len(mapa[0][0][self.y])-1
+            if self.x>alnX+len(mapa[0][self.y])-1:
+                self.x=alnX+len(mapa[0][self.y])-1
             if self.x<alnX:
                 self.x=alnX
         if self.botaoesquerdo:
             if self.dentro:
-                if mapa[0][1][self.y][self.x].numID>=3 and mapa[0][1][self.y][self.x].numID<=11:
-                    mapa[0][1][self.y][self.x].piece=(2,len(mapa[2]))
-                    mapa[2].append(torreGuerreiro(self.torre,(60,50),6,False,2,2,2,self.x,self.y))
+                if mapa[1][self.y][self.x].numID>=3 and mapa[1][self.y][self.x].numID<=11:
+                    mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.torre,(60,50),6,False,10,10,1,self.x,self.y))
         if self.botaodireito:
-            if mapa[0][0][self.y][self.x].numID==0:
+            if mapa[0][self.y][self.x].numID==0:
                 if self.dentro:
-                    pass#mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,1000,self.x,self.y,[],1,0))
+                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,10,self.x,self.y,[],1,0))
         if event.type==MOUSEBUTTONDOWN:
             if event.button==1:
                 self.botaoesquerdo=True
@@ -208,15 +208,12 @@ class sugaInimigo(object):
         if self.sentido==None:
             for x in range(-1,2):
                 for y in range(-1,2):
-                    around=mapa[0][0][self.pos[1]+y][self.pos[0]+x]
+                    around=mapa[0][self.pos[1]+y][self.pos[0]+x]
                     if around.piece!=None:
-                        mapa[1][around.piece]=None
                         around.piece=None
-                        
         else:
-            point=mapa[0][0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
+            point=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
             if point.piece!=None:
-                mapa[1][point.piece]=None
                 point.piece=None
                 
 
@@ -240,38 +237,36 @@ class spawnInimigo(object):
         self.contador=0
     def fightControls(self,mapa):
         global frame_atual
-        if frame_atual%self.spawntime==0:
-            if self.contador<len(self.sprite):
+        if self.contador<len(self.sprite):
+            if frame_atual%self.spawntime[self.contador]==0:
                 if self.quantidade[0]<self.quantidade[1][self.contador]:
                     sc=self.contador# (self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , movimento, sentidox,sentidoy)
-                    inimigo=inimigoAlvo(self.sprite[self.contador],self.size[sc],self.next[sc], self.rewind[sc], self.atk[sc],self.vel[sc],self.hp[sc], (self.pos[0]+self.spawn[0]), (self.pos[1]+self.spawn[1]), self.movimento[sc], self.sentido[sc][0], self.sentido[sc][1])
-                    mapa[0][0][self.pos[1]+self.spawn[1]][self.pos[0]+self.spawn[0]].piece=(1,len(mapa[1]))
-                    mapa[1][mapa[0][0][self.pos[1]+self.spawn[1]][self.pos[0]+self.spawn[0]].piece[1]]=inimigo
+                    #print str(self.sprite[sc])+" , "+str(self.size[sc])+" , "+str(self.next[sc])+" , "+str(self.rewind[sc])+" , "+str(self.atk[sc])+" , "+str(self.vel[sc])+" , "+str(self.hp[sc])+" , "+str(self.pos[0]+self.spawn[0])+" , "+str(self.pos[1]+self.spawn[1])+" , "+str(self.sentido[sc])
+                    #print str(self.sprite)+" , "+str(self.size)+" , "+str(self.next)+" , "+str(self.rewind)+" , "+str(self.atk)+" , "+str(self.vel)+" , "+str(self.hp)+" , "+str(self.pos[0]+self.spawn[0])+" , "+str(self.pos[1]+self.spawn[1])+" , "+str(self.sentido)
+                    inimigo=inimigoAlvo(self.sprite[sc],self.size[sc],self.next[sc], self.rewind[sc], self.atk[sc],self.vel[sc],self.hp[sc], (self.pos[0]+self.spawn[0]), (self.pos[1]+self.spawn[1]), self.movimento[sc], self.sentido[sc][0], self.sentido[sc][1])
+                    
+                    mapa[0][self.pos[1]+self.spawn[1]][self.pos[0]+self.spawn[0]].piece=inimigo
                     self.quantidade[0]+=1
+                    #print self.quantidade
                 else:
                     self.contador+=1
                     self.quantidade[0]=0
-
-        
-
+                
 class mapaLimitavel(object):
     def __init__(self, mapa,imagens,size):
         self.alingment=(0,0)
-        self.size=size
-        self.selecao=quadradoControlavel(self.size)
-        self.mapa=[mapa,[],[]]
-        for z in range(len(self.mapa[0])):
-            for y in range(len(self.mapa[0][z])):
-                for x in range(len(self.mapa[0][z][y])):
+        self.mapa=mapa
+        for z in range(len(self.mapa)):
+            for y in range(len(self.mapa[z])):
+                for x in range(len(self.mapa[z][y])):
                     try:
-                        if self.mapa[0][z][y][x]<len(imagens) and self.mapa[0][z][y][x]>=0:
-                            self.mapa[0][z][y][x]=blocoTabuleiro(self.mapa[0][z][y][x],imagens[self.mapa[0][z][y][x]])
+                        if self.mapa[z][y][x]<len(imagens) and self.mapa[z][y][x]>=0:
+                            self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],imagens[self.mapa[z][y][x]])
                         else:
-                            self.mapa[0][z][y][x]=blocoTabuleiro(self.mapa[0][z][y][x],None)
-                        if self.mapa[0][0][y][x].numID==2 and z==2:
-                            self.mapa[0][1][y][x].addPiece((1,len(self.mapa[1])))
-                            self.mapa[1].append(sugaInimigo((x,y),(-1,0)))
-                        if self.mapa[0][0][y][x].numID==1 and z==2:
+                            self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],None)
+                        if self.mapa[0][y][x].numID==2 and z==2:
+                            self.mapa[1][y][x].piece = sugaInimigo((x,y),(-1,0))
+                        if self.mapa[0][y][x].numID==1 and z==2:
                             if y==3: mov0=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
                                            (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
                                            (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
@@ -279,55 +274,52 @@ class mapaLimitavel(object):
                                         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
                                         (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
                             try: #spawnInimigo(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades):
-                                enemyimg=[pygame.image.load("inimigo01sheet2.png")]
-                                enemyobj=spawnInimigo( (x,y) , 120 , (1,0) , enemyimg , [(20,20)] , [10] , [True] , [1] , [0.5] , [1000] , [mov0] , [(1,0)] , [10] )
-                                self.mapa[0][1][y][x].addPiece((1,len(self.mapa[1])))
-                                self.mapa[1].append(enemyobj)
-                                
+                                enemyimg=pygame.image.load("inimigo01sheet2.png")
+                                enemyobj=spawnInimigo( (x,y) , [120,150] , (1,0) , [enemyimg,enemyimg] , [(20,20),(20,20)] , [8,10] , [True,True] , [1,1] , [0.5,0.3] , [100,300] , [mov0,mov0] , [(1,0),(1,0)] , [20,20] )
+                                self.mapa[1][y][x].piece = enemyobj
                             except:
                                 pass
                     except:
                         pass
+        self.size=size
+        self.selecao=quadradoControlavel(self.size)
     def blitOn(self,screen):
-        for z in range(len(self.mapa[0])):                                
-            for y in range(len(self.mapa[0][z])):
-                for x in range(len(self.mapa[0][z][y])):
-                    if self.mapa[0][z][y][x].piece!=None:
+        for z in range(len(self.mapa)):                                
+            for y in range(len(self.mapa[z])):
+                for x in range(len(self.mapa[z][y])):
+                    if self.mapa[z][y][x].piece!=None:
                         try:
-                            self.mapa[self.mapa[0][z][y][x].piece[0]][self.mapa[0][z][y][x].piece[1]].movimentoPadrao(self.mapa[0],self.size)
+                            self.mapa[z][y][x].piece.movimentoPadrao(self.mapa,self.size)
                         except:
-                            try:
-                                self.mapa[self.mapa[0][z][y][x].piece[0]][self.mapa[0][z][y][x].piece[1]].fightControls(self.mapa[0])
-                            except:
-                                pass
+                            self.mapa[z][y][x].piece.fightControls(self.mapa)
                     #sprite=False
                     try:
-                        screen.blit(self.mapa[0][z][y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
+                        screen.blit(self.mapa[z][y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                     except:
                         try:
-                            screen.fill(self.mapa[0][z][y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
+                            screen.fill(self.mapa[z][y][x].cor,pygame.Rect(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size),self.size,self.size))
                         except:pass
-        for y in range(len(self.mapa[0][1])):
-            for x in range(len(self.mapa[0][1][y])):
+        for y in range(len(self.mapa[1])):
+            for x in range(len(self.mapa[1][y])):
                 try:
-                    if self.mapa[0][0][y][x].piece!=None:
-                        alinhaspriteX=(self.size/2)-(self.mapa[self.mapa[0][0][y][x].piece[0]][self.mapa[0][0][y][x].piece[1]].sprite.size[0]/2)
-                        posx=self.alingment[0]+(x*self.size)+self.mapa[self.mapa[0][0][y][x].piece[0]][self.mapa[0][0][y][x].piece[1]].pixelpos[0]
-                        posy=self.alingment[1]+((1+y)*self.size)-10+self.mapa[self.mapa[0][0][y][x].piece[0]][self.mapa[0][0][y][x].piece[1]].pixelpos[1]
-                        screen.blit(self.mapa[self.mapa[0][0][y][x].piece[0]][self.mapa[0][0][y][x].piece[1]].sprite.getNextImage(), (posx+alinhaspriteX,self.alingment[1]+(y*self.size)+self.mapa[self.mapa[0][0][y][x].piece[0]][self.mapa[0][0][y][x].piece[1]].pixelpos[1]))
+                    if self.mapa[0][y][x].piece!=None:
+                        alinhaspriteX=(self.size/2)-(self.mapa[0][y][x].piece.sprite.size[0]/2)
+                        posx=self.alingment[0]+(x*self.size)+self.mapa[0][y][x].piece.pixelpos[0]
+                        posy=self.alingment[1]+((1+y)*self.size)-10+self.mapa[0][y][x].piece.pixelpos[1]
+                        screen.blit(self.mapa[0][y][x].piece.sprite.getNextImage(), (posx+alinhaspriteX,self.alingment[1]+(y*self.size)+self.mapa[0][y][x].piece.pixelpos[1]))
 
                         screen.fill((0,0,0),pygame.Rect(posx+2,posy,self.size-4,8))
                         screen.fill((255,0,0),pygame.Rect(posx+4,posy+2,self.size-8,4))
                         
-                        life=self.size-((self.mapa[self.mapa[0][0][y][x].piece[0]][self.mapa[0][0][y][x].piece[1]].hpmax-self.mapa[self.mapa[0][z][y][x].piece[0]][self.mapa[0][0][y][x].piece[1]].hp)*self.size/self.mapa[self.mapa[0][0][y][x].piece[0]][self.mapa[0][0][y][x].piece[1]].hpmax)
+                        life=self.size-((self.mapa[0][y][x].piece.hpmax-self.mapa[0][y][x].piece.hp)*self.size/self.mapa[0][y][x].piece.hpmax)
 
                         screen.fill((255,255,255),pygame.Rect(posx+4,posy+2,life-8,4))
                 except:
                     pass #print "erro desenhar inimigo"
                 try:
-                    if self.mapa[0][1][y][x].piece!=None:
-                        alinhaspriteX=(self.size/2)-(self.mapa[2][self.mapa[0][1][y][x].piece].sprite.size[0]/2)
-                        screen.blit(self.mapa[2][self.mapa[0][1][y][x].piece].sprite.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
+                    if self.mapa[1][y][x].piece!=None:
+                        alinhaspriteX=(self.size/2)-(self.mapa[1][y][x].piece.sprite.size[0]/2)
+                        screen.blit(self.mapa[1][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
                         #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
                     pass #print "erro desenhar torre"
@@ -355,10 +347,36 @@ class controlesExtras(object):
             if event.key==K_SPACE:
                 for i in range(-self.rng,1+self.rng):
                     for e in range(-self.rng,1+self.rng):
-                        self.tela.itens[0].mapa[0][0][self.x+i][self.y+e].cor=(255,0,0)
+                        self.tela.itens[0].mapa[0][self.x+i][self.y+e].cor=(255,0,0)
                 
-                self.tela.itens[0].mapa[0][0][self.x][self.y].cor=(0,0,255)
+                self.tela.itens[0].mapa[0][self.x][self.y].cor=(0,0,255)
         return None
+
+class animaFundo(object):
+    def __init__(self,link,tempo_imagens, vetor_imagens):
+        self.link=link
+        self.time=tempo_imagens
+        self.images=vetor_imagens
+        self.step=0
+    def keyControls(self,event):
+        reply=None
+        if self.step>=len(vetor_imagens):
+            print self.link
+            reply=self.link
+        return reply
+    def blitOn(self,scr):
+        if frame_atual%self.time==0:
+            if self.step<len(self.images)-1:
+                self.step+=1
+        scr.blit(self.images[self.step],(0,0))
+
+class fadeOutFundoAnimado(object):
+    def __init__(self,link,tempo_imagens, vetor_imagens):
+        self.fadeOut=animaFundo(link,tempo_imagens,vetor_imagens)
+    def linkReply(self,scr):
+        global frame_atual
+        scr.addItem(self.fadeOut)
+        return scr
 
 mapa_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
@@ -412,7 +430,16 @@ fase_1.addItem(controlesExtras(fase_1))
 botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pyTreeBee.linkedButton(selecao_fase,arial,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert()))
+#botao_start=pyTreeBee.linkedButton(fadeOutFundoAnimado(selecao_fase,6,[pygame.image.load("Abertura copy1.png").convert(),pygame.image.load("Abertura copy2.png").convert(),pygame.image.load("Abertura copy3.png").convert()]),arial,[""],pygame.Rect(0,0,800,600),250,250)
+botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert())
+#botao_start.setAll_BarSize(0)
+#botao_start.setAll_BarColor((-1,-1,-1))
+#botao_start.setAll_Background((300,300,300))
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_start)
+    #fadeOutFundoAnimado(selecao_fase,6,[pygame.image.load("Abertura copy1.png").convert(),pygame.image.load("Abertura copy2.png").convert(),pygame.image.load("Abertura copy3.png").convert()])
+    
+#tela_inicial.addItem(controlesExtras(tela_inicial))
+#tela_inicial.setImage(pygame.image.load("Abertura copy.png"),(0,0))
 selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
 fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
 pyTreeBee.treeBeeStart(tela_inicial)
