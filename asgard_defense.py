@@ -1,7 +1,8 @@
 # -*- coding: cp1252 -*-
 import pyTreeBee,pygame,sys,os
 from pygame.locals import*
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (15, 40)
+infoObject = pygame.display.Info()
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
 temporarydisplay=pygame.display.set_mode((800,600))
 frame_atual=0
 arial=pygame.font.SysFont("Arial",12)
@@ -137,7 +138,22 @@ class torreGuerreiro(object):
                 except:
                     self.aim=None
                     self.sprite.setLine(0)
-        
+
+
+class charSelected(object):
+    def __init__(self,mouse,sprite,size,nextsprite,rewind,atk,vel,rng):
+        self.mouse=mouse
+        self.sprite=sprite
+        self.size=size
+        self.nextsprite=nextsprite
+        self.rewind=rewind
+        self.atk=atk
+        self.vel=vel
+        self.rng=rng
+    def linkReply(self,prevscr):
+        self.mouse.setSelection(self.sprite,self.size,self.nextsprite,self.rewind,self.atk,self.vel,self.rng)
+        return prevscr
+
 class quadradoControlavel(object):
     def __init__(self,size):
         self.x=1
@@ -150,7 +166,34 @@ class quadradoControlavel(object):
         self.inimigo=pygame.image.load("inimigo01sheet2.png")
         self.botaodireito=False
         self.botaoesquerdo=False
+        
+        self.char_sprite=None
+        self.char_size=None
+        self.nextsprite=None
+        self.rewind=None
+        self.atk=None
+        self.vel=None
+        self.rng=None
+    def setSelection(self,sprite,size,nextsprite,rewind,atk,vel,rng):
+        self.char_sprite=sprite
+        self.char_size=size
+        self.nextsprite=nextsprite
+        self.rewind=rewind
+        self.atk=atk
+        self.vel=vel
+        self.rng=rng
+    def nullSelection(self):
+        self.char_sprite=None
+        self.char_size=None
+        self.nextsprite=None
+        self.rewind=None
+        self.atk=None
+        self.vel=None
+        self.rng=None
     def blitOn(self,screen):
+        if self.char_sprite!=None:
+            try: screen.blit(self.char_sprite.subsurface(((0,0),self.char_size)),((self.x*self.size)-(self.char_size[0]/2)+(self.size/2),self.y*self.size) )
+            except:pass
         screen.blit(self.sprite.getNextImage(),(self.x*self.size,self.y*self.size))
     def keyControls(self,event,mapa,alingment):
         if event.type==MOUSEMOTION:
@@ -173,8 +216,17 @@ class quadradoControlavel(object):
                 self.x=alnX
         if self.botaoesquerdo:
             if self.dentro:
-                if mapa[1][self.y][self.x].numID>=3 and mapa[1][self.y][self.x].numID<=11:
-                    mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.torre,(60,50),6,False,10,10,1,self.x,self.y))
+                if self.char_sprite!=None:
+                    if mapa[1][self.y][self.x].piece==None:
+                        if mapa[1][self.y][self.x].numID>=3 and mapa[1][self.y][self.x].numID<=11:
+                            mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.char_sprite,self.char_size,self.nextsprite,self.rewind,self.atk,self.vel,self.rng, self.x,self.y))
+                            self.nullSelection()
+                '''
+                else:
+                    if mapa[1][self.y][self.x].piece==None:
+                        if mapa[1][self.y][self.x].numID>=3 and mapa[1][self.y][self.x].numID<=11:
+                            mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.torre,(60,50),6,False,10,10,1,self.x,self.y))
+                '''
         if self.botaodireito:
             if mapa[0][self.y][self.x].numID==0:
                 if self.dentro:
@@ -200,7 +252,7 @@ class quadradoControlavel(object):
             except:
                 print "can't set visible"
             
-class sugaInimigo(object):
+class lifeTarget(object):
     def __init__(self,pos, sentido=None):
         self.pos=pos
         self.sentido=sentido
@@ -264,25 +316,14 @@ class mapaLimitavel(object):
                             self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],imagens[self.mapa[z][y][x]])
                         else:
                             self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],None)
-                        if self.mapa[0][y][x].numID==2 and z==2:
-                            self.mapa[1][y][x].piece = sugaInimigo((x,y),(-1,0))
-                        if self.mapa[0][y][x].numID==1 and z==2:
-                            if y==3: mov0=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
-                                           (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
-                                           (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-                            else: mov0=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
-                                        (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
-                                        (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-                            try: #spawnInimigo(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades):
-                                enemyimg=pygame.image.load("inimigo01sheet2.png")
-                                enemyobj=spawnInimigo( (x,y) , [120,150] , (1,0) , [enemyimg,enemyimg] , [(20,20),(20,20)] , [8,10] , [True,True] , [1,1] , [0.5,0.3] , [100,300] , [mov0,mov0] , [(1,0),(1,0)] , [20,20] )
-                                self.mapa[1][y][x].piece = enemyobj
-                            except:
-                                pass
                     except:
                         pass
         self.size=size
         self.selecao=quadradoControlavel(self.size)
+    def addSpawn(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades):
+        self.mapa[1][pos[1]][pos[0]].piece=spawnInimigo(pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades)
+    def addTarget(self,pos, sentido=None):
+        self.mapa[1][pos[1]][pos[0]].piece=lifeTarget(pos,sentido)
     def blitOn(self,screen):
         for z in range(len(self.mapa)):                                
             for y in range(len(self.mapa[z])):
@@ -333,52 +374,38 @@ class mapaLimitavel(object):
 class controlesExtras(object):
     def __init__(self,tela):
         self.tela=tela
-        self.rng=2
-        self.x=9
-        self.y=9
+        self.scroll=[0,0]
+        self.frame_skip=1
     def blitOn(self,screen):
         global frame_atual
-        frame_atual+=1
+        if frame_atual>=pow(10,4)-self.frame_skip:
+            frame_atual=0
+            print 'zerou'
+        else:
+            frame_atual+=self.frame_skip
+        screen.scroll(self.scroll[0],self.scroll[1])
     def keyControls(self,event):
         if event.type==KEYUP:
             if event.key==K_ESCAPE:
                 self.tela.storedlink=None
                 self.tela.running=False
-            if event.key==K_SPACE:
-                for i in range(-self.rng,1+self.rng):
-                    for e in range(-self.rng,1+self.rng):
-                        self.tela.itens[0].mapa[0][self.x+i][self.y+e].cor=(255,0,0)
-                
-                self.tela.itens[0].mapa[0][self.x][self.y].cor=(0,0,255)
+            if event.key==K_DOWN:
+                self.scroll[1]+=10
+            if event.key==K_RIGHT:
+                self.scroll[0]+=10
+            if event.key==K_UP:
+                self.scroll[1]-=10
+            if event.key==K_LEFT:
+                self.scroll[0]-=10
+            if event.key==K_EQUALS:
+                self.tela.fps+=10
+            if event.key==K_MINUS:
+                self.tela.fps-=10
         return None
 
-class animaFundo(object):
-    def __init__(self,link,tempo_imagens, vetor_imagens):
-        self.link=link
-        self.time=tempo_imagens
-        self.images=vetor_imagens
-        self.step=0
-    def keyControls(self,event):
-        reply=None
-        if self.step>=len(vetor_imagens):
-            print self.link
-            reply=self.link
-        return reply
-    def blitOn(self,scr):
-        if frame_atual%self.time==0:
-            if self.step<len(self.images)-1:
-                self.step+=1
-        scr.blit(self.images[self.step],(0,0))
-
-class fadeOutFundoAnimado(object):
-    def __init__(self,link,tempo_imagens, vetor_imagens):
-        self.fadeOut=animaFundo(link,tempo_imagens,vetor_imagens)
-    def linkReply(self,scr):
-        global frame_atual
-        scr.addItem(self.fadeOut)
-        return scr
-
-mapa_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
+        
+#matriz seletora de tiles
+matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [ 1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 2],
               [ 1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 2],
@@ -417,31 +444,47 @@ mapa_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]]]
+#loading dos tiles
 tile_grama=pygame.image.load("tileset_grama.png").convert()
 tiles_fase_1=[pygame.image.load("mapacaminho5.png").convert(),pygame.image.load("mapaentrada2.png").convert(),pygame.image.load("mapasaida.png").convert()]#,tile_grama.subsurface((40,40),(40,40)),tile_grama.subsurface((40,80),(40,40)),tile_grama.subsurface((0,80),(40,40)),tile_grama.subsurface((80,80),(40,40)),tile_grama.subsurface((80,0),(40,40)),tile_grama.subsurface((0,0),(40,40)),tile_grama.subsurface((40,40),(0,40)),tile_grama.subsurface((40,0),(40,40)),tile_grama.subsurface(
 for w in range(3):
     for h in range(3):
         tiles_fase_1.append(tile_grama.subsurface((w*40,h*40),(40,40)))
 tiles_fase_1.append((34,57,65))
-fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapaLimitavel(mapa_fase_1, tiles_fase_1,40))
+mapa_fase_1 = mapaLimitavel(matriz_fase_1, tiles_fase_1,40)
+#spawn gerador de hordaS
+enemyimg=pygame.image.load("inimigo01sheet2.png")
+mov_y3=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
+        (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
+        (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
+mov_y2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
+        (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
+        (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
+mapa_fase_1.addSpawn( (0,3) , [120,150] , (1,0) , [enemyimg,enemyimg] , [(20,20),(20,20)] , [8,10] , [True,True] , [1,1] , [0.5,0.3] , [100,300] , [mov_y3,mov_y3] , [(1,0),(1,0)] , [20,20])
+mapa_fase_1.addSpawn( (0,2) , [120,150] , (1,0) , [enemyimg,enemyimg] , [(20,20),(20,20)] , [8,10] , [True,True] , [1,1] , [0.5,0.3] , [100,300] , [mov_y2,mov_y2] , [(1,0),(1,0)] , [20,20])
+#alvo para o inimigo dar pontos de dano
+mapa_fase_1.addTarget((19,3),(-1,0))
+mapa_fase_1.addTarget((19,2),(-1,0))
+#botoes de personagens
+viking_image=pygame.image.load("viking_spritesheet.png")
+viking_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),6,False,10,10,1)
+valkyria_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),2,True,10,10,2)
+botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial,["1 range"],pygame.Rect(25,535,50,50),0,0)
+botao_valkyria = pyTreeBee.linkedButton(valkyria_lvl_1,arial,["2 range"],pygame.Rect(100,535,50,50),0,0)
+#fase 1
+fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_valkyria)
 fase_1.addItem(controlesExtras(fase_1))
-
-
-botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Jardim de Valhalha"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+#seleção de fases
+botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Jardim de Valhalla"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
-#botao_start=pyTreeBee.linkedButton(fadeOutFundoAnimado(selecao_fase,6,[pygame.image.load("Abertura copy1.png").convert(),pygame.image.load("Abertura copy2.png").convert(),pygame.image.load("Abertura copy3.png").convert()]),arial,[""],pygame.Rect(0,0,800,600),250,250)
+#tela inicial
 botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert())
-#botao_start.setAll_BarSize(0)
-#botao_start.setAll_BarColor((-1,-1,-1))
-#botao_start.setAll_Background((300,300,300))
 tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_start)
-    #fadeOutFundoAnimado(selecao_fase,6,[pygame.image.load("Abertura copy1.png").convert(),pygame.image.load("Abertura copy2.png").convert(),pygame.image.load("Abertura copy3.png").convert()])
-    
-#tela_inicial.addItem(controlesExtras(tela_inicial))
-#tela_inicial.setImage(pygame.image.load("Abertura copy.png"),(0,0))
+#botões de voltar adicionados às telas anteriores
 selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
 fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
+#início dos ciclos
 pyTreeBee.treeBeeStart(tela_inicial)
 
 
