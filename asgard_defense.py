@@ -14,6 +14,67 @@ class blocoTabuleiro(object):
     def addPiece(self,piece):
         self.piece=piece
 
+class moveOject(object):
+    def __init__(self, origem,item, pos_ini, destino, velocidade):
+        self.item=item
+        self.origem=origem
+        self.pos_ini=pos_ini
+        self.destino=destino
+        self.step=((destino[0]-pos_ini[0])/velocidade,(destino[1]-pos_ini[1])/velocidae)
+    def keyControls(self,event):
+        try:
+            if self.destino[0]!=self.item.pos[0]:
+                self.item.pos[0]+=self.step[0]
+            if self.destino[1]!=self.item.pos[1]:
+                self.item.pos[1]+=self.step[1]
+            if self.destino[0]==self.item.pos[0] and self.destino[1]==self.item.pos[1]:
+                self.origem.count-=1
+                self=None
+        except:
+            if self.destino[0]!=self.item.x:
+                self.item.x+=self.step[0]
+            if self.destino[1]!=self.item.y:
+                self.item.y+=self.step[1]
+            if self.destino[0]==self.item.x and self.destino[1]==self.item.y:
+                self.origem.count-=1
+                self=None
+    def blitOn(self,scr):pass
+
+class itemCounter(object):
+    def __init__(self,link,count):
+        self.link=link
+        self.count=count
+    def keyControls(self,event):
+        retorno=None
+        if self.count==0: retorno=self.link
+        return retorno
+    def blitOn(self,scr):pass
+
+def fadeIn(scr, *itens):
+    scr.addItem(itemCounter(scr,len(self.itens)))
+    origem=scr.itens[len(itens)-1]
+    for item in itens:
+        try:
+            scr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
+        except:
+            scr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
+        
+
+class fadeOut(object):
+    def __init__(self, link, *itens):
+        self.link=link
+        self.itens=list(itens)
+    def linkReply(self,prevscr):
+        prevscr.addItem(itemCounter(self.link,len(self.itens)))
+        origem=prevscr.itens[len(itens)-1]
+        for item in self.itens:
+            try:
+                prevscr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
+            except:
+                prevscr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
+        return prevscr
+            
+
 class animacaoSprite(object):
     def __init__(self,spritesheet,spritesize,stepnextsprite,rewind,pos=(0,0)):
         self.sheet=spritesheet
@@ -110,7 +171,30 @@ class torreGuerreiro(object):
         self.x=x
         self.y=y
     def getNextImage(self): self.sprite.getNextImage()
-    def fightControls(self,mapa):
+    def movimentoPadrao(self,mapa,size):#ataque circular
+        global frame_atual
+        if self.aim==None:
+           for y in range(len(mapa[0])):
+               for x in range(len(mapa[0][y])):
+                   if mapa[0][y][x].piece!=None:
+                       x_a=(mapa[0][y][x].piece.pos[0]*size) + mapa[0][y][x].piece.pixelpos[0]
+                       y_a=(mapa[0][y][x].piece.pos[1]*size) + mapa[0][y][x].piece.pixelpos[1]
+                       if abs(pow(  (pow((self.x*size)-x_a,2) + pow((self.y*size)-y_a,2)),0.5))<self.rng*size:
+                           print str(pow(  (pow((self.x*size)-x_a,2) + pow((self.y*size)-y_a,2)),0.5))+" "+str(self.rng*size)
+                           if self.sprite.y!=1: self.sprite.setLine(1)
+                           self.aim=mapa[0][y][x]
+        else:            
+            if frame_atual%self.vel==0:
+                try:
+                    self.aim.piece.hp-=self.atk
+                    if self.aim.piece.hp<=0:
+                        self.aim.addPiece(None)
+                        self.aim=None
+                        if self.sprite.y!=0: self.sprite.setLine(0)
+                except:
+                    self.aim=None
+                    self.sprite.setLine(0)
+    def fightControls_anterior(self,mapa):
         global frame_atual
         if self.aim==None:
             for i in range(-self.rng,1+self.rng):
@@ -220,7 +304,7 @@ class quadradoControlavel(object):
                     if mapa[1][self.y][self.x].piece==None:
                         if mapa[1][self.y][self.x].numID>=3 and mapa[1][self.y][self.x].numID<=11:
                             mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.char_sprite,self.char_size,self.nextsprite,self.rewind,self.atk,self.vel,self.rng, self.x,self.y))
-                            self.nullSelection()
+                            self.nullSelection()#isso apaga a info do mouse depois de colocar a torre - voce pode realocar
                 '''
                 else:
                     if mapa[1][self.y][self.x].piece==None:
@@ -404,7 +488,7 @@ class controlesExtras(object):
         return None
 
         
-#matriz seletora de tiles
+#matriz seletora de tiles da fase 1
 matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [ 1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 2],
@@ -468,9 +552,9 @@ mapa_fase_1.addTarget((19,2),(-1,0))
 #botoes de personagens
 viking_image=pygame.image.load("viking_spritesheet.png")
 viking_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),6,False,10,10,1)
-valkyria_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),2,True,10,10,2)
+valkyria_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),2,True,10,10,8)
 botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial,["1 range"],pygame.Rect(25,535,50,50),0,0)
-botao_valkyria = pyTreeBee.linkedButton(valkyria_lvl_1,arial,["2 range"],pygame.Rect(100,535,50,50),0,0)
+botao_valkyria = pyTreeBee.linkedButton(valkyria_lvl_1,arial,["8 range"],pygame.Rect(100,535,50,50),0,0)
 #fase 1
 fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_valkyria)
 fase_1.addItem(controlesExtras(fase_1))
