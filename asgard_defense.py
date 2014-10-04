@@ -1,18 +1,18 @@
 # -*- coding: cp1252 -*-
-import pyTreeBee,pygame,sys,os
+import pyTreeBee,pygame,sys,os,time
 from pygame.locals import*
 infoObject = pygame.display.Info()
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
 temporarydisplay=pygame.display.set_mode((800,600))
+arialBlack=pygame.font.SysFont("Arial Black",22)
+
+loading=arialBlack.render("LOADING...",True,(255,255,255))
+temporarydisplay.blit(loading,(0,0))
+pygame.display.update()
+
+circulo=pygame.image.load("circulo.png")
 frame_atual=0
 arial=pygame.font.SysFont("Arial",12)
-class blocoTabuleiro(object):
-    def __init__(self,numid,cor):
-        self.numID=numid
-        self.cor=cor
-        self.piece=None
-    def addPiece(self,piece):
-        self.piece=piece
 
 class moveOject(object):
     def __init__(self, origem,item, pos_ini, destino, velocidade):
@@ -73,7 +73,15 @@ class fadeOut(object):
             except:
                 prevscr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
         return prevscr
-            
+
+
+class blocoTabuleiro(object):
+    def __init__(self,numid,cor):
+        self.numID=numid
+        self.cor=cor
+        self.piece=None
+    def addPiece(self,piece):
+        self.piece=piece
 
 class animacaoSprite(object):
     def __init__(self,spritesheet,spritesize,stepnextsprite,rewind,pos=(0,0)):
@@ -110,13 +118,15 @@ class animacaoSprite(object):
 
 
 class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,1,
-    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , movimento, sentidox,sentidoy):
+    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,hp, voador, tipo, x,y , movimento, sentidox,sentidoy):
         self.sprite=animacaoSprite(sprite,size,nextsprite,rewind)
         self.pos=[x,y]
         self.pixelpos=[0,0]
         self.atk=atk
         self.vel=vel
         self.hp=hp
+        self.fly=voador
+        self.type=tipo
         self.hpmax=0;self.hpmax+=hp
         self.sentido=[sentidox,sentidoy]#(1,0)horizontal,vertical
         self.parede=[0,0]
@@ -162,39 +172,18 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
     
 
 class torreGuerreiro(object):
-    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,rng, x,y):
+    def __init__(self,sprite,size,nextsprite,rewind,atk,vel,rng,alto,dmgtipos, x,y):
         self.sprite=animacaoSprite(sprite,size,nextsprite,rewind)
         self.atk=atk
         self.vel=vel
         self.rng=rng
+        self.fly=alto
+        self.dmg_types=dmgtipos
         self.aim=None
         self.x=x
         self.y=y
     def getNextImage(self): self.sprite.getNextImage()
-    def movimentoPadrao(self,mapa,size):#ataque circular
-        global frame_atual
-        if self.aim==None:
-           for y in range(len(mapa[0])):
-               for x in range(len(mapa[0][y])):
-                   if mapa[0][y][x].piece!=None:
-                       x_a=(mapa[0][y][x].piece.pos[0]*size) + mapa[0][y][x].piece.pixelpos[0]
-                       y_a=(mapa[0][y][x].piece.pos[1]*size) + mapa[0][y][x].piece.pixelpos[1]
-                       if abs(pow(  (pow((self.x*size)-x_a,2) + pow((self.y*size)-y_a,2)),0.5))<self.rng*size:
-                           print str(pow(  (pow((self.x*size)-x_a,2) + pow((self.y*size)-y_a,2)),0.5))+" "+str(self.rng*size)
-                           if self.sprite.y!=1: self.sprite.setLine(1)
-                           self.aim=mapa[0][y][x]
-        else:            
-            if frame_atual%self.vel==0:
-                try:
-                    self.aim.piece.hp-=self.atk
-                    if self.aim.piece.hp<=0:
-                        self.aim.addPiece(None)
-                        self.aim=None
-                        if self.sprite.y!=0: self.sprite.setLine(0)
-                except:
-                    self.aim=None
-                    self.sprite.setLine(0)
-    def fightControls_anterior(self,mapa):
+    def fightControls(self,mapa):
         global frame_atual
         if self.aim==None:
             for i in range(-self.rng,1+self.rng):
@@ -207,14 +196,15 @@ class torreGuerreiro(object):
                     '''
                     try:
                         if mapa[0][self.y+e][self.x+i].piece!=None:
-                            if self.sprite.y!=1: self.sprite.setLine(1)
-                            self.aim=mapa[0][self.y+e][self.x+i]
+                            if mapa[0][self.y+e][self.x+i].piece.fly==self.fly or self.fly:
+                                if self.sprite.y!=1: self.sprite.setLine(1)
+                                self.aim=mapa[0][self.y+e][self.x+i]
                     except:
                         pass
         else:            
             if frame_atual%self.vel==0:
                 try:
-                    self.aim.piece.hp-=self.atk
+                    self.aim.piece.hp-=self.atk*self.dmg_types[self.aim.piece.type]
                     if self.aim.piece.hp<=0:
                         self.aim.addPiece(None)
                         self.aim=None
@@ -225,7 +215,7 @@ class torreGuerreiro(object):
 
 
 class charSelected(object):
-    def __init__(self,mouse,sprite,size,nextsprite,rewind,atk,vel,rng):
+    def __init__(self,mouse,sprite,size,nextsprite,rewind,atk,vel,rng,voador,tipo):
         self.mouse=mouse
         self.sprite=sprite
         self.size=size
@@ -234,8 +224,10 @@ class charSelected(object):
         self.atk=atk
         self.vel=vel
         self.rng=rng
+        self.fly=voador
+        self.dmg_type=tipo
     def linkReply(self,prevscr):
-        self.mouse.setSelection(self.sprite,self.size,self.nextsprite,self.rewind,self.atk,self.vel,self.rng)
+        self.mouse.setSelection(self.sprite,self.size,self.nextsprite,self.rewind,self.atk,self.vel,self.rng,self.fly,self.dmg_type)
         return prevscr
 
 class quadradoControlavel(object):
@@ -258,7 +250,9 @@ class quadradoControlavel(object):
         self.atk=None
         self.vel=None
         self.rng=None
-    def setSelection(self,sprite,size,nextsprite,rewind,atk,vel,rng):
+        self.fly=None
+        self.dmg_type=None
+    def setSelection(self,sprite,size,nextsprite,rewind,atk,vel,rng,fly,dmg):
         self.char_sprite=sprite
         self.char_size=size
         self.nextsprite=nextsprite
@@ -266,6 +260,8 @@ class quadradoControlavel(object):
         self.atk=atk
         self.vel=vel
         self.rng=rng
+        self.fly=fly
+        self.dmg_type=dmg
     def nullSelection(self):
         self.char_sprite=None
         self.char_size=None
@@ -274,10 +270,11 @@ class quadradoControlavel(object):
         self.atk=None
         self.vel=None
         self.rng=None
+        self.fly=None
+        self.dmg_type=None
     def blitOn(self,screen):
         if self.char_sprite!=None:
-            try: screen.blit(self.char_sprite.subsurface(((0,0),self.char_size)),((self.x*self.size)-(self.char_size[0]/2)+(self.size/2),self.y*self.size) )
-            except:pass
+            screen.blit(self.char_sprite.subsurface(((0,0),self.char_size)),((self.x*self.size)-(self.char_size[0]/2)+(self.size/2),(self.y*self.size)-(self.char_size[1]*3/4)+(self.size/2)-5) )
         screen.blit(self.sprite.getNextImage(),(self.x*self.size,self.y*self.size))
     def keyControls(self,event,mapa,alingment):
         if event.type==MOUSEMOTION:
@@ -303,8 +300,8 @@ class quadradoControlavel(object):
                 if self.char_sprite!=None:
                     if mapa[1][self.y][self.x].piece==None:
                         if mapa[1][self.y][self.x].numID>=3 and mapa[1][self.y][self.x].numID<=11:
-                            mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.char_sprite,self.char_size,self.nextsprite,self.rewind,self.atk,self.vel,self.rng, self.x,self.y))
-                            self.nullSelection()#isso apaga a info do mouse depois de colocar a torre - voce pode realocar
+                            mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.char_sprite,self.char_size,self.nextsprite,self.rewind,self.atk,self.vel,self.rng,self.fly,self.dmg_type, self.x,self.y))
+                            self.nullSelection()
                 '''
                 else:
                     if mapa[1][self.y][self.x].piece==None:
@@ -335,26 +332,32 @@ class quadradoControlavel(object):
                 pygame.mouse.set_visible(True)
             except:
                 print "can't set visible"
+        return None
             
 class lifeTarget(object):
-    def __init__(self,pos, sentido=None):
+    def __init__(self,player,pos, sentido=None):
         self.pos=pos
         self.sentido=sentido
+        self.player=player
     def fightControls(self,mapa):
         if self.sentido==None:
             for x in range(-1,2):
                 for y in range(-1,2):
                     around=mapa[0][self.pos[1]+y][self.pos[0]+x]
                     if around.piece!=None:
+                        self.player.life-=around.piece.atk
                         around.piece=None
+                        
         else:
             point=mapa[0][self.pos[1]+self.sentido[1]][self.pos[0]+self.sentido[0]]
             if point.piece!=None:
+                
+                self.player.life-=point.piece.atk
                 point.piece=None
                 
 
 class spawnInimigo(object):
-    def __init__(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades):
+    def __init__(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,quantidades):
         self.spawntime=time
         self.spawn=where
         self.pos=pos
@@ -368,6 +371,8 @@ class spawnInimigo(object):
         self.atk=forcas
         self.vel=velocidades
         self.hp=vidas
+        self.fly=voador
+        self.type=tipos
         self.sentido=sentidos
         self.quantidade=[0,quantidades]
         self.contador=0
@@ -379,7 +384,7 @@ class spawnInimigo(object):
                     sc=self.contador# (self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , movimento, sentidox,sentidoy)
                     #print str(self.sprite[sc])+" , "+str(self.size[sc])+" , "+str(self.next[sc])+" , "+str(self.rewind[sc])+" , "+str(self.atk[sc])+" , "+str(self.vel[sc])+" , "+str(self.hp[sc])+" , "+str(self.pos[0]+self.spawn[0])+" , "+str(self.pos[1]+self.spawn[1])+" , "+str(self.sentido[sc])
                     #print str(self.sprite)+" , "+str(self.size)+" , "+str(self.next)+" , "+str(self.rewind)+" , "+str(self.atk)+" , "+str(self.vel)+" , "+str(self.hp)+" , "+str(self.pos[0]+self.spawn[0])+" , "+str(self.pos[1]+self.spawn[1])+" , "+str(self.sentido)
-                    inimigo=inimigoAlvo(self.sprite[sc],self.size[sc],self.next[sc], self.rewind[sc], self.atk[sc],self.vel[sc],self.hp[sc], (self.pos[0]+self.spawn[0]), (self.pos[1]+self.spawn[1]), self.movimento[sc], self.sentido[sc][0], self.sentido[sc][1])
+                    inimigo=inimigoAlvo(self.sprite[sc],self.size[sc],self.next[sc], self.rewind[sc], self.atk[sc],self.vel[sc],self.hp[sc],self.fly[sc],self.type[sc], (self.pos[0]+self.spawn[0]), (self.pos[1]+self.spawn[1]), self.movimento[sc], self.sentido[sc][0], self.sentido[sc][1])
                     
                     mapa[0][self.pos[1]+self.spawn[1]][self.pos[0]+self.spawn[0]].piece=inimigo
                     self.quantidade[0]+=1
@@ -389,8 +394,9 @@ class spawnInimigo(object):
                     self.quantidade[0]=0
                 
 class mapaLimitavel(object):
-    def __init__(self, mapa,imagens,size):
+    def __init__(self,player,mapa,imagens,size):
         self.alingment=(0,0)
+        self.player=player
         self.mapa=mapa
         for z in range(len(self.mapa)):
             for y in range(len(self.mapa[z])):
@@ -404,11 +410,12 @@ class mapaLimitavel(object):
                         pass
         self.size=size
         self.selecao=quadradoControlavel(self.size)
-    def addSpawn(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades):
-        self.mapa[1][pos[1]][pos[0]].piece=spawnInimigo(pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,sentidos,quantidades)
-    def addTarget(self,pos, sentido=None):
-        self.mapa[1][pos[1]][pos[0]].piece=lifeTarget(pos,sentido)
+    def addSpawn(self,pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,quantidades):
+        self.mapa[1][pos[1]][pos[0]].piece=spawnInimigo(pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,quantidades)
+    def addTarget(self,plr,pos, sentido=None):
+        self.mapa[1][pos[1]][pos[0]].piece=lifeTarget(plr,pos,sentido)
     def blitOn(self,screen):
+        global circulo
         for z in range(len(self.mapa)):                                
             for y in range(len(self.mapa[z])):
                 for x in range(len(self.mapa[z][y])):
@@ -433,43 +440,77 @@ class mapaLimitavel(object):
                         posy=self.alingment[1]+((1+y)*self.size)-10+self.mapa[0][y][x].piece.pixelpos[1]
                         screen.blit(self.mapa[0][y][x].piece.sprite.getNextImage(), (posx+alinhaspriteX,self.alingment[1]+(y*self.size)+self.mapa[0][y][x].piece.pixelpos[1]))
 
-                        screen.fill((0,0,0),pygame.Rect(posx+2,posy,self.size-4,8))
+                        #screen.fill((0,0,0),pygame.Rect(posx+2,posy,self.size-4,8))
                         screen.fill((255,0,0),pygame.Rect(posx+4,posy+2,self.size-8,4))
                         
                         life=self.size-((self.mapa[0][y][x].piece.hpmax-self.mapa[0][y][x].piece.hp)*self.size/self.mapa[0][y][x].piece.hpmax)
 
-                        screen.fill((255,255,255),pygame.Rect(posx+4,posy+2,life-8,4))
+                        screen.fill((0,255,50),pygame.Rect(posx+4,posy+2,life-8,4))
                 except:
                     pass #print "erro desenhar inimigo"
                 try:
                     if self.mapa[1][y][x].piece!=None:
                         alinhaspriteX=(self.size/2)-(self.mapa[1][y][x].piece.sprite.size[0]/2)
-                        screen.blit(self.mapa[1][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)))
+                        alinhaspriteY=(self.size/2)-(self.mapa[1][y][x].piece.sprite.size[1]*3/4)
+                        screen.blit(self.mapa[1][y][x].piece.sprite.getNextImage(), (self.alingment[0]+(x*self.size)+alinhaspriteX,self.alingment[1]+(y*self.size)+alinhaspriteY))
                         #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
                     pass #print "erro desenhar torre"
-
+        vermelho=( (float(self.player.maxlife)-float(self.player.life))/self.player.maxlife )*254
+        verde= (float(self.player.life)/self.player.maxlife)*254
+        screen.fill((int(vermelho)+1,int(verde)+1,0),(730,530,50,50))
+        screen.blit(pygame.transform.scale(circulo,(50,50)),(730,530))
+        screen.blit(arialBlack.render(str(self.player.life),True,(255,255,255)),(732+8,537))
         self.selecao.blitOn(screen)
         
     def keyControls(self,event):
         self.selecao.keyControls(event,self.mapa, self.alingment)
+        return None
         
+class gameOver(object):
+    def __init__(self,tela,player):
+        self.tela=tela
+        self.retorno=None
+        self.player=player
+    def blitOn(self,scr):
+        if self.player.life<=10:
+            self.retorno=self.tela
+    def keyControls(self,event):
+        global frame_atual
+        if self.retorno!=None: frame_atual=0
+        return self.retorno
+
+class statusPlayer(object):
+    def __init__(self,vida, mana):
+        self.life=vida
+        self.maxlife=vida
+        self.mana=mana
+    def blitOn(self,scr):pass
+    def keyControls(self,event):
+        return self.retorno
 
 class controlesExtras(object):
     def __init__(self,tela):
         self.tela=tela
         self.scroll=[0,0]
         self.frame_skip=1
+        self.pause=False
     def blitOn(self,screen):
         global frame_atual
-        if frame_atual>=pow(10,4)-self.frame_skip:
-            frame_atual=0
-            print 'zerou'
-        else:
-            frame_atual+=self.frame_skip
-        screen.scroll(self.scroll[0],self.scroll[1])
+        if not self.pause:
+            if frame_atual>=pow(10,4)-self.frame_skip:
+                frame_atual=0
+                print 'zerou'
+            else:
+                frame_atual+=self.frame_skip
+            screen.scroll(self.scroll[0],self.scroll[1])
     def keyControls(self,event):
         if event.type==KEYUP:
+            if event.key==K_SPACE:
+                if self.pause:
+                    self.pause=False
+                else:
+                    self.pause=True
             if event.key==K_ESCAPE:
                 self.tela.storedlink=None
                 self.tela.running=False
@@ -488,7 +529,7 @@ class controlesExtras(object):
         return None
 
         
-#matriz seletora de tiles da fase 1
+#matriz seletora de tiles
 matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [ 1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 2],
@@ -528,6 +569,9 @@ matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]]]
+#tela gameover e player
+game_over=pyTreeBee.dynamicScreen((800,600), 30,(0,0,0))
+player=statusPlayer(30,200)
 #loading dos tiles
 tile_grama=pygame.image.load("tileset_grama.png").convert()
 tiles_fase_1=[pygame.image.load("mapacaminho5.png").convert(),pygame.image.load("mapaentrada2.png").convert(),pygame.image.load("mapasaida.png").convert()]#,tile_grama.subsurface((40,40),(40,40)),tile_grama.subsurface((40,80),(40,40)),tile_grama.subsurface((0,80),(40,40)),tile_grama.subsurface((80,80),(40,40)),tile_grama.subsurface((80,0),(40,40)),tile_grama.subsurface((0,0),(40,40)),tile_grama.subsurface((40,40),(0,40)),tile_grama.subsurface((40,0),(40,40)),tile_grama.subsurface(
@@ -535,28 +579,47 @@ for w in range(3):
     for h in range(3):
         tiles_fase_1.append(tile_grama.subsurface((w*40,h*40),(40,40)))
 tiles_fase_1.append((34,57,65))
-mapa_fase_1 = mapaLimitavel(matriz_fase_1, tiles_fase_1,40)
+mapa_fase_1 = mapaLimitavel(player,matriz_fase_1, tiles_fase_1,40)
 #spawn gerador de hordaS
-enemyimg=pygame.image.load("inimigo01sheet2.png")
+enemy1=pygame.image.load("inimigo01sheet2.png")
+enemy4=pygame.image.load("inimigo04sheet.png")
+enemy5=pygame.image.load("inimigo05sheet.png")
+enemy8=pygame.image.load("inimigo08sheet.png")
 mov_y3=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
         (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
 mov_y2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
         (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-mapa_fase_1.addSpawn( (0,3) , [120,150] , (1,0) , [enemyimg,enemyimg] , [(20,20),(20,20)] , [8,10] , [True,True] , [1,1] , [0.5,0.3] , [100,300] , [mov_y3,mov_y3] , [(1,0),(1,0)] , [20,20])
-mapa_fase_1.addSpawn( (0,2) , [120,150] , (1,0) , [enemyimg,enemyimg] , [(20,20),(20,20)] , [8,10] , [True,True] , [1,1] , [0.5,0.3] , [100,300] , [mov_y2,mov_y2] , [(1,0),(1,0)] , [20,20])
+#pos,time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,movimento,voador,tipos,sentidos,quantidades):
+mapa_fase_1.addSpawn( (0,3) , [120,120,120,120] , (1,0) , [enemy1,enemy4,enemy5,enemy8] , [(20,20),(22,22),(22,22),(22,22)] , [8,8,8,8] , [True,False,False,False] , [1,1,1,1] , [0.5,0.5,0.5,0.5] , [100,100,100,100] ,[False,True,False,True],[0,0,0,0], [mov_y3,mov_y3,mov_y3,mov_y3] , [(1,0),(1,0),(1,0),(1,0)] , [20,20,15,10])
+mapa_fase_1.addSpawn( (0,2) , [120,120,120,120] , (1,0) , [enemy1,enemy4,enemy5,enemy8] , [(20,20),(22,22),(22,22),(22,22)] , [8,8,8,8] , [True,False,False,False] , [1,1,1,1] , [0.5,0.5,0.5,0.5] , [100,100,100,100] ,[False,True,False,True],[0,0,0,0], [mov_y2,mov_y2,mov_y2,mov_y2] , [(1,0),(1,0),(1,0),(1,0)] , [20,20,15,10])
 #alvo para o inimigo dar pontos de dano
-mapa_fase_1.addTarget((19,3),(-1,0))
-mapa_fase_1.addTarget((19,2),(-1,0))
+mapa_fase_1.addTarget(player,(19,3),(-1,0))
+mapa_fase_1.addTarget(player,(19,2),(-1,0))
 #botoes de personagens
-viking_image=pygame.image.load("viking_spritesheet.png")
-viking_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),6,False,10,10,1)
-valkyria_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),2,True,10,10,8)
-botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial,["1 range"],pygame.Rect(25,535,50,50),0,0)
-botao_valkyria = pyTreeBee.linkedButton(valkyria_lvl_1,arial,["8 range"],pygame.Rect(100,535,50,50),0,0)
+viking_image=pygame.image.load("vikingchifre_spritesheet.png")
+arqueiro_image=pygame.image.load("archer_spritesheet.png")
+berserker_image=pygame.image.load("berserker_spritesheet.png")
+valquiria_image=pygame.image.load("viking_spritesheet.png")
+#diferenciadores: listas de vantagens e desvantagens
+#normal, roxo, vermelho, azul,verde
+viking_diferenciador=   [1 ,0.5,  2,  1,0.8]#azul
+arqueiro_diferenciador= [1 ,  2,0.5,0.8,  1]#verde
+berserker_diferenciador=[1 ,0.8,  1,  2,0.5]#vermelho
+valquiria_diferenciador=[1 ,  1,0.8,0.5,  2]#roxo
+#mouse,sprite,size,nextsprite,rewind,atk,vel,rng,fly,types
+viking_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),6,False,30,18,2,False,viking_diferenciador)
+arqueiro_lvl_1=charSelected(mapa_fase_1.selecao,arqueiro_image,(50,50),7,False,10,21,4,True,arqueiro_diferenciador)
+berserker_lvl_1=charSelected(mapa_fase_1.selecao,berserker_image,(70,70),7,False,40,21,1,False,berserker_diferenciador)
+valquiria_lvl_1=charSelected(mapa_fase_1.selecao,valquiria_image,(60,50),5,False,30,12,3,True,valquiria_diferenciador)
+
+botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial,["custo","insira","aqui uma","foto de","  Viking"],pygame.Rect(25,535,50,50),0,-10)
+botao_arqueiro = pyTreeBee.linkedButton(arqueiro_lvl_1,arial,["de","insira","aqui uma","foto de"," Arqueiro"],pygame.Rect(100,535,50,50),0,-10)
+botao_berseker = pyTreeBee.linkedButton(berserker_lvl_1,arial,["mana","insira","aqui uma","foto de","Berserker"],pygame.Rect(175,535,50,50),0,-10)
+botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,arial,["insira","aqui uma","foto de","Valquíria"],pygame.Rect(250,535,50,50),0,5)
 #fase 1
-fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_valkyria)
+fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berseker,botao_valquiria,gameOver(game_over,player))
 fase_1.addItem(controlesExtras(fase_1))
 #seleção de fases
 botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Jardim de Valhalla"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
@@ -567,8 +630,9 @@ botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],pygame.Rect(0,0,800,6
 tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_start)
 #botões de voltar adicionados às telas anteriores
 selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
-fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
+fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],pygame.Rect(600,530,50,20),0,0))
 #início dos ciclos
+time.sleep(0.1)
 pyTreeBee.treeBeeStart(tela_inicial)
 
 
