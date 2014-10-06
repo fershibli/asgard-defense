@@ -14,14 +14,16 @@ circulo=pygame.image.load("circulo.png")
 frame_atual=0
 arial=pygame.font.SysFont("Arial",12)
 
-class moveOject(object):
+class moveObject(object):
     def __init__(self, origem,item, pos_ini, destino, velocidade):
         self.item=item
         self.origem=origem
         self.pos_ini=pos_ini
         self.destino=destino
-        self.step=((destino[0]-pos_ini[0])/velocidade,(destino[1]-pos_ini[1])/velocidae)
+        self.step=((destino[0]-pos_ini[0])/velocidade,(destino[1]-pos_ini[1])/velocidade)
     def keyControls(self,event):
+        return None
+    def blitOn(self,scr):
         try:
             if self.destino[0]!=self.item.pos[0]:
                 self.item.pos[0]+=self.step[0]
@@ -31,14 +33,16 @@ class moveOject(object):
                 self.origem.count-=1
                 self=None
         except:
-            if self.destino[0]!=self.item.x:
-                self.item.x+=self.step[0]
-            if self.destino[1]!=self.item.y:
-                self.item.y+=self.step[1]
-            if self.destino[0]==self.item.x and self.destino[1]==self.item.y:
-                self.origem.count-=1
-                self=None
-    def blitOn(self,scr):pass
+            try:
+                if self.destino[0]!=self.item.x:
+                    self.item.x+=self.step[0]
+                if self.destino[1]!=self.item.y:
+                    self.item.y+=self.step[1]
+                if self.destino[0]==self.item.x and self.destino[1]==self.item.y:
+                    self.origem.count-=1
+                    self=None
+            except:
+                pass
 
 class itemCounter(object):
     def __init__(self,link,count):
@@ -51,13 +55,24 @@ class itemCounter(object):
     def blitOn(self,scr):pass
 
 def fadeIn(scr, *itens):
-    scr.addItem(itemCounter(scr,len(self.itens)))
-    origem=scr.itens[len(itens)-1]
+    origem=itemCounter(scr,len(itens))
+    scr.addItem(origem)
     for item in itens:
         try:
             scr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
         except:
-            scr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
+            try:
+                scr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
+            except:
+                try:
+                    scr.addItem(moveObject(origem,item[0], (item[0].rect.x,item[0].rect.y), item[1], item[2]))
+                except:
+                    try:
+                        for r in range(len(item[0].rect)):
+                            scr.addItem(moveObject(origem,item[0], (item[0].rect[r].x,item[0].rect[r].y), item[1], item[2]))
+                            origem.count+=1
+                    except:
+                        pass
         
 
 class fadeOut(object):
@@ -456,10 +471,12 @@ class mapaLimitavel(object):
                         #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
                     pass #print "erro desenhar torre"
-        vermelho=( (float(self.player.maxlife)-float(self.player.life))/self.player.maxlife )*254
-        verde= (float(self.player.life)/self.player.maxlife)*254
-        screen.fill((int(vermelho)+1,int(verde)+1,0),(730,530,50,50))
-        screen.blit(pygame.transform.scale(circulo,(50,50)),(730,530))
+        try:
+            vermelho=( (float(self.player.maxlife)-float(self.player.life))/self.player.maxlife )*254
+            verde= (float(self.player.life)/self.player.maxlife)*254
+            screen.fill((int(vermelho)+1,int(verde)+1,0),(730,530,50,50))
+            screen.blit(pygame.transform.scale(circulo,(50,50)),(730,530))
+        except:pass
         screen.blit(arialBlack.render(str(self.player.life),True,(255,255,255)),(732+8,537))
         self.selecao.blitOn(screen)
         
@@ -468,16 +485,17 @@ class mapaLimitavel(object):
         return None
         
 class gameOver(object):
-    def __init__(self,tela,player):
+    def __init__(self,tela,link,player):
         self.tela=tela
+        self.link=link
         self.retorno=None
         self.player=player
     def blitOn(self,scr):
-        if self.player.life<=10:
-            self.retorno=self.tela
-    def keyControls(self,event):
         global frame_atual
         if self.retorno!=None: frame_atual=0
+        if self.player.life<=0:
+            self.tela.linkcalled=self.link
+    def keyControls(self,event):
         return self.retorno
 
 class statusPlayer(object):
@@ -570,11 +588,11 @@ matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]]]
 #tela gameover e player
-game_over=pyTreeBee.dynamicScreen((800,600), 30,(0,0,0))
+game_over=pyTreeBee.dynamicScreen((800,600), 30,(255,0,0),pyTreeBee.linkedButton(None,arial,["GameOver"],400,400,pygame.Rect(0,0,0,0),0,0))
 player=statusPlayer(30,200)
 #loading dos tiles
 tile_grama=pygame.image.load("tileset_grama.png").convert()
-tiles_fase_1=[pygame.image.load("mapacaminho5.png").convert(),pygame.image.load("mapaentrada2.png").convert(),pygame.image.load("mapasaida.png").convert()]#,tile_grama.subsurface((40,40),(40,40)),tile_grama.subsurface((40,80),(40,40)),tile_grama.subsurface((0,80),(40,40)),tile_grama.subsurface((80,80),(40,40)),tile_grama.subsurface((80,0),(40,40)),tile_grama.subsurface((0,0),(40,40)),tile_grama.subsurface((40,40),(0,40)),tile_grama.subsurface((40,0),(40,40)),tile_grama.subsurface(
+tiles_fase_1=[pygame.image.load("mapacaminho6.png").convert(),pygame.image.load("mapaentrada3.png").convert(),pygame.image.load("mapasaida3.png").convert()]#,tile_grama.subsurface((40,40),(40,40)),tile_grama.subsurface((40,80),(40,40)),tile_grama.subsurface((0,80),(40,40)),tile_grama.subsurface((80,80),(40,40)),tile_grama.subsurface((80,0),(40,40)),tile_grama.subsurface((0,0),(40,40)),tile_grama.subsurface((40,40),(0,40)),tile_grama.subsurface((40,0),(40,40)),tile_grama.subsurface(
 for w in range(3):
     for h in range(3):
         tiles_fase_1.append(tile_grama.subsurface((w*40,h*40),(40,40)))
@@ -614,24 +632,62 @@ arqueiro_lvl_1=charSelected(mapa_fase_1.selecao,arqueiro_image,(50,50),7,False,1
 berserker_lvl_1=charSelected(mapa_fase_1.selecao,berserker_image,(70,70),7,False,40,21,1,False,berserker_diferenciador)
 valquiria_lvl_1=charSelected(mapa_fase_1.selecao,valquiria_image,(60,50),5,False,30,12,3,True,valquiria_diferenciador)
 
-botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial,["custo","insira","aqui uma","foto de","  Viking"],pygame.Rect(25,535,50,50),0,-10)
-botao_arqueiro = pyTreeBee.linkedButton(arqueiro_lvl_1,arial,["de","insira","aqui uma","foto de"," Arqueiro"],pygame.Rect(100,535,50,50),0,-10)
-botao_berseker = pyTreeBee.linkedButton(berserker_lvl_1,arial,["mana","insira","aqui uma","foto de","Berserker"],pygame.Rect(175,535,50,50),0,-10)
-botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,arial,["insira","aqui uma","foto de","Valquíria"],pygame.Rect(250,535,50,50),0,5)
-#fase 1
-fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berseker,botao_valquiria,gameOver(game_over,player))
+botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial,["custo","insira","aqui uma","foto de","  Viking"],25,535,pygame.Rect(0,0,50,50),0,-10)
+botao_arqueiro = pyTreeBee.linkedButton(arqueiro_lvl_1,arial,["de","insira","aqui uma","foto de"," Arqueiro"],100,535,pygame.Rect(0,0,50,50),0,-10)
+botao_berseker = pyTreeBee.linkedButton(berserker_lvl_1,arial,["mana","insira","aqui uma","foto de","Berserker"],175,535,pygame.Rect(0,0,50,50),0,-10)
+botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,arial,["insira","aqui uma","foto de","Valquíria"],250,535,pygame.Rect(0,0,50,50),0,5)
+
+###>>>FASES<<<###
+
+###fase 1###
+fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berseker,botao_valquiria)
 fase_1.addItem(controlesExtras(fase_1))
-#seleção de fases
-botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Jardim de Valhalla"],pygame.Rect(100,100,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+fase_1.addItem(gameOver(fase_1,game_over,player))
+
+###>>>TELAS<<<###
+
+###seleção de fases###
+botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Jardim de Valhalla"],100,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
-#tela inicial
-botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],pygame.Rect(0,0,800,600),250,250,pygame.image.load("Abertura copy.png").convert())
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_start)
-#botões de voltar adicionados às telas anteriores
-selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],pygame.Rect(740,570,50,20),0,0))
-fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],pygame.Rect(600,530,50,20),0,0))
-#início dos ciclos
+###tela options###
+tela_options=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(None,arial,["Você tem a opção de...","VOLTAR!","","HUE","   HUE","      BR","        BR"],300,300,pygame.Rect(0,0,0,0),0,0))
+###tela staff###
+fabricio=pyTreeBee.linkedButton(None,arial,["Fabricio do Nascimento","   Artista / Roteirista"],100,100,pygame.Rect(0,0,0,0),0,0)
+fernando=pyTreeBee.linkedButton(None,arial,["Fernando Luiz Neme Chibli","   Programador"],100,200,pygame.Rect(0,0,0,0),0,0)
+freak=pyTreeBee.linkedButton(None,arial,["Guilherme de Almeida","   Artista / Programador"],100,300,pygame.Rect(0,0,0,0),0,0)
+mancha_e=pyTreeBee.linkedButton(None,arial,["Luiz Gustavo 'Manchae' Pelatieri Teixeira","   Artista / Game Designer"],100,400,pygame.Rect(0,0,0,0),0,0)
+maria=pyTreeBee.linkedButton(None,arial,["Maria Tereza Font Fernandes","   Produtora"],100,500,pygame.Rect(0,0,0,0),0,0)
+tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,255,200),fabricio,fernando,freak,mancha_e,maria)
+###tela inicial###
+#> letreiro
+
+#> viking
+pescoco=pyTreeBee.linkedButton(None,arial,[""],-800,0,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("pescoco.png"),(800,600)))
+cabeca=pyTreeBee.linkedButton(None,arial,[""],-800,0,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("viking 1.png"),(800,600)))
+espada=animacaoSprite(pygame.transform.scale(pygame.image.load("espada_spritesheet.png"),(4800,600)),(800,600),4,True,(0,0))
+#> start
+botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],800,300,pygame.Rect(0,0,180,60),0,0)
+botao_start.setEach_Image(pygame.image.load("start.png"),pygame.image.load("start hovered.png"),pygame.image.load("start clicado.png"))
+botao_start.setAll_BarSize((-10,-10))
+#> options
+botao_options=pyTreeBee.linkedButton(tela_options,arial,[""],800,380,pygame.Rect(0,0,180,60),0,0)
+botao_options.setEach_Image(pygame.image.load("options.png"),pygame.image.load("options hovered.png"),pygame.image.load("options clicado.png"))
+botao_options.setAll_BarSize((-10,-10))
+#> staff
+botao_staff=pyTreeBee.linkedButton(tela_staff,arial,[""],800,460,pygame.Rect(0,0,180,60),0,0)
+botao_staff.setEach_Image(pygame.image.load("staff.png"),pygame.image.load("staff hovered.png"),pygame.image.load("staff clicado.png"))
+botao_staff.setAll_BarSize((-10,-10))
+#> tela
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pescoco,cabeca,espada,botao_start,botao_options,botao_staff)
+tela_inicial.addItem(controlesExtras(tela_inicial))
+fadeIn(tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20],[pescoco,(0,0),40],[cabeca,(0,0),40])
+###botões de voltar adicionados às telas anteriores###
+tela_options.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0))
+tela_staff.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0))
+selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0))
+fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],600,530,pygame.Rect(0,0,50,20),0,0))
+###início dos ciclos###
 time.sleep(0.1)
 pyTreeBee.treeBeeStart(tela_inicial)
 
