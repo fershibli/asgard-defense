@@ -45,48 +45,44 @@ class moveObject(object):
                 pass
 
 class itemCounter(object):
-    def __init__(self,link,count):
+    def __init__(self,scr,link,count):
+        self.scr=scr
         self.link=link
         self.count=count
-    def keyControls(self,event):
-        retorno=None
-        if self.count==0: retorno=self.link
-        return retorno
-    def blitOn(self,scr):pass
-
-def fadeIn(scr, *itens):
-    origem=itemCounter(scr,len(itens))
+    def keyControls(self,event):pass
+    def blitOn(self,scr):
+        if self.count==0:
+            self.scr.linkcalled=self.link
+'''
+class fadeIn(object):
+    def __init__(self,
+'''
+def fadeIn(scr,link, *itens):
+    origem=itemCounter(scr,link,len(itens))
     scr.addItem(origem)
     for item in itens:
         try:
-            scr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
+            scr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
         except:
             try:
-                scr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
+                scr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
             except:
-                try:
-                    scr.addItem(moveObject(origem,item[0], (item[0].rect.x,item[0].rect.y), item[1], item[2]))
-                except:
-                    try:
-                        for r in range(len(item[0].rect)):
-                            scr.addItem(moveObject(origem,item[0], (item[0].rect[r].x,item[0].rect[r].y), item[1], item[2]))
-                            origem.count+=1
-                    except:
-                        pass
+                pass
         
 
 class fadeOut(object):
-    def __init__(self, link, *itens):
+    def __init__(self,scr, link, *itens):
+        self.scr=scr
         self.link=link
         self.itens=list(itens)
     def linkReply(self,prevscr):
-        prevscr.addItem(itemCounter(self.link,len(self.itens)))
-        origem=prevscr.itens[len(itens)-1]
+        origem=itemCounter(self.scr,self.link,len(self.itens))
+        prevscr.addItem(origem)
         for item in self.itens:
             try:
-                prevscr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
-            except:
                 prevscr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
+            except:
+                prevscr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
         return prevscr
 
 
@@ -102,33 +98,35 @@ class animacaoSprite(object):
     def __init__(self,spritesheet,spritesize,stepnextsprite,rewind,pos=(0,0)):
         self.sheet=spritesheet
         self.size=spritesize
-        self.x=0
-        self.y=0
+        self.x_sheet=0
+        self.y_sheet=0
+        self.x=pos[0]
+        self.y=pos[1]
         self.step=stepnextsprite
         self.rewind=rewind
         self.next=1
-        self.pos=pos
+        #self.pos=pos
     def setLine(self, line):
-        if line>=0 and line<int(self.sheet.get_height()/self.size[1]): self.y=line
+        if line>=0 and line<int(self.sheet.get_height()/self.size[1]): self.y_sheet=line
     def getNextImage(self):
         global frame_atual
         if frame_atual%self.step==0:
-            if int(((self.x+1)*self.size[0])/self.sheet.get_width())>=1 or (self.x+1)<=(-self.next+1)/2:
+            if int(((self.x_sheet+1)*self.size[0])/self.sheet.get_width())>=1 or (self.x_sheet+1)<=(-self.next+1)/2:
                 if self.rewind:
                     self.next=(-1)
-                    self.x=int(self.sheet.get_width()/self.size[0])-2
+                    self.x_sheet=int(self.sheet.get_width()/self.size[0])-2
                     self.rewind=False
                 else:
-                    self.x=(-self.next+1)/2
+                    self.x_sheet=(-self.next+1)/2
                     if self.next==(-1):
                         self.next=1
                         self.rewind=True
             else:
-                self.x+=self.next
+                self.x_sheet+=self.next
             
-        return self.sheet.subsurface((self.x*self.size[0],self.y*self.size[1]),self.size)
+        return self.sheet.subsurface((self.x_sheet*self.size[0],self.y_sheet*self.size[1]),self.size)
     def blitOn(self,screen):
-        screen.blit(self.getNextImage(),self.pos)
+        screen.blit(self.getNextImage(),(self.x,self.y))
     def keyControls(self,event):pass
 
 
@@ -588,7 +586,7 @@ matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]]]
 #tela gameover e player
-game_over=pyTreeBee.dynamicScreen((800,600), 30,(255,0,0),pyTreeBee.linkedButton(None,arial,["GameOver"],400,400,pygame.Rect(0,0,0,0),0,0))
+game_over=pyTreeBee.dynamicScreen((800,600), 30,(255,0,0),pyTreeBee.linkedButton(None,arial,["Segundo o Freak, essa tela não precisava existir.","Game Over não existe pra ele."],400,250,pygame.Rect(0,0,0,0),0,0))
 player=statusPlayer(30,200)
 #loading dos tiles
 tile_grama=pygame.image.load("tileset_grama.png").convert()
@@ -663,29 +661,35 @@ tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,255,200),fabricio,fernando,fr
 #> letreiro
 
 #> viking
-pescoco=pyTreeBee.linkedButton(None,arial,[""],-800,0,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("pescoco.png"),(800,600)))
-cabeca=pyTreeBee.linkedButton(None,arial,[""],-800,0,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("viking 1.png"),(800,600)))
-espada=animacaoSprite(pygame.transform.scale(pygame.image.load("espada_spritesheet.png"),(4800,600)),(800,600),4,True,(0,0))
+pescoco=pyTreeBee.linkedButton(None,arial,[""],0,438,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("pescoco 2.png"),(437,162)))
+cabeca=pyTreeBee.linkedButton(None,arial,[""],0,63,pygame.Rect(0,0,0,0),0,0,  pygame.transform.scale(pygame.image.load("cabeca 4.png"),(357,523)))
+olho=animacaoSprite(pygame.transform.scale(pygame.image.load("olho_spritesheet 2.png"),(760,75)),(190,75),6,True,(90,290))
+espada=animacaoSprite(pygame.transform.scale(pygame.image.load("espada_spritesheet.png"),(4800,600)),(800,600),10,True,(0,0))
 #> start
 botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],800,300,pygame.Rect(0,0,180,60),0,0)
-botao_start.setEach_Image(pygame.image.load("start.png"),pygame.image.load("start hovered.png"),pygame.image.load("start clicado.png"))
+botao_start.setEach_Image(pygame.image.load("start 2.png"),pygame.image.load("start hovered 2.png"),pygame.image.load("start clicado.png"))
 botao_start.setAll_BarSize((-10,-10))
 #> options
 botao_options=pyTreeBee.linkedButton(tela_options,arial,[""],800,380,pygame.Rect(0,0,180,60),0,0)
-botao_options.setEach_Image(pygame.image.load("options.png"),pygame.image.load("options hovered.png"),pygame.image.load("options clicado.png"))
+botao_options.setEach_Image(pygame.image.load("options 2.png"),pygame.image.load("options hovered 2.png"),pygame.image.load("options clicado.png"))
 botao_options.setAll_BarSize((-10,-10))
 #> staff
 botao_staff=pyTreeBee.linkedButton(tela_staff,arial,[""],800,460,pygame.Rect(0,0,180,60),0,0)
-botao_staff.setEach_Image(pygame.image.load("staff.png"),pygame.image.load("staff hovered.png"),pygame.image.load("staff clicado.png"))
+botao_staff.setEach_Image(pygame.image.load("staff 2.png"),pygame.image.load("staff hovered 2.png"),pygame.image.load("staff clicado.png"))
 botao_staff.setAll_BarSize((-10,-10))
 #> tela
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pescoco,cabeca,espada,botao_start,botao_options,botao_staff)
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pescoco,cabeca,olho,espada,botao_start,botao_options,botao_staff)
 tela_inicial.addItem(controlesExtras(tela_inicial))
-fadeIn(tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20],[pescoco,(0,0),40],[cabeca,(0,0),40])
+fadeIn(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])#[pescoco,(500,500),40],[cabeca,(0,0),40],[espada,(0,600),100]
+botao_start.link=fadeOut(tela_inicial,selecao_fase,[botao_start,(800,300),10],[botao_options,(800,380),15],[botao_staff,(800,460),20])
 ###botões de voltar adicionados às telas anteriores###
 tela_options.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0))
 tela_staff.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0))
-selecao_fase.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0))
+voltar_selecao=pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0)
+'''
+voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
+selecao_fase.addItem(voltar_selecao)
+'''
 fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],600,530,pygame.Rect(0,0,50,20),0,0))
 ###início dos ciclos###
 time.sleep(0.1)
