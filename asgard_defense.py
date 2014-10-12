@@ -20,25 +20,25 @@ class moveObject(object):
         self.origem=origem
         self.pos_ini=pos_ini
         self.destino=destino
-        self.step=((destino[0]-pos_ini[0])/velocidade,(destino[1]-pos_ini[1])/velocidade)
+        self.step=(((destino[0]-pos_ini[0])/velocidade),((destino[1]-pos_ini[1])/velocidade))
     def keyControls(self,event):
         return None
     def blitOn(self,scr):
         try:
-            if self.destino[0]!=self.item.pos[0]:
-                self.item.pos[0]+=self.step[0]
-            if self.destino[1]!=self.item.pos[1]:
-                self.item.pos[1]+=self.step[1]
-            if self.destino[0]==self.item.pos[0] and self.destino[1]==self.item.pos[1]:
+            if self.destino[0]!=self.item.x:
+                self.item.x+=self.step[0]
+            if self.destino[1]!=self.item.y:
+                self.item.y+=self.step[1]
+            if self.destino[0]==self.item.x and self.destino[1]==self.item.y:
                 self.origem.count-=1
-                self=None
+                self=None            
         except:
             try:
-                if self.destino[0]!=self.item.x:
-                    self.item.x+=self.step[0]
-                if self.destino[1]!=self.item.y:
-                    self.item.y+=self.step[1]
-                if self.destino[0]==self.item.x and self.destino[1]==self.item.y:
+                if self.destino[0]!=self.item.pos[0]:
+                    self.item.pos[0]+=self.step[0]
+                if self.destino[1]!=self.item.pos[1]:
+                    self.item.pos[1]+=self.step[1]
+                if self.destino[0]==self.item.pos[0] and self.destino[1]==self.item.pos[1]:
                     self.origem.count-=1
                     self=None
             except:
@@ -77,13 +77,13 @@ class fadeOut(object):
         self.itens=list(itens)
     def linkReply(self,prevscr):
         origem=itemCounter(self.scr,self.link,len(self.itens))
-        prevscr.addItem(origem)
+        self.scr.addItem(origem)
         for item in self.itens:
             try:
-                prevscr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
+                self.scr.addItem(moveObject(origem,item[0], (item[0].x,item[0].y), item[1], item[2]))
             except:
-                prevscr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
-        return prevscr
+                self.scr.addItem(moveObject(origem,item[0], (item[0].pos[0],item[0].pos[0]), item[1], item[2]))#item,posicao inicial,destino,velocidade
+        return self.scr
 
 
 class blocoTabuleiro(object):
@@ -105,12 +105,24 @@ class animacaoSprite(object):
         self.step=stepnextsprite
         self.rewind=rewind
         self.next=1
+        self.pause_time=0
+        self.repeats=0
+        self.stop=False
+        self.wait=False
         #self.pos=pos
+    def setPause(self,pause):
+        self.pause_time=pause
+    def setStop(self,repeats):
+        self.repeats=repeats
     def setLine(self, line):
         if line>=0 and line<int(self.sheet.get_height()/self.size[1]): self.y_sheet=line
     def getNextImage(self):
         global frame_atual
-        if frame_atual%self.step==0:
+        if self.wait and frame_atual%(self.pause_time+self.step)==0:
+            self.wait=False
+            if self.x_sheet==int(self.sheet.get_width()/self.size[0])-1: self.x_sheet-=1
+            if self.rewind: self.x_sheet+=1
+        if frame_atual%self.step==0 and self.stop==False and self.wait==False:
             if int(((self.x_sheet+1)*self.size[0])/self.sheet.get_width())>=1 or (self.x_sheet+1)<=(-self.next+1)/2:
                 if self.rewind:
                     self.next=(-1)
@@ -121,6 +133,16 @@ class animacaoSprite(object):
                     if self.next==(-1):
                         self.next=1
                         self.rewind=True
+                        
+                if self.repeats>0:
+                    self.repeats-=(-self.next+1)/2
+                    if self.repeats==0:
+                        self.stop=True
+                        self.x_sheet=int(self.sheet.get_width()/self.size[0])-1
+                if self.pause_time>0:
+                    self.wait=True
+                    if self.next==-1:self.x_sheet=int(self.sheet.get_width()/self.size[0])-1
+                    if self.rewind:self.x_sheet=(-self.next+1)/2
             else:
                 self.x_sheet+=self.next
             
@@ -222,13 +244,10 @@ class torreGuerreiro(object):
                 try:
                     self.aim.piece.hp-=self.atk*self.dmg_types[self.aim.piece.type]
                     if self.aim.piece.hp<=0:
-                        try:
-                            self.player.mana+=self.aim.piece.mana
-                        except:
-                            print 'Why you can\'t receive mana? '+' I owe you '+str(self.aim.piece.mana)+' Mana(s)'
+                        self.player.mana+=self.aim.piece.mana
                         self.aim.addPiece(None)
                         self.aim=None
-                        if self.sprite.y!=0: self.sprite.setLine(0)
+                        if self.sprite.y_sheet!=0: self.sprite.setLine(0)
                         self.player.score+=1
                 except:
                     self.aim=None
@@ -261,21 +280,9 @@ class quadradoControlavel(object):
         self.size=size
         self.buttonup=False
         self.dentro=True
-        self.torre=pygame.image.load("viking_spritesheet.png")
-        self.inimigo=pygame.image.load("inimigo01sheet2.png")
         self.botaodireito=False
         self.botaoesquerdo=False
-        
-        self.char_sprite=None
-        self.char_size=None
-        self.nextsprite=None
-        self.rewind=None
-        self.atk=None
-        self.vel=None
-        self.rng=None
-        self.fly=None
-        self.dmg_type=None
-        self.mana=None
+        self.nullSelection()
     def setSelection(self,sprite,size,nextsprite,rewind,atk,vel,rng,fly,dmg,mana):
         self.char_sprite=sprite
         self.char_size=size
@@ -331,16 +338,12 @@ class quadradoControlavel(object):
                                 mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.char_sprite,self.char_size,self.nextsprite,self.rewind,self.atk,self.vel,self.rng,self.fly,self.dmg_type, self.x,self.y,self.mana,self.player))
                                 self.player.mana-=self.mana
                             self.nullSelection()
-                '''
-                else:
-                    if mapa[1][self.y][self.x].piece==None:
-                        if mapa[1][self.y][self.x].numID>=3 and mapa[1][self.y][self.x].numID<=11:
-                            mapa[1][self.y][self.x].addPiece(torreGuerreiro(self.torre,(60,50),6,False,10,10,1,self.x,self.y))
-                '''
+            else:
+                self.nullSelection()
         if self.botaodireito:
             if mapa[0][self.y][self.x].numID==0:
                 if self.dentro:
-                    mapa[0][self.y][self.x].addPiece(inimigoAlvo(self.inimigo,(20,20),10,False,1,1,10,self.x,self.y,[],1,0,0))
+                    pass #acontecimentos para botao direito
         if event.type==MOUSEBUTTONDOWN:
             if event.button==1:
                 self.botaoesquerdo=True
@@ -501,7 +504,20 @@ class mapaLimitavel(object):
     def keyControls(self,event):
         self.selecao.keyControls(event,self.mapa, self.alingment)
         return None
-        
+
+class winnerScreen(object):
+    def __init__(self,tela,link,player,qnt_inimigos):
+        self.tela=tela
+        self.link=link
+        self.retorno=None
+        self.player=player
+        self.inimigos=qnt_inimigos
+    def blitOn(self,scr):
+        if self.player.maxlife-self.player.life+self.player.score==self.inimigos:
+            self.tela.linkcalled=self.link
+    def keyControls(self,event):
+        pass
+
 class gameOver(object):
     def __init__(self,tela,link,player):
         self.tela=tela
@@ -608,7 +624,10 @@ matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]]]
 #tela gameover e player
 player=statusPlayer(30,200)
-game_over=pyTreeBee.dynamicScreen((800,600), 30,(255,0,0),pyTreeBee.linkedButton(None,arial,["Segundo o Freak, essa tela não precisava existir.","Game Over não existe pra ele."],450,450,pygame.Rect(0,0,0,0),0,0),pyTreeBee.linkedButton(None,arialBlack,["GAME OVER"],350,250,pygame.Rect(0,0,0,0),0,0))
+game_over=pyTreeBee.dynamicScreen((800,600), 30,(100,0,0))
+game_over.setImage(pygame.image.load('gameover.png'),(0,0))
+winner_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255))
+winner_scr.setImage(pygame.image.load('vitoria.png'),(0,0))
 #loading dos tiles
 tile_grama=pygame.image.load("tileset_grama.png").convert()
 tiles_fase_1=[pygame.image.load("mapacaminho6.png").convert(),pygame.image.load("mapaentrada3.png").convert(),pygame.image.load("mapasaida3.png").convert()]#,tile_grama.subsurface((40,40),(40,40)),tile_grama.subsurface((40,80),(40,40)),tile_grama.subsurface((0,80),(40,40)),tile_grama.subsurface((80,80),(40,40)),tile_grama.subsurface((80,0),(40,40)),tile_grama.subsurface((0,0),(40,40)),tile_grama.subsurface((40,40),(0,40)),tile_grama.subsurface((40,0),(40,40)),tile_grama.subsurface(
@@ -663,6 +682,7 @@ botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,arial,["80","insira","a
 fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berseker,botao_valquiria)
 fase_1.addItem(controlesExtras(fase_1))
 fase_1.addItem(gameOver(fase_1,game_over,player))
+fase_1.addItem(winnerScreen(fase_1,winner_scr,player,130))
 
 ###>>>TELAS<<<###
 
@@ -686,7 +706,9 @@ tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,255,200),fabricio,fernando,fr
 pescoco=pyTreeBee.linkedButton(None,arial,[""],0,438,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("pescoco 2.png"),(437,162)))
 cabeca=pyTreeBee.linkedButton(None,arial,[""],0,63,pygame.Rect(0,0,0,0),0,0,  pygame.transform.scale(pygame.image.load("cabeca 4.png"),(357,523)))
 olho=animacaoSprite(pygame.transform.scale(pygame.image.load("olho_spritesheet 2.png"),(760,75)),(190,75),6,True,(90,290))
+olho.setPause(60)
 espada=animacaoSprite(pygame.transform.scale(pygame.image.load("espada_spritesheet.png"),(4800,600)),(800,600),10,True,(0,0))
+espada.setStop(2)
 #> start
 botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],800,300,pygame.Rect(0,0,180,60),0,0)
 botao_start.setEach_Image(pygame.image.load("start 2.png"),pygame.image.load("start hovered 2.png"),pygame.image.load("start clicado.png"))
