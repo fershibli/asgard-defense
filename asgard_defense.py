@@ -109,6 +109,7 @@ class animacaoSprite(object):
         self.repeats=0
         self.stop=False
         self.wait=False
+        self.invert=[False,False]
         #self.pos=pos
     def setPause(self,pause):
         self.pause_time=pause
@@ -145,8 +146,7 @@ class animacaoSprite(object):
                     if self.rewind:self.x_sheet=(-self.next+1)/2
             else:
                 self.x_sheet+=self.next
-            
-        return self.sheet.subsurface((self.x_sheet*self.size[0],self.y_sheet*self.size[1]),self.size)
+        return pygame.transform.flip(self.sheet.subsurface((self.x_sheet*self.size[0],self.y_sheet*self.size[1]),self.size),self.invert[0],self.invert[1])
     def blitOn(self,screen):
         screen.blit(self.getNextImage(),(self.x,self.y))
     def keyControls(self,event):pass
@@ -186,6 +186,13 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
                     mapa[0][self.pos[1]][self.pos[0]].piece=None
                     self.pos[0]+=self.movimento[self.vectorpos][0]
                     self.pos[1]+=self.movimento[self.vectorpos][1]
+                    try:
+                        if self.movimento[self.vectorpos+1][0]==1:
+                            self.sprite.invert[0]=False
+                        if self.movimento[self.vectorpos+1][0]==-1:
+                            self.sprite.invert[0]=True
+                    except:
+                        pass
                     self.vectorpos+=self.vectorstep
                     if self.pixelpos[0]>=size:
                         self.pixelpos[0]-=size
