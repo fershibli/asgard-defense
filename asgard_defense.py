@@ -10,9 +10,9 @@ loading=arialBlack.render("LOADING...",True,(255,255,255))
 temporarydisplay.blit(loading,(0,0))
 pygame.display.update()
 
-circulo=pygame.image.load("circulo.png")
 frame_atual=0
 arial=pygame.font.SysFont("Arial",12)
+arial12b=pygame.font.SysFont("Arial Black",12)
 
 class moveObject(object):
     def __init__(self, origem,item, pos_ini, destino, velocidade):
@@ -289,7 +289,7 @@ class quadradoControlavel(object):
         self.player=player
         self.x=1
         self.y=1
-        self.sprite=animacaoSprite(pygame.image.load("selecao3.png"),(40,40),9,True)
+        self.sprite=animacaoSprite(pygame.image.load("selecao4.png"),(40,40),9,True)
         self.size=size
         self.buttonup=False
         self.dentro=True
@@ -465,7 +465,6 @@ class mapaLimitavel(object):
     def addTarget(self,plr,pos, sentido=None):
         self.mapa[1][pos[1]][pos[0]].piece=lifeTarget(plr,pos,sentido)
     def blitOn(self,screen):
-        global circulo
         for z in range(len(self.mapa)):                                
             for y in range(len(self.mapa[z])):
                 for x in range(len(self.mapa[z][y])):
@@ -506,13 +505,20 @@ class mapaLimitavel(object):
                         #screen.blit(pygame.transform.scale(self.mapa[y][x].getNextImage(),(40,33)), (self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                 except:
                     pass #print "erro desenhar torre"
-        
+
+        if self.player.life>(self.player.maxlife*2)/3:
+            cor_vida=(25,255,0)
+        else:
+            if self.player.life>self.player.maxlife/3:
+                cor_vida=(255,200,10)
+            else:
+                cor_vida=(255,10,10)
         screen.blit(arial.render("VIDAS:",True,(255,255,255)),(740,0))
-        screen.blit(arialBlack.render(str(self.player.life),True,(255,255,255)),(740,10))
+        screen.blit(arialBlack.render(str(self.player.life),True,cor_vida),(740,10))
         screen.blit(arial.render("SCORE:",True,(255,255,255)),(32,0))
         screen.blit(arialBlack.render(str(self.player.score),True,(255,255,255)),(32,10))
         screen.blit(arial.render("MANA:",True,(255,255,255)),(680,0))
-        screen.blit(arialBlack.render(str(self.player.mana),True,(255,255,255)),(680,10))
+        screen.blit(arialBlack.render(str(self.player.mana),True,(10,125,255)),(680,10))
         self.selecao.blitOn(screen)
         
     def keyControls(self,event):
@@ -649,9 +655,9 @@ tiles_fase_1.append((34,57,65))
 mapa_fase_1 = mapaLimitavel(player,matriz_fase_1, tiles_fase_1,40)
 #spawn gerador de hordaS
 enemy1=pygame.image.load("inimigo01sheet2.png")
-enemy4=pygame.image.load("inimigo04sheet.png")
-enemy5=pygame.image.load("inimigo05sheet.png")
-enemy8=pygame.image.load("inimigo08sheet.png")
+for n in range(8):
+    exec 'enemy'+str(n+2)+'=pygame.image.load("inimigo0'+str(n+2)+'sheet.png")'
+enemy10=pygame.image.load("inimigo10sheet.png")
 mov_y3=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
         (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
@@ -659,10 +665,8 @@ mov_y2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
         (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
 #pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,mana,quantidades):
-#mapa_fase_1.addSpawn( (0,3) , [120,120,120,120] ,[800,800,800,800], (1,0) , [enemy1,enemy4,enemy5,enemy8] , [(20,20),(22,22),(22,22),(22,22)] , [8,8,8,8] , [True,False,False,False] , [1,1,1,1] , [0.5,0.5,0.5,0.5] , [100,100,100,100] ,[False,True,False,True],[0,0,0,0], [mov_y3,mov_y3,mov_y3,mov_y3] , [(1,0),(1,0),(1,0),(1,0)] ,[1,2,4,8], [20,20,15,10])
-#mapa_fase_1.addSpawn( (0,2) , [120,120,120,120] ,[800,800,800,800], (1,0) , [enemy1,enemy4,enemy5,enemy8] , [(20,20),(22,22),(22,22),(22,22)] , [8,8,8,8] , [True,False,False,False] , [1,1,1,1] , [0.5,0.5,0.5,0.5] , [100,100,100,100] ,[False,True,False,True],[0,0,0,0], [mov_y2,mov_y2,mov_y2,mov_y2] , [(1,0),(1,0),(1,0),(1,0)] ,[1,2,4,8], [20,20,15,10])
-mapa_fase_1.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy1,enemy1,enemy4,enemy5,enemy1,enemy1,enemy8,enemy1,enemy1] , [(20,20),(20,20),(20,20),(22,22),(22,22),(20,20),(20,20),(22,22),(20,20),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [100,150,320,300,420,500,500,460,650,8000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,0], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
-mapa_fase_1.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy1,enemy1,enemy4,enemy5,enemy1,enemy1,enemy8,enemy1,enemy1] , [(20,20),(20,20),(20,20),(22,22),(22,22),(20,20),(20,20),(22,22),(20,20),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [100,150,320,300,420,500,500,460,650,8000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,0], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
+mapa_fase_1.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [100,150,320,300,420,500,500,460,650,8000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,0], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
+mapa_fase_1.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [100,150,320,300,420,500,500,460,650,8000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,0], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
 #alvo para o inimigo dar pontos de dano
 mapa_fase_1.addTarget(player,(19,3),(-1,0))
 mapa_fase_1.addTarget(player,(19,2),(-1,0))
@@ -672,34 +676,47 @@ arqueiro_image=pygame.image.load("archer_spritesheet.png")
 berserker_image=pygame.image.load("berserker_spritesheet.png")
 valquiria_image=pygame.image.load("valkyrie_spritesheet.png")
 #diferenciadores: listas de vantagens e desvantagens
-#normal, roxo, vermelho, azul,verde
-viking_diferenciador=   [1 ,0.5,  2,  1,0.8]#azul
-arqueiro_diferenciador= [1 ,  2,0.5,0.8,  1]#verde
-berserker_diferenciador=[1 ,0.8,  1,  2,0.5]#vermelho
-valquiria_diferenciador=[1 ,  1,0.8,0.5,  2]#roxo
+#                         nl, rx,  vm,  az,  vr
+viking_diferenciador=    [1 , 0.5,   2,   1, 0.8] #azul
+arqueiro_diferenciador=  [1 ,   2, 0.5, 0.8,   1] #verde
+berserker_diferenciador= [1 , 0.8,   1,   2, 0.5] #vermelho
+valquiria_diferenciador= [1 ,   1, 0.8, 0.5,   2] #roxo
 #mouse,sprite,size,nextsprite,rewind,atk,vel,rng,fly,types
 viking_lvl_1=charSelected(mapa_fase_1.selecao,viking_image,(60,50),6,False,30,22,2,False,viking_diferenciador,35)
 arqueiro_lvl_1=charSelected(mapa_fase_1.selecao,arqueiro_image,(50,50),5,False,35,30,3,True,arqueiro_diferenciador,50)
 berserker_lvl_1=charSelected(mapa_fase_1.selecao,berserker_image,(70,70),5,False,5,5,1,False,berserker_diferenciador,50)
 valquiria_lvl_1=charSelected(mapa_fase_1.selecao,valquiria_image,(80,80),4,False,15,12,2,True,valquiria_diferenciador,75)
 
-botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial,["35","","","","  Viking"],25,535,pygame.Rect(0,0,50,50),0,-10,pygame.transform.scale(pygame.image.load("viking_selecao.png"),(50,50)))
-botao_viking.setAll_BarColor((78,133,154))
-botao_arqueiro = pyTreeBee.linkedButton(arqueiro_lvl_1,arial,["50","","",""," Arqueiro"],100,535,pygame.Rect(0,0,50,50),0,-10,pygame.transform.scale(pygame.image.load("arqueira.png"),(50,50)))
-botao_arqueiro.setAll_BarColor((78,133,154))
-botao_berserker = pyTreeBee.linkedButton(berserker_lvl_1,arial,["50","","","","Berserker"],175,535,pygame.Rect(0,0,50,50),0,-10,pygame.transform.scale(pygame.image.load("berserker.png"),(50,50)))
-botao_berserker.setAll_BarColor((78,133,154))
-botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,arial,["75","insira","aqui uma","foto de","Valquíria"],250,535,pygame.Rect(0,0,50,50),0,-10)
-
+cor_mana=(0,0,0)#(50,255,50)
+cor_fundo=(78,133,154)
+botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial12b,["    35"],25,535,pygame.Rect(0,0,60,60),0,-15,pygame.transform.scale(pygame.image.load("viking.png"),(60,60)))
+#texto_viking = pyTreeBee.linkedButton(None,arial,["   Viking"],30,582,pygame.Rect(0,0,0,0),0,0)
+botao_viking.setAll_BarColor(cor_fundo)
+botao_viking.setAll_TextColor(cor_mana)
+botao_arqueiro = pyTreeBee.linkedButton(arqueiro_lvl_1,arial12b,["    50"],100,535,pygame.Rect(0,0,60,60),0,-15,pygame.transform.scale(pygame.image.load("arqueira.png"),(60,60)))
+#texto_arqueiro = pyTreeBee.linkedButton(None,arial,[" Arqueiro"],105,582,pygame.Rect(0,0,0,0),0,0)
+botao_arqueiro.setAll_BarColor(cor_fundo)
+botao_arqueiro.setAll_TextColor(cor_mana)
+botao_berserker = pyTreeBee.linkedButton(berserker_lvl_1,arial12b,["    50"],175,535,pygame.Rect(0,0,60,60),0,-15,pygame.transform.scale(pygame.image.load("berserker.png"),(60,60)))
+#texto_berserker = pyTreeBee.linkedButton(None,arial,["Berserker"],180,582,pygame.Rect(0,0,0,0),0,0)
+botao_berserker.setAll_BarColor(cor_fundo)
+botao_berserker.setAll_TextColor(cor_mana)
+botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,arial12b,["    75"],250,535,pygame.Rect(0,0,60,60),0,-15,pygame.transform.scale(pygame.image.load("valkyrie.png"),(60,60)))
+#texto_valquiria = pyTreeBee.linkedButton(None,arial,["Valquíria"],255,582,pygame.Rect(0,0,0,0),0,0)
+botao_valquiria.setAll_BarColor(cor_fundo)
+botao_valquiria.setAll_TextColor(cor_mana)
 ### botoes aceleradores ###
-accelx1=pyTreeBee.linkedButton(accelGame(60),arial,["X1"],500+150,550,pygame.Rect(0,0,25,25),3,6)
-accelx2=pyTreeBee.linkedButton(accelGame(90),arial,["X2"],550+150,550,pygame.Rect(0,0,25,25),3,6)
-accelx3=pyTreeBee.linkedButton(accelGame(120),arial,["X3"],600+150,550,pygame.Rect(0,0,25,25),3,6)
+accelx1=pyTreeBee.linkedButton(accelGame(60),arialBlack,["1"],500+150,550,pygame.Rect(0,0,30,30),10,0,pygame.image.load('botao_x2.png'))
+accelx1.setAll_BarSize((-10,-10))
+accelx2=pyTreeBee.linkedButton(accelGame(90),arial,[""],550+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x2.png'))
+accelx2.setAll_BarSize((-10,-10))
+accelx3=pyTreeBee.linkedButton(accelGame(120),arial,[""],600+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x3.png'))
+accelx3.setAll_BarSize((-10,-10))
 
 ###>>>FASES<<<###
 
 ###fase 1###
-fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)
+fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
 fase_1.addItem(controlesExtras(fase_1))
 fase_1.addItem(gameOver(fase_1,game_over,player))
 fase_1.addItem(winnerScreen(fase_1,winner_scr,player,332))
@@ -713,17 +730,21 @@ selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
 ###tela options###
 tela_options=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(None,arial,["Você tem a opção de...","VOLTAR!","","HUE","   HUE","      BR","        BR"],300,300,pygame.Rect(0,0,0,0),0,0))
 ###tela staff###
-fabricio=pyTreeBee.linkedButton(None,arial,["Fabricio do Nascimento","   Artista / Roteirista"],100,100,pygame.Rect(0,0,0,0),0,0)
-s_fabricio=animacaoSprite(berserker_image,(70,70),6,False,(25,100))
-fernando=pyTreeBee.linkedButton(None,arial,["Fernando Luiz Neme Chibli","   Programador"],100,200,pygame.Rect(0,0,0,0),0,0)
-s_fernando=animacaoSprite(pygame.transform.scale(enemy1,(150,50)),(50,50),6,False,(25,200))
-freak=pyTreeBee.linkedButton(None,arial,["Guilherme de Almeida","   Artista / Programador"],100,300,pygame.Rect(0,0,0,0),0,0)
-s_freak=animacaoSprite(viking_image,(60,50),6,False,(25,300))
-mancha_e=pyTreeBee.linkedButton(None,arial,["Luiz Gustavo 'Manchae' Pelatieri Teixeira","   Artista / Game Designer"],100,400,pygame.Rect(0,0,0,0),0,0)
-s_mancha_e=animacaoSprite(arqueiro_image,(50,50),6,False,(25,400))
-maria=pyTreeBee.linkedButton(None,arial,["Maria Tereza Font Fernandes","   Produtora"],100,500,pygame.Rect(0,0,0,0),0,0)
-s_maria=animacaoSprite(valquiria_image,(80,80),6,False,(25,500))
-tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,255,200),fabricio,fernando,freak,mancha_e,maria,s_fabricio,s_fernando,s_freak,s_mancha_e,s_maria)
+devs_vector=[]
+devs_sheet=pygame.image.load("devs.png")
+for i in range(5):
+    devs_vector.append(devs_sheet.subsurface((52*i,0),(52,45)))
+fabricio=pyTreeBee.linkedButton(None,arial,["Fabricio do Nascimento","   Artista / Roteirista"],30,80,pygame.Rect(0,0,0,0),70,20,devs_vector[3])
+#s_fabricio=animacaoSprite(berserker_image,(70,70),6,False,(25,100))
+fernando=pyTreeBee.linkedButton(None,arial,["Fernando Luiz Neme Chibli","   Programador"],30,180,pygame.Rect(0,0,0,0),70,20,devs_vector[2])
+#s_fernando=animacaoSprite(pygame.transform.scale(enemy1,(150,50)),(50,50),6,False,(25,200))
+freak=pyTreeBee.linkedButton(None,arial,["Guilherme de Almeida","   Artista / Programador"],30,280,pygame.Rect(0,0,0,0),70,20,devs_vector[4])
+#s_freak=animacaoSprite(viking_image,(60,50),6,False,(25,300))
+mancha_e=pyTreeBee.linkedButton(None,arial,["Luiz Gustavo 'Manchae' Pelatieri Teixeira","   Artista / Game Designer"],30,380,pygame.Rect(0,0,0,0),70,20,devs_vector[1])
+#s_mancha_e=animacaoSprite(arqueiro_image,(50,50),6,False,(25,400))
+maria=pyTreeBee.linkedButton(None,arial,["Maria Tereza Font Fernandes","   Produtora"],30,480,pygame.Rect(0,0,0,0),70,20,devs_vector[0])
+#s_maria=animacaoSprite(valquiria_image,(80,80),6,False,(25,500))
+tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,255,200),fabricio,fernando,freak,mancha_e,maria)#,s_fabricio,s_fernando,s_freak,s_mancha_e,s_maria
 tela_staff.addItem(controlesExtras(tela_staff))
 ###tela inicial###
 #> letreiro
@@ -754,9 +775,19 @@ tela_inicial.addItem(controlesExtras(tela_inicial))
 fadeIn(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])#[pescoco,(500,500),40],[cabeca,(0,0),40],[espada,(0,600),100]
 botao_start.link=fadeOut(tela_inicial,selecao_fase,[botao_start,(800,300),10],[botao_options,(800,380),15],[botao_staff,(800,460),20])
 ###botões de voltar adicionados às telas anteriores###
-tela_options.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0))
-tela_staff.addItem(pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0))
-voltar_selecao=pyTreeBee.linkedButton(tela_inicial,arial,["Voltar"],740,570,pygame.Rect(0,0,50,20),0,0)
+img_voltar=pygame.image.load("botao_voltar.png")
+
+voltar_options=pyTreeBee.linkedButton(tela_inicial,arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
+voltar_options.setAll_BarSize((-10,-10))
+tela_options.addItem(voltar_options)
+
+voltar_staff=pyTreeBee.linkedButton(tela_inicial,arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
+voltar_staff.setAll_BarSize((-10,-10))
+tela_staff.addItem(voltar_staff)
+
+voltar_selecao=pyTreeBee.linkedButton(tela_inicial,arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
+voltar_selecao.setAll_BarSize((-10,-10))
+tela_staff.addItem(voltar_staff)
 '''
 voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
 selecao_fase.addItem(voltar_selecao)
