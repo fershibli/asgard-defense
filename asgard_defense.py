@@ -14,8 +14,7 @@ frame_atual=0
 arial=pygame.font.SysFont("Arial",12)
 arial12b=pygame.font.SysFont("Arial Black",12)
 pygame.mixer.init()
-pygame.mixer.music.load("Volatile Reaction.mp3")
-pygame.mixer.music.play(-1, 0.0)
+
 class moveObject(object):
     def __init__(self, origem,item, pos_ini, destino, velocidade):
         self.item=item
@@ -24,7 +23,7 @@ class moveObject(object):
         self.destino=destino
         self.step=(((destino[0]-pos_ini[0])/velocidade),((destino[1]-pos_ini[1])/velocidade))
     def keyControls(self,event):
-        return None
+        return False
     def blitOn(self,scr):
         try:
             if self.destino[0]!=self.item.x:
@@ -151,7 +150,6 @@ class animacaoSprite(object):
         return pygame.transform.flip(self.sheet.subsurface((self.x_sheet*self.size[0],self.y_sheet*self.size[1]),self.size),self.invert[0],self.invert[1])
     def blitOn(self,screen):
         screen.blit(self.getNextImage(),(self.x,self.y))
-    def keyControls(self,event):pass
 
 
 class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),(20,20),10,False,1,1,1,
@@ -266,7 +264,7 @@ class accelGame(object):
     def __init__(self, fps):
         self.fps=fps
     def linkReply(self,prevscr):
-        prevscr.fps=self.fps
+        tela.fps=self.fps
         return prevscr
 
 class charSelected(object):
@@ -379,7 +377,7 @@ class quadradoControlavel(object):
                 pygame.mouse.set_visible(True)
             except:
                 print "can't set visible"
-        return None
+        return False
             
 class lifeTarget(object):
     def __init__(self,player,pos, sentido=None):
@@ -525,7 +523,7 @@ class mapaLimitavel(object):
         
     def keyControls(self,event):
         self.selecao.keyControls(event,self.mapa, self.alingment)
-        return None
+        return False
 
 class winnerScreen(object):
     def __init__(self,tela,link,player,qnt_inimigos):
@@ -544,11 +542,11 @@ class gameOver(object):
     def __init__(self,tela,link,player):
         self.tela=tela
         self.link=link
-        self.retorno=None
+        self.retorno=False
         self.player=player
     def blitOn(self,scr):
         global frame_atual
-        if self.retorno!=None: frame_atual=0
+        if self.retorno!=False: frame_atual=0
         if self.player.life<=0:
             self.tela.linkcalled=self.link
     def keyControls(self,event):
@@ -561,44 +559,20 @@ class statusPlayer(object):
         self.mana=mana
         self.score=0
         self.counter=0
-    def blitOn(self,scr):pass
-    def keyControls(self,event):
-        return self.retorno
 
 class controlesExtras(object):
     def __init__(self,tela):
         self.tela=tela
-        self.scroll=[0,0]
         self.frame_skip=1
-        self.pause=False
     def blitOn(self,screen):
         global frame_atual
-        if not self.pause:
-            frame_atual+=self.frame_skip
-            screen.scroll(self.scroll[0],self.scroll[1])
+        frame_atual+=self.frame_skip
     def keyControls(self,event):
         if event.type==KEYUP:
-            if event.key==K_SPACE:
-                if self.pause:
-                    self.pause=False
-                else:
-                    self.pause=True
             if event.key==K_ESCAPE:
                 self.tela.storedlink=None
                 self.tela.running=False
-            if event.key==K_DOWN:
-                self.scroll[1]+=10
-            if event.key==K_RIGHT:
-                self.scroll[0]+=10
-            if event.key==K_UP:
-                self.scroll[1]-=10
-            if event.key==K_LEFT:
-                self.scroll[0]-=10
-            if event.key==K_EQUALS:
-                self.tela.fps+=10
-            if event.key==K_MINUS:
-                self.tela.fps-=10
-        return None
+        return False
 
         
 #matriz seletora de tiles
@@ -720,18 +694,23 @@ botao_valquiria.setAll_TextColor(cor_mana)
 ### botoes aceleradores ###
 accelx1=pyTreeBee.linkedButton(accelGame(60),arialBlack,["1"],500+150,550,pygame.Rect(0,0,30,30),10,0,pygame.image.load('botao_x2.png'))
 accelx1.setAll_BarSize((-10,-10))
+
 accelx2=pyTreeBee.linkedButton(accelGame(90),arial,[""],550+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x2.png'))
 accelx2.setAll_BarSize((-10,-10))
+
 accelx3=pyTreeBee.linkedButton(accelGame(120),arial,[""],600+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x3.png'))
 accelx3.setAll_BarSize((-10,-10))
+
 
 ###>>>FASES<<<###
 
 ###fase 1###
 fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
+
 fase_1.addItem(controlesExtras(fase_1))
 fase_1.addItem(gameOver(fase_1,game_over,player))
 fase_1.addItem(winnerScreen(fase_1,winner_scr,player,332))
+fase_1.setMusic("Volatile Reaction.mp3",-1, 0.0)
 
 ###>>>TELAS<<<###
 
@@ -739,6 +718,7 @@ fase_1.addItem(winnerScreen(fase_1,winner_scr,player,332))
 botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Idavoll"],100,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
+selecao_fase.setMusic("Teller of the Tales.mp3",-1, 0.0)
 ###tela options###
 tela_options=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(None,arial,["Você tem a opção de...","VOLTAR!","","HUE","   HUE","      BR","        BR"],300,300,pygame.Rect(0,0,0,0),0,0))
 ###tela staff###
@@ -784,6 +764,7 @@ botao_staff.setAll_BarSize((-10,-10))
 tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pescoco,cabeca,olho,espada,botao_start,botao_options,botao_staff)
 tela_inicial.setImage(pygame.image.load("Abertura.png").convert(),(0,0))
 tela_inicial.addItem(controlesExtras(tela_inicial))
+tela_inicial.setMusic("Five Armies.mp3",-1, 0.0,False)
 fadeIn(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])#[pescoco,(500,500),40],[cabeca,(0,0),40],[espada,(0,600),100]
 botao_start.link=fadeOut(tela_inicial,selecao_fase,[botao_start,(800,300),10],[botao_options,(800,380),15],[botao_staff,(800,460),20])
 ###botões de voltar adicionados às telas anteriores###
