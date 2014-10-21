@@ -264,7 +264,7 @@ class accelGame(object):
     def __init__(self, fps):
         self.fps=fps
     def linkReply(self,prevscr):
-        tela.fps=self.fps
+        prevscr.fps=self.fps
         return prevscr
 
 class charSelected(object):
@@ -651,8 +651,8 @@ mov_y2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
         (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
 #pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,mana,quantidades):
-mapa_fase_1.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,500,700,1000,500,1350,12000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,0], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
-mapa_fase_1.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,500,700,1000,500,1350,12000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,0], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
+mapa_fase_1.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
+mapa_fase_1.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
 #alvo para o inimigo dar pontos de dano
 mapa_fase_1.addTarget(player,(19,3),(-1,0))
 mapa_fase_1.addTarget(player,(19,2),(-1,0))
@@ -692,7 +692,7 @@ botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,arial12b,["    75"],250
 botao_valquiria.setAll_BarColor(cor_fundo)
 botao_valquiria.setAll_TextColor(cor_mana)
 ### botoes aceleradores ###
-accelx1=pyTreeBee.linkedButton(accelGame(60),arialBlack,["1"],500+150,550,pygame.Rect(0,0,30,30),10,0,pygame.image.load('botao_x2.png'))
+accelx1=pyTreeBee.linkedButton(accelGame(60),arial,[""],500+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x1.png'))
 accelx1.setAll_BarSize((-10,-10))
 
 accelx2=pyTreeBee.linkedButton(accelGame(90),arial,[""],550+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x2.png'))
@@ -710,7 +710,7 @@ fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_vi
 fase_1.addItem(controlesExtras(fase_1))
 fase_1.addItem(gameOver(fase_1,game_over,player))
 fase_1.addItem(winnerScreen(fase_1,winner_scr,player,332))
-fase_1.setMusic("Volatile Reaction.mp3",-1, 0.0)
+#fase_1.setMusic("Volatile Reaction.mp3",-1, 0.0)           #ATIVE-ME PARA MUSICA! 8-)
 
 ###>>>TELAS<<<###
 
@@ -722,22 +722,11 @@ selecao_fase.setMusic("Teller of the Tales.mp3",-1, 0.0)
 ###tela options###
 tela_options=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(None,arial,["Você tem a opção de...","VOLTAR!","","HUE","   HUE","      BR","        BR"],300,300,pygame.Rect(0,0,0,0),0,0))
 ###tela staff###
-devs_vector=[]
-devs_sheet=pygame.image.load("devs.png")
-for i in range(5):
-    devs_vector.append(devs_sheet.subsurface((52*i,0),(52,45)))
-fabricio=pyTreeBee.linkedButton(None,arial,["Fabricio do Nascimento","   Artista / Roteirista"],30,80,pygame.Rect(0,0,0,0),70,20,devs_vector[3])
-#s_fabricio=animacaoSprite(berserker_image,(70,70),6,False,(25,100))
-fernando=pyTreeBee.linkedButton(None,arial,["Fernando Luiz Neme Chibli","   Programador"],30,180,pygame.Rect(0,0,0,0),70,20,devs_vector[2])
-#s_fernando=animacaoSprite(pygame.transform.scale(enemy1,(150,50)),(50,50),6,False,(25,200))
-freak=pyTreeBee.linkedButton(None,arial,["Guilherme de Almeida","   Programador / Artista"],30,280,pygame.Rect(0,0,0,0),70,20,devs_vector[4])
-#s_freak=animacaoSprite(viking_image,(60,50),6,False,(25,300))
-mancha_e=pyTreeBee.linkedButton(None,arial,["Luiz Gustavo 'Manchae' Pelatieri Teixeira","   Game Designer / Artista"],30,380,pygame.Rect(0,0,0,0),70,20,devs_vector[1])
-#s_mancha_e=animacaoSprite(arqueiro_image,(50,50),6,False,(25,400))
-maria=pyTreeBee.linkedButton(None,arial,["Maria Tereza Font Fernandes","   Produtora"],30,480,pygame.Rect(0,0,0,0),70,20,devs_vector[0])
-#s_maria=animacaoSprite(valquiria_image,(80,80),6,False,(25,500))
-tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,255,200),fabricio,fernando,freak,mancha_e,maria)#,s_fabricio,s_fernando,s_freak,s_mancha_e,s_maria
-tela_staff.addItem(controlesExtras(tela_staff))
+tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,0,0))
+tela_staff.setImage(pygame.image.load("credits.png").convert(),(0,0))
+###tela tutorial###
+tela_tutorial=pyTreeBee.dynamicScreen((800,600),60,(0,0,0))
+tela_tutorial.setImage(pygame.image.load("tela_tutorial.png").convert(),(0,0))
 ###tela inicial###
 #> letreiro
 
@@ -748,39 +737,42 @@ olho=animacaoSprite(pygame.transform.scale(pygame.image.load("olho_spritesheet 2
 olho.setPause(60)
 espada=animacaoSprite(pygame.transform.scale(pygame.image.load("espada_spritesheet.png"),(4800,600)),(800,600),10,True,(0,0))
 espada.setStop(1)
+
+identa_botoes_x=0
+identa_botoes_y=-100
+
 #> start
-botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],800,300,pygame.Rect(0,0,180,60),0,0)
+botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],800+identa_botoes_x,300+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
 botao_start.setEach_Image(pygame.image.load("start 2.png"),pygame.image.load("start hovered 2.png"),pygame.image.load("start clicado.png"))
 botao_start.setAll_BarSize((-10,-10))
 #> options
-botao_options=pyTreeBee.linkedButton(tela_options,arial,[""],800,380,pygame.Rect(0,0,180,60),0,0)
+botao_options=pyTreeBee.linkedButton(tela_options,arial,[""],800+identa_botoes_x,380+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
 botao_options.setEach_Image(pygame.image.load("options 2.png"),pygame.image.load("options hovered 2.png"),pygame.image.load("options clicado.png"))
 botao_options.setAll_BarSize((-10,-10))
+#> tutorial
+botao_tutorial=pyTreeBee.linkedButton(tela_tutorial,arial,[''],800+identa_botoes_x,460+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
+botao_tutorial.setEach_Image(pygame.image.load("tutorial.png"),pygame.image.load("tutorial hovered.png"),pygame.image.load("tutorial clicado.png"))
+botao_tutorial.setAll_BarSize((-10,-10))
 #> staff
-botao_staff=pyTreeBee.linkedButton(tela_staff,arial,[""],800,460,pygame.Rect(0,0,180,60),0,0)
+botao_staff=pyTreeBee.linkedButton(tela_staff,arial,[""],800+identa_botoes_x,540+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
 botao_staff.setEach_Image(pygame.image.load("staff 2.png"),pygame.image.load("staff hovered 2.png"),pygame.image.load("staff clicado.png"))
 botao_staff.setAll_BarSize((-10,-10))
 #> tela
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pescoco,cabeca,olho,espada,botao_start,botao_options,botao_staff)
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pescoco,cabeca,olho,espada,botao_start,botao_options,botao_staff,botao_tutorial)
 tela_inicial.setImage(pygame.image.load("Abertura.png").convert(),(0,0))
 tela_inicial.addItem(controlesExtras(tela_inicial))
 tela_inicial.setMusic("Five Armies.mp3",-1, 0.0,False)
-fadeIn(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])#[pescoco,(500,500),40],[cabeca,(0,0),40],[espada,(0,600),100]
-botao_start.link=fadeOut(tela_inicial,selecao_fase,[botao_start,(800,300),10],[botao_options,(800,380),15],[botao_staff,(800,460),20])
+fadeIn(tela_inicial,tela_inicial,[botao_start,(500+identa_botoes_x,300+identa_botoes_y),10],[botao_options,(500+identa_botoes_x,380+identa_botoes_y),15],[botao_tutorial,(500+identa_botoes_x,460+identa_botoes_y),20],[botao_staff,(500+identa_botoes_x,540+identa_botoes_y),25])#[pescoco,(500,500),40],[cabeca,(0,0),40],[espada,(0,600),100]
+botao_start.link=fadeOut(tela_inicial,selecao_fase,[botao_start,(800+identa_botoes_x,300+identa_botoes_y),10],[botao_options,(800+identa_botoes_x,380+identa_botoes_y),15],[botao_tutorial,(800+identa_botoes_x,460+identa_botoes_y),20],[botao_staff,(800+identa_botoes_x,540+identa_botoes_y),25])
 ###botões de voltar adicionados às telas anteriores###
 img_voltar=pygame.image.load("botao_voltar.png")
 
-voltar_options=pyTreeBee.linkedButton(tela_inicial,arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
-voltar_options.setAll_BarSize((-10,-10))
-tela_options.addItem(voltar_options)
-
-voltar_staff=pyTreeBee.linkedButton(tela_inicial,arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
-voltar_staff.setAll_BarSize((-10,-10))
-tela_staff.addItem(voltar_staff)
-
-voltar_selecao=pyTreeBee.linkedButton(tela_inicial,arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
-voltar_selecao.setAll_BarSize((-10,-10))
-tela_staff.addItem(voltar_staff)
+voltar_para_inicio=pyTreeBee.linkedButton(tela_inicial,arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
+voltar_para_inicio.setAll_BarSize((-10,-10))
+tela_options.addItem(voltar_para_inicio)
+tela_staff.addItem(voltar_para_inicio)
+tela_tutorial.addItem(voltar_para_inicio)
+#selecao_fase.addItem(voltar_para_inicio)
 '''
 voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
 selecao_fase.addItem(voltar_selecao)
