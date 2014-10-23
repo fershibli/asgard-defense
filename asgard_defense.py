@@ -15,6 +15,22 @@ arial=pygame.font.SysFont("Arial",12)
 arial12b=pygame.font.SysFont("Arial Black",12)
 pygame.mixer.init()
 
+#musica inicial, precisa dela pros botões de voltar cuidarem disso.
+pygame.mixer.music.load("Five Armies.mp3")
+pygame.mixer.music.play(-1, 0.0)
+
+class linkedMusic(object):
+    def __init__(self, link, music, repeat, start_time):
+        self.link=link
+        self.music=music
+        self.repeat=repeat
+        self.start_time=start_time
+    def linkReply(self,prevscr):
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load(self.music)
+        pygame.mixer.music.play(self.repeat,self.start_time)
+        return self.link
+
 class moveObject(object):
     def __init__(self, origem,item, pos_ini, destino, velocidade):
         self.item=item
@@ -308,16 +324,7 @@ class quadradoControlavel(object):
         self.dmg_type=dmg
         self.mana=mana
     def nullSelection(self):
-        self.char_sprite=None
-        self.char_size=None
-        self.nextsprite=None
-        self.rewind=None
-        self.atk=None
-        self.vel=None
-        self.rng=None
-        self.fly=None
-        self.dmg_type=None
-        self.mana=None
+        self.setSelection(None,None,None,None,None,None,None,None,None,None)
     def blitOn(self,screen):
         if self.dentro:
             if self.char_sprite!=None:
@@ -368,15 +375,9 @@ class quadradoControlavel(object):
             if event.button==3:
                 self.botaodireito=False
         if self.dentro:
-            try:
-                pygame.mouse.set_visible(False)
-            except:
-                print "can't set invisible"
+            pygame.mouse.set_visible(False)
         else:
-            try:
-                pygame.mouse.set_visible(True)
-            except:
-                print "can't set visible"
+            pygame.mouse.set_visible(True)
         return False
             
 class lifeTarget(object):
@@ -430,14 +431,10 @@ class spawnInimigo(object):
         if self.contador<len(self.sprite):
             if frame_atual%self.spawntime[self.contador]==0 and self.pause==False:
                 if self.quantidade[0]<self.quantidade[1][self.contador]:
-                    sc=self.contador# (self,sprite,size,nextsprite,rewind,atk,vel,hp, x,y , movimento, sentidox,sentidoy)
-                    #print str(self.sprite[sc])+" , "+str(self.size[sc])+" , "+str(self.next[sc])+" , "+str(self.rewind[sc])+" , "+str(self.atk[sc])+" , "+str(self.vel[sc])+" , "+str(self.hp[sc])+" , "+str(self.pos[0]+self.spawn[0])+" , "+str(self.pos[1]+self.spawn[1])+" , "+str(self.sentido[sc])
-                    #print str(self.sprite)+" , "+str(self.size)+" , "+str(self.next)+" , "+str(self.rewind)+" , "+str(self.atk)+" , "+str(self.vel)+" , "+str(self.hp)+" , "+str(self.pos[0]+self.spawn[0])+" , "+str(self.pos[1]+self.spawn[1])+" , "+str(self.sentido)
+                    sc=self.contador
                     inimigo=inimigoAlvo(self.sprite[sc],self.size[sc],self.next[sc], self.rewind[sc], self.atk[sc],self.vel[sc],self.hp[sc],self.fly[sc],self.type[sc], (self.pos[0]+self.spawn[0]), (self.pos[1]+self.spawn[1]), self.movimento[sc], self.sentido[sc][0], self.sentido[sc][1],self.mana[sc])
-                    
                     mapa[0][self.pos[1]+self.spawn[1]][self.pos[0]+self.spawn[0]].piece=inimigo
                     self.quantidade[0]+=1
-                    #print self.quantidade
                 else:
                     self.contador+=1
                     self.quantidade[0]=0
@@ -473,7 +470,6 @@ class mapaLimitavel(object):
                             self.mapa[z][y][x].piece.movimentoPadrao(self.mapa,self.size)
                         except:
                             self.mapa[z][y][x].piece.fightControls(self.mapa)
-                    #sprite=False
                     try:
                         screen.blit(self.mapa[z][y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                     except:
@@ -715,7 +711,7 @@ fase_1.addItem(winnerScreen(fase_1,winner_scr,player,332))
 ###>>>TELAS<<<###
 
 ###seleção de fases###
-botao_1=pyTreeBee.linkedButton(fase_1,arial,["Fase 1","Idavoll"],100,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+botao_1=pyTreeBee.linkedButton(linkedMusic(fase_1,"Volatile Reaction.mp3",-1, 0.0),arial,["Fase 1","Idavoll"],100,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
 selecao_fase.setMusic("Teller of the Tales.mp3",-1, 0.0)
@@ -731,39 +727,38 @@ tela_tutorial.setImage(pygame.image.load("tela_tutorial.png").convert(),(0,0))
 #> letreiro
 
 #> viking
-pescoco=pyTreeBee.linkedButton(None,arial,[""],0,438,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("pescoco 2.png"),(437,162)))
-cabeca=pyTreeBee.linkedButton(None,arial,[""],0,63,pygame.Rect(0,0,0,0),0,0,  pygame.transform.scale(pygame.image.load("cabeca 4.png"),(357,523)))
-olho=animacaoSprite(pygame.transform.scale(pygame.image.load("olho_spritesheet 2.png"),(760,75)),(190,75),6,True,(90,290))
-olho.setPause(60)
-espada=animacaoSprite(pygame.transform.scale(pygame.image.load("espada_spritesheet.png"),(4800,600)),(800,600),10,True,(0,0))
-espada.setStop(1)
+#pescoco=pyTreeBee.linkedButton(None,arial,[""],0,438,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("pescoco 2.png"),(437,162)))
+#cabeca=pyTreeBee.linkedButton(None,arial,[""],0,63,pygame.Rect(0,0,0,0),0,0,  pygame.transform.scale(pygame.image.load("cabeca 4.png"),(357,523)))
+#olho=animacaoSprite(pygame.transform.scale(pygame.image.load("olho_spritesheet 2.png"),(760,75)),(190,75),6,True,(90,290))
+#olho.setPause(60)
+#espada=animacaoSprite(pygame.transform.scale(pygame.image.load("espada_spritesheet.png"),(4800,600)),(800,600),10,True,(0,0))
+#espada.setStop(1)
 
 identa_botoes_x=0
 identa_botoes_y=-100
 
 #> start
 botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],800+identa_botoes_x,300+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
-botao_start.setEach_Image(pygame.image.load("start 2.png"),pygame.image.load("start hovered 2.png"),pygame.image.load("start clicado.png"))
+botao_start.setEach_Image(pygame.image.load("start1.png"),pygame.image.load("start2.png"),pygame.image.load("start3.png"))
 botao_start.setAll_BarSize((-10,-10))
 #> options
 botao_options=pyTreeBee.linkedButton(tela_options,arial,[""],800+identa_botoes_x,380+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
-botao_options.setEach_Image(pygame.image.load("options 2.png"),pygame.image.load("options hovered 2.png"),pygame.image.load("options clicado.png"))
+botao_options.setEach_Image(pygame.image.load("options1.png"),pygame.image.load("options2.png"),pygame.image.load("options3.png"))
 botao_options.setAll_BarSize((-10,-10))
 #> tutorial
 botao_tutorial=pyTreeBee.linkedButton(tela_tutorial,arial,[''],800+identa_botoes_x,460+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
-botao_tutorial.setEach_Image(pygame.image.load("tutorial.png"),pygame.image.load("tutorial hovered.png"),pygame.image.load("tutorial clicado.png"))
+botao_tutorial.setEach_Image(pygame.image.load("tutorial1.png"),pygame.image.load("tutorial2.png"),pygame.image.load("tutorial3.png"))
 botao_tutorial.setAll_BarSize((-10,-10))
 #> staff
 botao_staff=pyTreeBee.linkedButton(tela_staff,arial,[""],800+identa_botoes_x,540+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
-botao_staff.setEach_Image(pygame.image.load("staff 2.png"),pygame.image.load("staff hovered 2.png"),pygame.image.load("staff clicado.png"))
+botao_staff.setEach_Image(pygame.image.load("staff1.png"),pygame.image.load("staff2.png"),pygame.image.load("staff3.png"))
 botao_staff.setAll_BarSize((-10,-10))
 #> tela
-tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),pescoco,cabeca,olho,espada,botao_start,botao_options,botao_staff,botao_tutorial)
-tela_inicial.setImage(pygame.image.load("Abertura.png").convert(),(0,0))
+tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_start,botao_options,botao_staff,botao_tutorial)#,pescoco,cabeca,olho,espada
+tela_inicial.setImage(pygame.image.load("Abertura Nova.png").convert(),(0,0))
 tela_inicial.addItem(controlesExtras(tela_inicial))
-tela_inicial.setMusic("Five Armies.mp3",-1, 0.0,False)
 fadeIn(tela_inicial,tela_inicial,[botao_start,(500+identa_botoes_x,300+identa_botoes_y),10],[botao_options,(500+identa_botoes_x,380+identa_botoes_y),15],[botao_tutorial,(500+identa_botoes_x,460+identa_botoes_y),20],[botao_staff,(500+identa_botoes_x,540+identa_botoes_y),25])#[pescoco,(500,500),40],[cabeca,(0,0),40],[espada,(0,600),100]
-botao_start.link=fadeOut(tela_inicial,selecao_fase,[botao_start,(800+identa_botoes_x,300+identa_botoes_y),10],[botao_options,(800+identa_botoes_x,380+identa_botoes_y),15],[botao_tutorial,(800+identa_botoes_x,460+identa_botoes_y),20],[botao_staff,(800+identa_botoes_x,540+identa_botoes_y),25])
+#botao_start.link=fadeOut(tela_inicial,selecao_fase,[botao_start,(800+identa_botoes_x,300+identa_botoes_y),10],[botao_options,(800+identa_botoes_x,380+identa_botoes_y),15],[botao_tutorial,(800+identa_botoes_x,460+identa_botoes_y),20],[botao_staff,(800+identa_botoes_x,540+identa_botoes_y),25])
 ###botões de voltar adicionados às telas anteriores###
 img_voltar=pygame.image.load("botao_voltar.png")
 
@@ -772,7 +767,9 @@ voltar_para_inicio.setAll_BarSize((-10,-10))
 tela_options.addItem(voltar_para_inicio)
 tela_staff.addItem(voltar_para_inicio)
 tela_tutorial.addItem(voltar_para_inicio)
-#selecao_fase.addItem(voltar_para_inicio)
+voltar_para_inicio_musica=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
+voltar_para_inicio_musica.setAll_BarSize((-10,-10))
+selecao_fase.addItem(voltar_para_inicio_musica)
 '''
 voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
 selecao_fase.addItem(voltar_selecao)
