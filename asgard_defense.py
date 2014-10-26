@@ -1,5 +1,5 @@
 # -*- coding: cp1252 -*-
-import pyTreeBee,pygame,sys,os,time, pygame.mixer
+import pyTreeBee,pygame,sys,os,time, pygame.mixer, copy, pickle
 from pygame.locals import*
 infoObject = pygame.display.Info()
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
@@ -18,6 +18,34 @@ pygame.mixer.init()
 #musica inicial, precisa dela pros botões de voltar cuidarem disso.
 pygame.mixer.music.load("Five Armies.mp3")
 pygame.mixer.music.play(-1, 0.0)
+'''
+class hiddenStages(object):
+    def __init__(self,selec_scr,*linkedButton_stage):
+        self.stages=list(linkedButton_stage)
+        self.locked=[False]*len(self.stages)
+        self.added=[False]*len(self.stages)
+    def unlockStage(self,number):
+'''
+class lockedButton(object):
+    def __init__(self,linkedButton):
+        self.linkedButton=linkedButton
+        self.unlocked=False
+    def unlockButton(self):
+        self.unlocked=True
+    def blitOn(self,scr):
+        if self.unlocked: self.linkedButton.blitOn(scr)
+    def keyControls(self,event):
+        retorno=False
+        if self.unlocked: retorno=self.linkedButton.keyControls(event)
+        return retorno
+    def stateLoad(self):        
+        arq=open('game.ages','rb')
+        self.unlocked=pickle.load(arq)
+        arq.close
+    def stateSave(self):        
+        arq=open('game.ages','wb')
+        pickle.dump(self.unlocked,arq)
+        arq.close
 
 class linkedMusic(object):
     def __init__(self, link, music, repeat, start_time):
@@ -188,6 +216,8 @@ class inimigoAlvo(object):#inimigoAlvo(pygame.image.load("inimigo01sheet2.png"),
         self.vectorstep=1
         self.rewind=False
         self.repeat=False
+    def setZero(self,mapa):
+        mapa[0][self.pos[1]][self.pos[0]].addPiece(None)
     def movimentoPadrao(self,mapa,size):
         if len(self.movimento)>0:
 
@@ -243,6 +273,8 @@ class torreGuerreiro(object):
         self.aim=None
         self.x=x
         self.y=y
+    def setZero(self,mapa):
+        mapa[1][self.y][self.x].addPiece(None)
     def getNextImage(self): self.sprite.getNextImage()
     def fightControls(self,mapa):
         global frame_atual
@@ -385,6 +417,8 @@ class lifeTarget(object):
         self.pos=pos
         self.sentido=sentido
         self.player=player
+    def setZero(self,mapa):
+        pass
     def fightControls(self,mapa):
         if self.sentido==None:
             for x in range(-1,2):
@@ -424,6 +458,10 @@ class spawnInimigo(object):
         self.contador=0
         self.pause=True
         self.pause_time=pause_time
+    def setZero(self,mapa):
+        self.quantidade[0]=0
+        self.contador=0
+        self.pause=True
     def fightControls(self,mapa):
         global frame_atual
         if self.pause and frame_atual%self.pause_time[self.contador-1]==0:
@@ -445,19 +483,36 @@ class mapaLimitavel(object):
         self.alingment=(0,0)
         self.player=player
         self.mapa=mapa
+        self.imagens=imagens
+        self.desenhaMapa()
+        self.size=size
+        self.selecao=quadradoControlavel(self.size,self.player)
+        self.qnt_inimigos=0
+    def desenhaMapa(self):
         for z in range(len(self.mapa)):
             for y in range(len(self.mapa[z])):
                 for x in range(len(self.mapa[z][y])):
                     try:
-                        if self.mapa[z][y][x]<len(imagens) and self.mapa[z][y][x]>=0:
-                            self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],imagens[self.mapa[z][y][x]])
+                        if self.mapa[z][y][x]<len(self.imagens) and self.mapa[z][y][x]>=0:
+                            self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],self.imagens[self.mapa[z][y][x]])
                         else:
                             self.mapa[z][y][x]=blocoTabuleiro(self.mapa[z][y][x],None)
                     except:
                         pass
-        self.size=size
-        self.selecao=quadradoControlavel(self.size,self.player)
+    def setZero(self,tela):
+        global frame_atual
+        frame_atual=0
+        tela.fps=60
+        for camada in self.mapa:
+            for fileira in camada:
+                for bloco in fileira:
+                    if bloco.piece!=None:
+                        bloco.piece.setZero(self.mapa)
+        self.player.setZero()
+        self.selecao.nullSelection()
     def addSpawn(self,pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,manas,quantidades):
+        for qnt in quantidades:
+            self.qnt_inimigos+=qnt
         self.mapa[1][pos[1]][pos[0]].piece=spawnInimigo(pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,manas,quantidades)
     def addTarget(self,plr,pos, sentido=None):
         self.mapa[1][pos[1]][pos[0]].piece=lifeTarget(plr,pos,sentido)
@@ -522,28 +577,31 @@ class mapaLimitavel(object):
         return False
 
 class winnerScreen(object):
-    def __init__(self,tela,link,player,qnt_inimigos):
+    def __init__(self,tela,link,mapa):
         self.tela=tela
         self.link=link
         self.retorno=None
-        self.player=player
-        self.inimigos=qnt_inimigos
+        self.mapa=mapa
     def blitOn(self,scr):
-        if self.player.maxlife-self.player.life+self.player.score==self.inimigos:
+        if self.mapa.player.maxlife-self.mapa.player.life+self.mapa.player.score==self.mapa.qnt_inimigos:
+            pygame.mouse.set_visible(True)
+            self.mapa.setZero(self.tela)
             self.tela.linkcalled=self.link
     def keyControls(self,event):
         pass
 
 class gameOver(object):
-    def __init__(self,tela,link,player):
+    def __init__(self,tela,link,mapa):
         self.tela=tela
         self.link=link
         self.retorno=False
-        self.player=player
+        self.mapa=mapa
     def blitOn(self,scr):
         global frame_atual
         if self.retorno!=False: frame_atual=0
-        if self.player.life<=0:
+        if self.mapa.player.life<=0:
+            pygame.mouse.set_visible(True)
+            self.mapa.setZero(self.tela)
             self.tela.linkcalled=self.link
     def keyControls(self,event):
         return self.retorno
@@ -553,6 +611,12 @@ class statusPlayer(object):
         self.life=vida
         self.maxlife=vida
         self.mana=mana
+        self.initialmana=mana
+        self.score=0
+        self.counter=0
+    def setZero(self):
+        self.life=self.maxlife
+        self.mana=self.initialmana
         self.score=0
         self.counter=0
 
@@ -560,8 +624,12 @@ class controlesExtras(object):
     def __init__(self,tela):
         self.tela=tela
         self.frame_skip=1
+        self.primeira_vez=True
     def blitOn(self,screen):
         global frame_atual
+        if self.primeira_vez:
+            frame_atual=0
+            self.primeira_vez=False
         frame_atual+=self.frame_skip
     def keyControls(self,event):
         if event.type==KEYUP:
@@ -704,9 +772,8 @@ accelx3.setAll_BarSize((-10,-10))
 fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
 
 fase_1.addItem(controlesExtras(fase_1))
-fase_1.addItem(gameOver(fase_1,game_over,player))
-fase_1.addItem(winnerScreen(fase_1,winner_scr,player,332))
-#fase_1.setMusic("Volatile Reaction.mp3",-1, 0.0)           #ATIVE-ME PARA MUSICA! 8-)
+fase_1.addItem(gameOver(fase_1,game_over,mapa_fase_1))
+fase_1.addItem(winnerScreen(fase_1,winner_scr,mapa_fase_1))#332=quantidade de inimigos
 
 ###>>>TELAS<<<###
 
@@ -770,6 +837,7 @@ tela_tutorial.addItem(voltar_para_inicio)
 voltar_para_inicio_musica=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
 voltar_para_inicio_musica.setAll_BarSize((-10,-10))
 selecao_fase.addItem(voltar_para_inicio_musica)
+game_over.addItem(voltar_para_inicio_musica)
 '''
 voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
 selecao_fase.addItem(voltar_selecao)
@@ -779,4 +847,10 @@ selecao_fase.addItem(voltar_selecao)
 time.sleep(0.1)
 pyTreeBee.treeBeeStart(tela_inicial)
 
+loading=arialBlack.render("SAVING...",True,(255,255,255))
+temporarydisplay.fill((0,0,0))
+temporarydisplay.blit(loading,(0,0))
+pygame.display.update()
+
+pyTreeBee.treeBeeEnd()
 
