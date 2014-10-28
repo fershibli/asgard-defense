@@ -4,15 +4,15 @@ from pygame.locals import*
 infoObject = pygame.display.Info()
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
 temporarydisplay=pygame.display.set_mode((800,600))
-arialBlack=pygame.font.SysFont("Arial Black",22)
+dinB_22=pygame.font.Font("DIN-Black.otf",22)
 
-loading=arialBlack.render("LOADING...",True,(255,255,255))
+loading=dinB_22.render("LOADING...",True,(255,255,255))
 temporarydisplay.blit(loading,(0,0))
 pygame.display.update()
 
 frame_atual=0
-arial=pygame.font.SysFont("Arial",12)
-arial12b=pygame.font.SysFont("Arial Black",12)
+din_12=pygame.font.Font("DIN-Medium.otf",12)
+dinB_12=pygame.font.Font("DIN-Black.otf",12)
 pygame.mixer.init()
 
 #musica inicial, precisa dela pros botões de voltar cuidarem disso.
@@ -31,7 +31,10 @@ class deleteSave(object):
         self.tela=tela
     def linkReply(self,prevscr):
         arq=open('game.ages','w')
-        arq.write('')
+        arq.write('''
+hahahaha
+eu escrevo o que eu quiser
+hahahahaha!!!!''')
         arq.close
         for liberada in load_fases_liberadas:
             liberada.stateClear()
@@ -77,6 +80,7 @@ class linkedMusic(object):
             pygame.mixer.music.play(self.repeat,self.start_time)
         except:
             print "can't play music"
+        self.link.stored_music=self.music
         return self.link
 
 class moveObject(object):
@@ -526,7 +530,6 @@ class mapaLimitavel(object):
         global frame_atual
         frame_atual=0
         tela.fps=60
-        
         for camada in self.mapa:
             for fileira in camada:
                 for bloco in fileira:
@@ -590,12 +593,12 @@ class mapaLimitavel(object):
                 cor_vida=(255,200,10)
             else:
                 cor_vida=(255,10,10)
-        screen.blit(arial.render("VIDAS:",True,(255,255,255)),(740,0))
-        screen.blit(arialBlack.render(str(self.player.life),True,cor_vida),(740,10))
-        screen.blit(arial.render("SCORE:",True,(255,255,255)),(32,0))
-        screen.blit(arialBlack.render(str(self.player.score),True,(255,255,255)),(32,10))
-        screen.blit(arial.render("MANA:",True,(255,255,255)),(680,0))
-        screen.blit(arialBlack.render(str(self.player.mana),True,(10,125,255)),(680,10))
+        screen.blit(din_12.render("VIDAS:",True,(255,255,255)),(740,0))
+        screen.blit(dinB_22.render(str(self.player.life),True,cor_vida),(740,10))
+        screen.blit(din_12.render("SCORE:",True,(255,255,255)),(32,0))
+        screen.blit(dinB_22.render(str(self.player.score),True,(255,255,255)),(32,10))
+        screen.blit(din_12.render("MANA:",True,(255,255,255)),(680,0))
+        screen.blit(dinB_22.render(str(self.player.mana),True,(10,125,255)),(680,10))
         self.selecao.blitOn(screen)
         
     def keyControls(self,event):
@@ -606,33 +609,31 @@ class winnerScreen(object):
     def __init__(self,tela,link,mapa):
         self.tela=tela
         self.link=link
-        self.retorno=None
         self.mapa=mapa
     def blitOn(self,scr):
+        global voltar_retry
         if self.mapa.player.maxlife-self.mapa.player.life+self.mapa.player.score==self.mapa.qnt_inimigos:
             pygame.mouse.set_visible(True)
             for fase in self.mapa.stage_key:
                 fase.unlockButton()
+            voltar_retry.link=linkedMusic(self.tela,self.tela.stored_music,-1,0.0)
             self.mapa.setZero(self.tela)
             self.tela.linkcalled=self.link
-    def keyControls(self,event):
-        pass
+    def keyControls(self,event):pass
 
 class gameOver(object):
     def __init__(self,tela,link,mapa):
         self.tela=tela
         self.link=link
-        self.retorno=False
         self.mapa=mapa
     def blitOn(self,scr):
-        global frame_atual
-        if self.retorno!=False: frame_atual=0
+        global voltar_retry
         if self.mapa.player.life<=0:
             pygame.mouse.set_visible(True)
+            voltar_retry.link=linkedMusic(self.tela,self.tela.stored_music,-1,0.0)
             self.mapa.setZero(self.tela)
             self.tela.linkcalled=self.link
-    def keyControls(self,event):
-        return self.retorno
+    def keyControls(self,event):pass
 
 class statusPlayer(object):
     def __init__(self,vida, mana):
@@ -750,6 +751,7 @@ player=statusPlayer(30,70)
 mouse=quadradoControlavel(player)
 game_over=pyTreeBee.dynamicScreen((800,600), 30,(100,0,0))
 game_over.setImage(pygame.image.load('gameover.png'),(0,0))
+game_over.setMusic("Steel and Seething.mp3",1,0.0)
 winner_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255))
 winner_scr.setImage(pygame.image.load('vitoria.png'),(0,0))
 #loading dos tiles
@@ -762,7 +764,7 @@ tiles_fase_1.append((34,57,65))
 #preparação fases posteriores
 mapa_fase_2 = mapaLimitavel(mouse,player,matriz_fase_2, tiles_fase_1,40)
 fase_2 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_2)
-botao_2=pyTreeBee.linkedButton(linkedMusic(fase_2,"Heroic Age.mp3",-1, 0.0),arial,["Fase 2","Intestino Delgado"],480,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+botao_2=pyTreeBee.linkedButton(linkedMusic(fase_2,"Heroic Age.mp3",-1, 0.0),din_12,["Fase 2","Intestino Delgado"],480,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_2.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 botao_2=lockedButton(botao_2)
 # # #
@@ -825,30 +827,30 @@ valquiria_lvl_1=charSelected(mapa_fase_1.selecao,valquiria_image,(80,80),4,False
 
 cor_mana=(0,0,0)#(50,255,50)
 cor_fundo=(78,133,154)
-botao_viking = pyTreeBee.linkedButton(viking_lvl_1,arial12b,["    35"],25,535,pygame.Rect(0,0,60,60),0,-15,pygame.transform.scale(pygame.image.load("viking.png"),(60,60)))
+botao_viking = pyTreeBee.linkedButton(viking_lvl_1,dinB_12,["    35"],25,535,pygame.Rect(0,0,60,60),0,-15,pygame.image.load("viking.png"))
 #texto_viking = pyTreeBee.linkedButton(None,arial,["   Viking"],30,582,pygame.Rect(0,0,0,0),0,0)
 botao_viking.setAll_BarColor(cor_fundo)
 botao_viking.setAll_TextColor(cor_mana)
-botao_arqueiro = pyTreeBee.linkedButton(arqueiro_lvl_1,arial12b,["    50"],100,535,pygame.Rect(0,0,60,60),0,-15,pygame.transform.scale(pygame.image.load("arqueira.png"),(60,60)))
+botao_arqueiro = pyTreeBee.linkedButton(arqueiro_lvl_1,dinB_12,["    50"],100,535,pygame.Rect(0,0,60,60),0,-15,pygame.image.load("arqueira.png"))
 #texto_arqueiro = pyTreeBee.linkedButton(None,arial,[" Arqueiro"],105,582,pygame.Rect(0,0,0,0),0,0)
 botao_arqueiro.setAll_BarColor(cor_fundo)
 botao_arqueiro.setAll_TextColor(cor_mana)
-botao_berserker = pyTreeBee.linkedButton(berserker_lvl_1,arial12b,["    50"],175,535,pygame.Rect(0,0,60,60),0,-15,pygame.transform.scale(pygame.image.load("berserker.png"),(60,60)))
+botao_berserker = pyTreeBee.linkedButton(berserker_lvl_1,dinB_12,["    50"],175,535,pygame.Rect(0,0,60,60),0,-15,pygame.image.load("berserker.png"))
 #texto_berserker = pyTreeBee.linkedButton(None,arial,["Berserker"],180,582,pygame.Rect(0,0,0,0),0,0)
 botao_berserker.setAll_BarColor(cor_fundo)
 botao_berserker.setAll_TextColor(cor_mana)
-botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,arial12b,["    75"],250,535,pygame.Rect(0,0,60,60),0,-15,pygame.transform.scale(pygame.image.load("valkyrie.png"),(60,60)))
+botao_valquiria = pyTreeBee.linkedButton(valquiria_lvl_1,dinB_12,["    75"],250,535,pygame.Rect(0,0,60,60),0,-15,pygame.image.load("valkyrie.png"))
 #texto_valquiria = pyTreeBee.linkedButton(None,arial,["Valquíria"],255,582,pygame.Rect(0,0,0,0),0,0)
 botao_valquiria.setAll_BarColor(cor_fundo)
 botao_valquiria.setAll_TextColor(cor_mana)
 ### botoes aceleradores ###
-accelx1=pyTreeBee.linkedButton(accelGame(60),arial,[""],500+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x1.png'))
+accelx1=pyTreeBee.linkedButton(accelGame(60),din_12,[""],500+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x1.png'))
 accelx1.setAll_BarSize((-10,-10))
 
-accelx2=pyTreeBee.linkedButton(accelGame(90),arial,[""],550+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x2.png'))
+accelx2=pyTreeBee.linkedButton(accelGame(90),din_12,[""],550+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x2.png'))
 accelx2.setAll_BarSize((-10,-10))
 
-accelx3=pyTreeBee.linkedButton(accelGame(120),arial,[""],600+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x3.png'))
+accelx3=pyTreeBee.linkedButton(accelGame(120),din_12,[""],600+150,550,pygame.Rect(0,0,30,30),0,0,pygame.image.load('botao_x3.png'))
 accelx3.setAll_BarSize((-10,-10))
 
 
@@ -877,14 +879,25 @@ fase_1.addItem(winnerScreen(fase_1,winner_scr,mapa_fase_1))#332=quantidade de in
 ###>>>TELAS<<<###
 
 ###seleção de fases###
-botao_1=pyTreeBee.linkedButton(linkedMusic(fase_1,"Volatile Reaction.mp3",-1, 0.0),arial,["Fase 1","Idavoll"],100,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+botao_1=pyTreeBee.linkedButton(linkedMusic(fase_1,"Volatile Reaction.mp3",-1, 0.0),din_12,["Fase 1","Idavoll"],100,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1,botao_2)
 selecao_fase.setMusic("Teller of the Tales.mp3",-1, 0.0)
 ###tela options###
-tela_confirma_exclusao=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(None,arial,["TEM CERTEZA QUE DESEJA APAGAR TODO SEU PROGRESSO?"],300,300,pygame.Rect(0,0,0,0),0,0))
-tela_options=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(tela_confirma_exclusao,arial,["Apagar Progresso"],300,300,pygame.Rect(0,0,100,40),0,0))
-tela_confirma_exclusao.addItem(pyTreeBee.linkedButton(deleteSave(tela_options),arial,["SIM"],300,400,pygame.Rect(0,0,100,40),50,20),pyTreeBee.linkedButton(tela_options,arial,["NÃO"],420,400,pygame.Rect(0,0,100,40),50,20))
+texto_confirmacao=pyTreeBee.linkedButton(None,dinB_22,["      TENS CERTEZA DE QUE É SÁBIO", "APAGAR TODO O VOSSO PROGRESSO?"],210,220,pygame.Rect(0,0,0,0),0,0)
+texto_confirmacao.setAll_TextColor((255,255,255))
+tela_confirma_exclusao=pyTreeBee.dynamicScreen((800,600),60,(0,0,0),texto_confirmacao)
+botao_apagar=pyTreeBee.linkedButton(tela_confirma_exclusao,din_12,[""],400-(280/2),300,pygame.Rect(0,0,280-12,60-12),0,0)
+botao_apagar.setEach_Image(pygame.image.load('botao_apagar1.png'),pygame.image.load('botao_apagar2.png'),pygame.image.load('botao_apagar3.png'))
+botao_apagar.setAll_BarSize((-6,-6))
+tela_options=pyTreeBee.dynamicScreen((800,600),60,(0,0,0),botao_apagar)
+confirma_sim=pyTreeBee.linkedButton(deleteSave(tela_options),din_12,[""],250,300,pygame.Rect(0,0,130-12,60-12),0,0)
+confirma_sim.setEach_Image(pygame.image.load('botao_sim1.png'),pygame.image.load('botao_sim2.png'),pygame.image.load('botao_sim3.png'))
+confirma_sim.setAll_BarSize((-6,-6))
+confirma_nao=pyTreeBee.linkedButton(tela_options,din_12,[""],420,300,pygame.Rect(0,0,130-12,60-12),0,0)
+confirma_nao.setEach_Image(pygame.image.load('botao_nao1.png'),pygame.image.load('botao_nao2.png'),pygame.image.load('botao_nao3.png'))
+confirma_nao.setAll_BarSize((-6,-6))
+tela_confirma_exclusao.addItem(confirma_sim,confirma_nao)
 ###tela staff###
 tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,0,0))
 tela_staff.setImage(pygame.image.load("credits.png").convert(),(0,0))
@@ -895,7 +908,7 @@ tela_tutorial.setImage(pygame.image.load("tela_tutorial.png").convert(),(0,0))
 #> letreiro
 
 #> viking
-#pescoco=pyTreeBee.linkedButton(None,arial,[""],0,438,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("pescoco 2.png"),(437,162)))
+#pescoco=pyTreeBee.linkedButton(None,din_12,[""],0,438,pygame.Rect(0,0,0,0),0,0, pygame.transform.scale(pygame.image.load("pescoco 2.png"),(437,162)))
 #cabeca=pyTreeBee.linkedButton(None,arial,[""],0,63,pygame.Rect(0,0,0,0),0,0,  pygame.transform.scale(pygame.image.load("cabeca 4.png"),(357,523)))
 #olho=animacaoSprite(pygame.transform.scale(pygame.image.load("olho_spritesheet 2.png"),(760,75)),(190,75),6,True,(90,290))
 #olho.setPause(60)
@@ -906,19 +919,19 @@ identa_botoes_x=0
 identa_botoes_y=-100
 
 #> start
-botao_start=pyTreeBee.linkedButton(selecao_fase,arial,[""],800+identa_botoes_x,300+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
+botao_start=pyTreeBee.linkedButton(selecao_fase,din_12,[""],800+identa_botoes_x,300+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
 botao_start.setEach_Image(pygame.image.load("start1.png"),pygame.image.load("start2.png"),pygame.image.load("start3.png"))
 botao_start.setAll_BarSize((-10,-10))
 #> options
-botao_options=pyTreeBee.linkedButton(tela_options,arial,[""],800+identa_botoes_x,380+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
+botao_options=pyTreeBee.linkedButton(tela_options,din_12,[""],800+identa_botoes_x,380+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
 botao_options.setEach_Image(pygame.image.load("options1.png"),pygame.image.load("options2.png"),pygame.image.load("options3.png"))
 botao_options.setAll_BarSize((-10,-10))
 #> tutorial
-botao_tutorial=pyTreeBee.linkedButton(tela_tutorial,arial,[''],800+identa_botoes_x,460+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
+botao_tutorial=pyTreeBee.linkedButton(tela_tutorial,din_12,[''],800+identa_botoes_x,460+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
 botao_tutorial.setEach_Image(pygame.image.load("tutorial1.png"),pygame.image.load("tutorial2.png"),pygame.image.load("tutorial3.png"))
 botao_tutorial.setAll_BarSize((-10,-10))
 #> staff
-botao_staff=pyTreeBee.linkedButton(tela_staff,arial,[""],800+identa_botoes_x,540+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
+botao_staff=pyTreeBee.linkedButton(tela_staff,din_12,[""],800+identa_botoes_x,540+identa_botoes_y,pygame.Rect(0,0,180,60),0,0)
 botao_staff.setEach_Image(pygame.image.load("staff1.png"),pygame.image.load("staff2.png"),pygame.image.load("staff3.png"))
 botao_staff.setAll_BarSize((-10,-10))
 #> tela
@@ -928,23 +941,49 @@ tela_inicial.addItem(controlesExtras(tela_inicial))
 fadeIn(tela_inicial,tela_inicial,[botao_start,(500+identa_botoes_x,300+identa_botoes_y),10],[botao_options,(500+identa_botoes_x,380+identa_botoes_y),15],[botao_tutorial,(500+identa_botoes_x,460+identa_botoes_y),20],[botao_staff,(500+identa_botoes_x,540+identa_botoes_y),25])#[pescoco,(500,500),40],[cabeca,(0,0),40],[espada,(0,600),100]
 #botao_start.link=fadeOut(tela_inicial,selecao_fase,[botao_start,(800+identa_botoes_x,300+identa_botoes_y),10],[botao_options,(800+identa_botoes_x,380+identa_botoes_y),15],[botao_tutorial,(800+identa_botoes_x,460+identa_botoes_y),20],[botao_staff,(800+identa_botoes_x,540+identa_botoes_y),25])
 ###botões de voltar adicionados às telas anteriores###
-img_voltar=pygame.image.load("botao_voltar.png")
+img_voltar_1=pygame.image.load("botao_voltar1.png")
+img_voltar_2=pygame.image.load("botao_voltar2.png")
+img_voltar_3=pygame.image.load("botao_voltar3.png")
 
-voltar_para_inicio=pyTreeBee.linkedButton(tela_inicial,arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
-voltar_para_inicio.setAll_BarSize((-10,-10))
+cir_voltar_1=pygame.image.load("botao_menu1.png")
+cir_voltar_2=pygame.image.load("botao_menu2.png")
+cir_voltar_3=pygame.image.load("botao_menu3.png")
+
+cir_fases_1=pygame.image.load("botao_avancar1.png")
+cir_fases_2=pygame.image.load("botao_avancar2.png")
+cir_fases_3=pygame.image.load("botao_avancar3.png")
+
+cir_retry_1=pygame.image.load("botao_retry1.png")
+cir_retry_2=pygame.image.load("botao_retry2.png")
+cir_retry_3=pygame.image.load("botao_retry3.png")
+
+voltar_para_inicio=pyTreeBee.linkedButton(tela_inicial,din_12,[""],655,530,pygame.Rect(0,0,130-12,60-12),0,0)
+voltar_para_inicio.setEach_Image(img_voltar_1,img_voltar_2,img_voltar_3)
+voltar_para_inicio.setAll_BarSize((-6,-6))
 tela_options.addItem(voltar_para_inicio)
 tela_staff.addItem(voltar_para_inicio)
 tela_tutorial.addItem(voltar_para_inicio)
-voltar_para_inicio_musica=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),arial,[""],680,550,pygame.Rect(0,0,100,30),0,0,img_voltar)
-voltar_para_inicio_musica.setAll_BarSize((-10,-10))
+voltar_para_inicio_musica=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),din_12,[""],655,530,pygame.Rect(0,0,130-12,60-12),0,0)
+voltar_para_inicio_musica.setEach_Image(img_voltar_1,img_voltar_2,img_voltar_3)
+voltar_para_inicio_musica.setAll_BarSize((-6,-6))
 selecao_fase.addItem(voltar_para_inicio_musica)
-game_over.addItem(voltar_para_inicio_musica)
-winner_scr.addItem(voltar_para_inicio_musica)
+
+voltar_retry=pyTreeBee.linkedButton(None,din_12,[""],220,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_retry.setEach_Image(cir_retry_1,cir_retry_2,cir_retry_3)
+voltar_retry.setAll_BarSize((-12,-12))
+voltar_menu=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),din_12,[""],375,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_menu.setEach_Image(cir_voltar_1,cir_voltar_2,cir_voltar_3)
+voltar_menu.setAll_BarSize((-12,-12))
+voltar_selecao=pyTreeBee.linkedButton(selecao_fase,din_12,[""],530,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_selecao.setEach_Image(cir_fases_1,cir_fases_2,cir_fases_3)
+voltar_selecao.setAll_BarSize((-12,-12))
+game_over.addItem(voltar_menu,voltar_selecao,voltar_retry)
+winner_scr.addItem(voltar_menu,voltar_selecao,voltar_retry)
 '''
 voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
 selecao_fase.addItem(voltar_selecao)
 '''
-#fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],600,530,pygame.Rect(0,0,50,20),0,0))
+#fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,din_12,["Voltar"],600,530,pygame.Rect(0,0,50,20),0,0))
 ### loading save ###
 try:
     load_fases_liberadas=[botao_2]
@@ -956,7 +995,7 @@ except:
 time.sleep(0.1)
 pyTreeBee.treeBeeStart(tela_inicial)
 
-loading=arialBlack.render("SAVING...",True,(255,255,255))
+loading=dinB_22.render("SAVING...",True,(255,255,255))
 temporarydisplay.fill((0,0,0))
 temporarydisplay.blit(loading,(0,0))
 pygame.display.update()
