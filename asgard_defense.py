@@ -26,23 +26,37 @@ class hiddenStages(object):
         self.added=[False]*len(self.stages)
     def unlockStage(self,number):
 '''
+class deleteSave(object):
+    def __init__(self,tela):
+        self.tela=tela
+    def linkReply(self,prevscr):
+        arq=open('game.ages','w')
+        arq.write('')
+        arq.close
+        for liberada in load_fases_liberadas:
+            liberada.stateClear()
+        return self.tela
+    
 class lockedButton(object):
     def __init__(self,linkedButton):
         self.linkedButton=linkedButton
         self.unlocked=False
-    def unlockButton(self):
-        self.unlocked=True
     def blitOn(self,scr):
         if self.unlocked: self.linkedButton.blitOn(scr)
     def keyControls(self,event):
         retorno=False
         if self.unlocked: retorno=self.linkedButton.keyControls(event)
         return retorno
-    def stateLoad(self):        
+    def unlockButton(self):#na vitoria
+        self.unlocked=True
+    def stateLoad(self):#no inicio        
         arq=open('game.ages','rb')
         self.unlocked=pickle.load(arq)
         arq.close
-    def stateSave(self):        
+    def stateClear(self):
+        self.unlocked=False
+        self.stateDump()
+    def stateDump(self):#no fim
         arq=open('game.ages','wb')
         pickle.dump(self.unlocked,arq)
         arq.close
@@ -55,8 +69,14 @@ class linkedMusic(object):
         self.start_time=start_time
     def linkReply(self,prevscr):
         pygame.mixer.music.stop()
-        pygame.mixer.music.load(self.music)
-        pygame.mixer.music.play(self.repeat,self.start_time)
+        try:
+            pygame.mixer.music.load(self.music)
+        except:
+            print "can't load music"
+        try:
+            pygame.mixer.music.play(self.repeat,self.start_time)
+        except:
+            print "can't play music"
         return self.link
 
 class moveObject(object):
@@ -333,17 +353,19 @@ class charSelected(object):
         return prevscr
 
 class quadradoControlavel(object):
-    def __init__(self,size,player):
+    def __init__(self,player):
         self.player=player
         self.x=1
         self.y=1
         self.sprite=animacaoSprite(pygame.image.load("selecao4.png"),(40,40),9,True)
-        self.size=size
         self.buttonup=False
         self.dentro=True
         self.botaodireito=False
         self.botaoesquerdo=False
         self.nullSelection()
+        self.size=1
+    def setSize(self,size):
+        self.size=size
     def setSelection(self,sprite,size,nextsprite,rewind,atk,vel,rng,fly,dmg,mana):
         self.char_sprite=sprite
         self.char_size=size
@@ -479,14 +501,15 @@ class spawnInimigo(object):
                     self.pause=True
                 
 class mapaLimitavel(object):
-    def __init__(self,player,mapa,imagens,size):
+    def __init__(self,mouse,player,mapa,imagens,size,*fases_liberadas):
         self.alingment=(0,0)
+        self.stage_key=list(fases_liberadas)
         self.player=player
         self.mapa=mapa
         self.imagens=imagens
         self.desenhaMapa()
         self.size=size
-        self.selecao=quadradoControlavel(self.size,self.player)
+        self.selecao=mouse
         self.qnt_inimigos=0
     def desenhaMapa(self):
         for z in range(len(self.mapa)):
@@ -503,6 +526,7 @@ class mapaLimitavel(object):
         global frame_atual
         frame_atual=0
         tela.fps=60
+        
         for camada in self.mapa:
             for fileira in camada:
                 for bloco in fileira:
@@ -517,6 +541,8 @@ class mapaLimitavel(object):
     def addTarget(self,plr,pos, sentido=None):
         self.mapa[1][pos[1]][pos[0]].piece=lifeTarget(plr,pos,sentido)
     def blitOn(self,screen):
+        if self.selecao.size!=self.size:
+            self.selecao.size=self.size
         for z in range(len(self.mapa)):                                
             for y in range(len(self.mapa[z])):
                 for x in range(len(self.mapa[z][y])):
@@ -585,6 +611,8 @@ class winnerScreen(object):
     def blitOn(self,scr):
         if self.mapa.player.maxlife-self.mapa.player.life+self.mapa.player.score==self.mapa.qnt_inimigos:
             pygame.mouse.set_visible(True)
+            for fase in self.mapa.stage_key:
+                fase.unlockButton()
             self.mapa.setZero(self.tela)
             self.tela.linkcalled=self.link
     def keyControls(self,event):
@@ -638,8 +666,46 @@ class controlesExtras(object):
                 self.tela.running=False
         return False
 
-        
 #matriz seletora de tiles
+matriz_fase_2=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1],
+              [-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1],
+              [-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1],
+              [-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1],
+              [-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1],
+              [-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1],
+              [-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1,-1, 0, 0, 0,-1],
+              [ 1, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 2],
+              [ 1, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 2],
+              [ 1, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 2],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]],#13
+             [[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [ 7, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 7],
+              [10,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1, 4],
+              [10,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1, 4],
+              [10,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1, 4],
+              [10,-1,-1,-1, 3, 9,-1,-1,-1, 4,10,-1,-1,-1, 3, 9,-1,-1,-1, 4],
+              [10,-1,-1,-1, 4,10,-1,-1,-1, 4,10,-1,-1,-1, 4,10,-1,-1,-1, 4],
+              [10,-1,-1,-1, 4,10,-1,-1,-1, 4,10,-1,-1,-1, 4,10,-1,-1,-1, 4],
+              [11,-1,-1,-1, 4,10,-1,-1,-1, 5,11,-1,-1,-1, 4,10,-1,-1,-1, 5],
+              [-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1],
+              [-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1],
+              [-1,-1,-1,-1, 4,10,-1,-1,-1,-1,-1,-1,-1,-1, 4,10,-1,-1,-1,-1],
+              [ 6, 6, 6, 6, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 6, 6, 6, 6]],
+             [[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+              [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]]]
 matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [ 1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 2],
@@ -681,6 +747,7 @@ matriz_fase_1=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]]]
 #tela gameover e player
 player=statusPlayer(30,70)
+mouse=quadradoControlavel(player)
 game_over=pyTreeBee.dynamicScreen((800,600), 30,(100,0,0))
 game_over.setImage(pygame.image.load('gameover.png'),(0,0))
 winner_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255))
@@ -692,7 +759,14 @@ for w in range(3):
     for h in range(3):
         tiles_fase_1.append(tile_grama.subsurface((w*40,h*40),(40,40)))
 tiles_fase_1.append((34,57,65))
-mapa_fase_1 = mapaLimitavel(player,matriz_fase_1, tiles_fase_1,40)
+#preparação fases posteriores
+mapa_fase_2 = mapaLimitavel(mouse,player,matriz_fase_2, tiles_fase_1,40)
+fase_2 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_2)
+botao_2=pyTreeBee.linkedButton(linkedMusic(fase_2,"Heroic Age.mp3",-1, 0.0),arial,["Fase 2","Intestino Delgado"],480,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+botao_2.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
+botao_2=lockedButton(botao_2)
+# # #
+mapa_fase_1 = mapaLimitavel(mouse,player,matriz_fase_1, tiles_fase_1,40,botao_2)
 #spawn gerador de hordaS
 enemy1=pygame.image.load("inimigo01sheet2.png")
 enemy2=pygame.image.load("inimigo02sheet.png")
@@ -708,6 +782,18 @@ for n in range(8):
     exec 'enemy'+str(n+2)+'=pygame.image.load("inimigo0'+str(n+2)+'sheet.png")'
 '''
 enemy10=pygame.image.load("inimigo10sheet.png")
+mov_2_y11=[(1,0),(1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),
+           (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
+           (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),
+           (1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0),(1,0),(1,0)]
+mov_2_y10=[(1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),
+           (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0),(1,0),(1,0),(1,0),
+           (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),
+           (1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0)]
+mov_2_y9=[(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
+          (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0),(1,0),
+          (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),
+          (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0)]
 mov_y3=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
         (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
@@ -768,6 +854,19 @@ accelx3.setAll_BarSize((-10,-10))
 
 ###>>>FASES<<<###
 
+###fase 2###
+mapa_fase_2.addSpawn( (0,9) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
+mapa_fase_2.addSpawn( (0,10) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
+mapa_fase_2.addSpawn( (0,11) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
+mapa_fase_2.addTarget(player,(19,9),(-1,0))
+mapa_fase_2.addTarget(player,(19,10),(-1,0))
+mapa_fase_2.addTarget(player,(19,11),(-1,0))
+
+fase_2.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)
+fase_2.addItem(controlesExtras(fase_2))
+fase_2.addItem(gameOver(fase_2,game_over,mapa_fase_2))
+fase_2.addItem(winnerScreen(fase_2,winner_scr,mapa_fase_2))#332=quantidade de inimigos
+
 ###fase 1###
 fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1,botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
 
@@ -780,10 +879,12 @@ fase_1.addItem(winnerScreen(fase_1,winner_scr,mapa_fase_1))#332=quantidade de in
 ###seleção de fases###
 botao_1=pyTreeBee.linkedButton(linkedMusic(fase_1,"Volatile Reaction.mp3",-1, 0.0),arial,["Fase 1","Idavoll"],100,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
-selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1)
+selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1,botao_2)
 selecao_fase.setMusic("Teller of the Tales.mp3",-1, 0.0)
 ###tela options###
-tela_options=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(None,arial,["Você tem a opção de...","VOLTAR!","","HUE","   HUE","      BR","        BR"],300,300,pygame.Rect(0,0,0,0),0,0))
+tela_confirma_exclusao=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(None,arial,["TEM CERTEZA QUE DESEJA APAGAR TODO SEU PROGRESSO?"],300,300,pygame.Rect(0,0,0,0),0,0))
+tela_options=pyTreeBee.dynamicScreen((800,600),60,(200,255,0),pyTreeBee.linkedButton(tela_confirma_exclusao,arial,["Apagar Progresso"],300,300,pygame.Rect(0,0,100,40),0,0))
+tela_confirma_exclusao.addItem(pyTreeBee.linkedButton(deleteSave(tela_options),arial,["SIM"],300,400,pygame.Rect(0,0,100,40),50,20),pyTreeBee.linkedButton(tela_options,arial,["NÃO"],420,400,pygame.Rect(0,0,100,40),50,20))
 ###tela staff###
 tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,0,0))
 tela_staff.setImage(pygame.image.load("credits.png").convert(),(0,0))
@@ -838,11 +939,19 @@ voltar_para_inicio_musica=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five 
 voltar_para_inicio_musica.setAll_BarSize((-10,-10))
 selecao_fase.addItem(voltar_para_inicio_musica)
 game_over.addItem(voltar_para_inicio_musica)
+winner_scr.addItem(voltar_para_inicio_musica)
 '''
 voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
 selecao_fase.addItem(voltar_selecao)
 '''
 #fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,arial,["Voltar"],600,530,pygame.Rect(0,0,50,20),0,0))
+### loading save ###
+try:
+    load_fases_liberadas=[botao_2]
+    for liberada in load_fases_liberadas:
+        liberada.stateLoad()
+except:
+    pass
 ###início dos ciclos###
 time.sleep(0.1)
 pyTreeBee.treeBeeStart(tela_inicial)
@@ -852,5 +961,10 @@ temporarydisplay.fill((0,0,0))
 temporarydisplay.blit(loading,(0,0))
 pygame.display.update()
 
-pyTreeBee.treeBeeEnd()
+### dumping save ###
+load_fases_liberadas=[botao_2]
+for liberada in load_fases_liberadas:
+    liberada.stateDump()
+
+pygame.quit()
 
