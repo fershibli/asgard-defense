@@ -553,7 +553,10 @@ class mapaLimitavel(object):
                         try:
                             self.mapa[z][y][x].piece.movimentoPadrao(self.mapa,self.size)
                         except:
-                            self.mapa[z][y][x].piece.fightControls(self.mapa)
+                            try:
+                                self.mapa[z][y][x].piece.fightControls(self.mapa)
+                            except:
+                                pass
                     try:
                         screen.blit(self.mapa[z][y][x].cor,(self.alingment[0]+(x*self.size),self.alingment[1]+(y*self.size)))
                     except:
@@ -668,6 +671,49 @@ class controlesExtras(object):
         return False
 
 #matriz seletora de tiles
+matriz_fase_3=[ 
+ [  
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],   
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],  
+  [-1, 9, 9, 9, 9, 9, 9, 9, 9, -1, -1, 9, 9, 9, 9, 9, 9, 9, 9, -1],  
+  [-1, 9, -1, -1, -1, -1, -1, -1, 9, -1, -1, 9, -1, -1, -1, -1, -1, -1, 9, -1],  
+  [-1, 9, -1, -1, -1, -1, -1, -1, 9, -1, -1, 9, -1, -1, -1, -1, -1, -1, 9, -1], 
+  [-1, 9, -1, -1, -1, 9, 9, 9, 9, -1, -1, 9, 9, 9, 9, -1, -1, -1, 9, -1],
+  [-1, 9, -1, -1, -1, 9, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1, -1, -1, 9, -1], 
+  [-1, 9, -1, -1, -1, 9, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1, -1, -1, 9, -1], 
+  [-1, 9, -1, -1, -1, 9, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1, -1, -1, 9, -1], 
+  [-1, 9, -1, -1, -1, 9, 9, -1, -1, 15, 15, -1, -1, 9, 9, -1, -1, -1, 9, -1], 
+  [-1, 9, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 9, 9, -1, -1, -1, -1, 9, -1],  
+  [10, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, 12],  
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]   ],
+ [   
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],  
+  [4, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 4],  
+  [5, -1, -1, -1, -1, -1, -1, -1, -1, 3, 5, -1, -1, -1, -1, -1, -1, -1, -1, 3],  
+  [5, -1, 0, 1, 1, 1, 1, 2, -1, 3, 5, -1, 0, 1, 1, 1, 1, 2, -1, 3],   
+  [5, -1, 3, 4, 4, 7, 7, 8, -1, 3, 5, -1, 6, 7, 7, 4, 4, 5, -1, 3],  
+  [5, -1, 3, 4, 5, -1, -1, -1, -1, 3, 5, -1, -1, -1, -1, 3, 4, 5, -1, 3],  
+  [5, -1, 3, 4, 5, -1, 0, 1, 1, 4, 4, 1, 1, 2, -1, 3, 4, 5, -1, 3], 
+  [5, -1, 3, 4, 5, -1, 3, 4, 4, 4, 4, 4, 4, 5, -1, 3, 4, 5, -1, 3],  
+  [5, -1, 3, 4, 5, -1, 6, 4, 4, 4, 4, 4, 4, 8, -1, 3, 4, 5, -1, 3], 
+  [5, -1, 3, 4, 5, -1, -1, 6, 8, -1, -1, 6, 8, -1, -1, 3, 4, 5, -1, 3], 
+  [8, -1, 3, 4, 4, 2, -1, -1, -1, -1, -1, -1, -1, -1, 0, 4, 4, 5, -1, 6], 
+  [-1, -1, 3, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 5, -1, -1],   
+  [1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1]   ],  
+ [   
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], 
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], 
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], 
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], 
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], 
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], 
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],  
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], 
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],  
+  [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]   ]   ]   
 matriz_fase_2=[[[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],
               [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
               [-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1],
@@ -755,6 +801,11 @@ game_over.setMusic("Steel and Seething.mp3",1,0.0)
 winner_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255))
 winner_scr.setImage(pygame.image.load('vitoria.png'),(0,0))
 #loading dos tiles
+tileset_fase2=pygame.image.load("tileset2.png").convert()
+tile_list_2=[]
+for h in range(tileset_fase2.get_height()//40):
+    for w in range(tileset_fase2.get_width()//40):
+        tile_list_2.append(tileset_fase2.subsurface((w*40,h*40),(40,40)))
 tile_grama=pygame.image.load("tileset_grama.png").convert()
 tiles_fase_1=[pygame.image.load("mapacaminho6.png").convert(),pygame.image.load("mapaentrada3.png").convert(),pygame.image.load("mapasaida3.png").convert()]#,tile_grama.subsurface((40,40),(40,40)),tile_grama.subsurface((40,80),(40,40)),tile_grama.subsurface((0,80),(40,40)),tile_grama.subsurface((80,80),(40,40)),tile_grama.subsurface((80,0),(40,40)),tile_grama.subsurface((0,0),(40,40)),tile_grama.subsurface((40,40),(0,40)),tile_grama.subsurface((40,0),(40,40)),tile_grama.subsurface(
 for w in range(3):
@@ -762,13 +813,18 @@ for w in range(3):
         tiles_fase_1.append(tile_grama.subsurface((w*40,h*40),(40,40)))
 tiles_fase_1.append((34,57,65))
 #preparação fases posteriores
+mapa_fase_3 = mapaLimitavel(mouse,player,matriz_fase_3, tile_list_2,40)
+fase_3 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_3)
+botao_3=pyTreeBee.linkedButton(linkedMusic(fase_3,"Heroic Age.mp3",-1, 0.0),din_12,["Fase 2","URDARBRUNN"],480,300,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+botao_3.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
+botao_3=lockedButton(botao_3)
 mapa_fase_2 = mapaLimitavel(mouse,player,matriz_fase_2, tiles_fase_1,40)
 fase_2 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_2)
-botao_2=pyTreeBee.linkedButton(linkedMusic(fase_2,"Heroic Age.mp3",-1, 0.0),din_12,["Fase 2","Intestino Delgado"],480,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+botao_2=pyTreeBee.linkedButton(linkedMusic(fase_2,"Heroic Age.mp3",-1, 0.0),din_12,["Fase 2","Intestino Delgado"],480,50,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_2.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
 botao_2=lockedButton(botao_2)
 # # #
-mapa_fase_1 = mapaLimitavel(mouse,player,matriz_fase_1, tiles_fase_1,40,botao_2)
+mapa_fase_1 = mapaLimitavel(mouse,player,matriz_fase_1, tiles_fase_1,40,botao_2,botao_3)
 #spawn gerador de hordaS
 enemy1=pygame.image.load("inimigo01sheet2.png")
 enemy2=pygame.image.load("inimigo02sheet.png")
@@ -784,6 +840,17 @@ for n in range(8):
     exec 'enemy'+str(n+2)+'=pygame.image.load("inimigo0'+str(n+2)+'sheet.png")'
 '''
 enemy10=pygame.image.load("inimigo10sheet.png")
+mov_3_A=[(1, 0), (0, -1), (0, -1), (0, -1), (0, -1),
+         (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (1, 0),
+         (1, 0), (1, 0), (1, 0), (1, 0), (0, 1), (0, 1),
+         (0, 1), (-1, 0), (-1, 0), (-1, 0), (0, 1), (0, 1), (0, 1), (0, 1),
+         (1, 0), (0, 1), (1, 0), (1, 0), (1, 0), (0, -1), (0, -1)]#(0,11)
+mov_3_B=[(-1, 0), (0, -1), (0, -1), (0, -1), (0, -1),
+         (0, -1), (0, -1), (0, -1), (0, -1), (0, -1),
+         (-1, 0), (-1, 0), (-1, 0), (-1, 0), (-1, 0),
+         (-1, 0), (-1, 0), (0, 1), (0, 1), (0, 1),
+         (1, 0), (1, 0), (1, 0), (0, 1), (0, 1), (0, 1),
+         (0, 1), (-1, 0), (0, 1), (-1, 0), (-1, 0), (-1, 0), (0, -1), (0, -1)]#(19,11)
 mov_2_y11=[(1,0),(1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),
            (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
            (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),
@@ -796,18 +863,18 @@ mov_2_y9=[(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,
           (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0),(1,0),
           (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),
           (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0)]
-mov_y3=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
+mov_y3=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),(0,1),(0,1),
         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
-        (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
-mov_y2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
+        (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
+mov_y2=[(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),(0,1),(0,1),(0,1),(0,1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,1),(0,1),(0,1),
         (1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
-        (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
+        (0,-1),(0,-1),(0,-1),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(-1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
 #pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,mana,quantidades):
-mapa_fase_1.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
-mapa_fase_1.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
+mapa_fase_1.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3,mov_y3] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
+mapa_fase_1.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2,mov_y2] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
 #alvo para o inimigo dar pontos de dano
-mapa_fase_1.addTarget(player,(19,3),(-1,0))
-mapa_fase_1.addTarget(player,(19,2),(-1,0))
+mapa_fase_1.addTarget(player,(19,3),(0,0))
+mapa_fase_1.addTarget(player,(19,2),(0,0))
 #botoes de personagens
 viking_image=pygame.image.load("vikingchifre_spritesheet.png")
 arqueiro_image=pygame.image.load("archer_spritesheet.png")
@@ -857,6 +924,16 @@ accelx3.setAll_BarSize((-10,-10))
 ###>>>FASES<<<###
 
 ###fase 2###
+mapa_fase_3.addSpawn( (0,11), [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
+mapa_fase_3.addSpawn( (19,11), [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
+mapa_fase_3.addTarget(player,(9,9),(0,0))
+mapa_fase_3.addTarget(player,(10,9),(0,0))
+
+fase_3.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)
+fase_3.addItem(controlesExtras(fase_3))
+fase_3.addItem(gameOver(fase_3,game_over,mapa_fase_3))
+fase_3.addItem(winnerScreen(fase_3,winner_scr,mapa_fase_3))#332=quantidade de inimigos
+
 mapa_fase_2.addSpawn( (0,9) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9,mov_2_y9] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
 mapa_fase_2.addSpawn( (0,10) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10,mov_2_y10] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
 mapa_fase_2.addSpawn( (0,11) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11,mov_2_y11] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
@@ -879,9 +956,9 @@ fase_1.addItem(winnerScreen(fase_1,winner_scr,mapa_fase_1))#332=quantidade de in
 ###>>>TELAS<<<###
 
 ###seleção de fases###
-botao_1=pyTreeBee.linkedButton(linkedMusic(fase_1,"Volatile Reaction.mp3",-1, 0.0),din_12,["Fase 1","Idavoll"],100,100,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
+botao_1=pyTreeBee.linkedButton(linkedMusic(fase_1,"Volatile Reaction.mp3",-1, 0.0),din_12,["Fase 1","Idavoll"],50,50,pygame.Rect(0,0,280,192),-20,200,pygame.image.load("logo_fase1.png").convert())
 botao_1.setEach_BarSize((-20,-5),(-20,-10),(-20,-15))
-selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1,botao_2)
+selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1,botao_2,botao_3)
 selecao_fase.setMusic("Teller of the Tales.mp3",-1, 0.0)
 ###tela options###
 texto_confirmacao=pyTreeBee.linkedButton(None,dinB_22,["      TENS CERTEZA DE QUE É SÁBIO", "APAGAR TODO O VOSSO PROGRESSO?"],210,220,pygame.Rect(0,0,0,0),0,0)
@@ -986,7 +1063,7 @@ selecao_fase.addItem(voltar_selecao)
 #fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,din_12,["Voltar"],600,530,pygame.Rect(0,0,50,20),0,0))
 ### loading save ###
 try:
-    load_fases_liberadas=[botao_2]
+    load_fases_liberadas=[botao_2,botao_3]
     for liberada in load_fases_liberadas:
         liberada.stateLoad()
 except:
@@ -1001,7 +1078,7 @@ temporarydisplay.blit(loading,(0,0))
 pygame.display.update()
 
 ### dumping save ###
-load_fases_liberadas=[botao_2]
+load_fases_liberadas=[botao_2,botao_3]
 for liberada in load_fases_liberadas:
     liberada.stateDump()
 
