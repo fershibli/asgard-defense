@@ -1,6 +1,6 @@
 # -*- coding: cp1252 -*-
 import pyTreeBee,pygame,sys,os,time, pygame.mixer, copy
-import cPickle as pickle
+import shelve
 from pygame.locals import*
 infoObject = pygame.display.Info()
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
@@ -29,15 +29,15 @@ class hiddenStages(object):
         self.added=[False]*len(self.stages)
     def unlockStage(self,number):
 '''
+def readSave():
+    shelf = shelve.open('data_ages')
+    for key in shelf.keys():
+        print(repr(key), repr(shelf[key]))
+
 class deleteSave(object):
     def __init__(self,tela):
         self.tela=tela
     def linkReply(self,prevscr):
-        arq=open('game.ages','w')
-        arq.write('''
-lavhalsvnxlvkasfh
-''')
-        arq.close
         for liberada in load_fases_liberadas:
             liberada.stateClear()
         return self.tela
@@ -46,7 +46,7 @@ class lockedButton(object):
     def __init__(self,linkedButton,id_str):
         self.linkedButton=linkedButton
         self.unlocked=False
-        self.id_str=id_str
+        self.id_str=str(id_str)
     def blitOn(self,scr):
         if self.unlocked: self.linkedButton.blitOn(scr)
     def keyControls(self,event):
@@ -56,15 +56,15 @@ class lockedButton(object):
     def unlockButton(self):#na vitoria
         self.unlocked=True
     def stateLoad(self):#no inicio        
-        arq=open('Data\game'+self.id_str+'.ages','rb')
-        self.unlocked=pickle.load(arq)
+        arq=shelve.open('data_ages')
+        self.unlocked = arq[self.id_str]
         arq.close
     def stateClear(self):
         self.unlocked=False
         self.stateDump()
     def stateDump(self):#no fim
-        arq=open('Data\game'+self.id_str+'.ages','wb')
-        pickle.dump(self.unlocked,arq)
+        arq=shelve.open('data_ages')
+        arq[self.id_str]=self.unlocked
         arq.close
 
 class linkedMusic(object):
@@ -518,6 +518,8 @@ class spawnInimigo(object):
                     self.contador+=1
                     self.quantidade[0]=0
                     self.pause=True
+        else:
+            self.pause=True
                 
 class mapaLimitavel(object):
     def __init__(self,mouse,player,mapa,imagens,size,*fases_liberadas):
@@ -749,7 +751,150 @@ class controlesExtras(object):
                 pygame.mixer.music.pause()
         return retorno
 
-###matriz seletora de tiles
+###matrizes seletoras de tiles
+matriz_fase_D=[
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, 11, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, -1, -1, -1, -1, 9, 16],
+        [10, 9, 9, 9, 9, 9, -1, -1, -1, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 16],
+        [-1, -1, -1, -1, 9, 9, -1, -1, -1, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 16],
+        [-1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 16],
+        [10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, -1, -1, -1, -1, 9, -1, -1, -1, -1],
+        [10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, -1, -1, -1, -1, 9, -1, -1, -1, -1],
+        [-1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 16],
+        [-1, -1, -1, -1, 9, 9, -1, -1, -1, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 16],
+        [10, 9, 9, 9, 9, 9, -1, -1, -1, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 16],
+        [10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, -1, -1, -1, -1, 9, 16],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, 13, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        ],
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [7, 7, 7, 7, 7, 7, 7, 7, 8, -1, -1, 6, 7, 7, 4, 4, 4, 4, 7, 7],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 6, 7, 7, 8, -1, -1],
+        [-1, -1, -1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 2, -1, -1, -1, -1, -1, -1, -1],
+        [1, 1, 1, 1, 2, -1, 6, 7, 7, 7, 7, 7, 8, -1, -1, -1, -1, -1, -1, -1],
+        [7, 7, 7, 7, 8, -1, -1, -1, -1, -1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 1, 2, -1, 0, 1, 1, 1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 6, 7, 7, 8, -1, 6, 7, 7, 7],
+        [1, 1, 1, 1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [7, 7, 7, 7, 8, -1, 0, 1, 1, 1, 1, 1, 2, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, 6, 7, 7, 7, 7, 7, 8, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 1, 2, -1, -1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 2, -1, -1, 0, 1, 1, 4, 4, 4, 4, 1, 1]
+        ],
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        ]
+    ]
+matriz_fase_C=[
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, 15, 15, 15, 15, -1, -1, -1, -1, -1, -1, -1, -1],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, -1, -1, -1, 9, 9, -1, -1, -1, 9, 9, -1, -1, -1, 9, 9, -1, -1, -1, 9],
+        [9, -1, -1, -1, 9, 9, -1, -1, -1, 9, 9, -1, -1, -1, 9, 9, -1, -1, -1, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [-1, 9, -1, -1, -1, -1, 9, 9, -1, -1, -1, -1, 9, 9, -1, -1, -1, -1, 9, -1],
+        [-1, 9, -1, -1, -1, -1, 9, 9, -1, -1, -1, -1, 9, 9, -1, -1, -1, -1, 9, -1],
+        [-1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, -1],
+        [-1, 9, 9, -1, -1, -1, -1, -1, 9, 9, 9, 9, -1, -1, -1, -1, -1, 9, 9, -1],
+        [-1, 9, 9, -1, -1, -1, -1, -1, 9, 9, 9, 9, -1, -1, -1, -1, -1, 9, 9, -1],
+        [-1, 9, 9, -1, -1, -1, -1, -1, 9, 9, 9, 9, -1, -1, -1, -1, -1, 9, 9, -1],
+        [-1, 13, 13, -1, 12, -1, -1, -1, 13, 13, 13, 13, -1, -1, -1, -1, -1, 13, 13, -1]
+        ],
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [6, 7, 7, 7, 7, 7, 7, 8, -1, -1, -1, -1, 6, 7, 7, 7, 7, 7, 7, 8],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, 0, 1, 2, -1, -1, 0, 1, 2, -1, -1, 0, 1, 2, -1, -1, 0, 1, 2, -1],
+        [-1, 6, 7, 8, -1, -1, 6, 7, 8, -1, -1, 6, 7, 8, -1, -1, 6, 7, 8, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [2, -1, 0, 1, 1, 2, -1, -1, 0, 1, 1, 2, -1, -1, 0, 1, 1, 2, -1, 0],
+        [5, -1, 6, 7, 7, 8, -1, -1, 6, 7, 7, 8, -1, -1, 6, 7, 7, 8, -1, 3],
+        [5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 3],
+        [5, -1, -1, 0, 1, 1, 1, 2, -1, -1, -1, -1, 0, 1, 1, 1, 2, -1, -1, 3],
+        [5, -1, -1, 3, 4, 4, 4, 5, -1, -1, -1, -1, 3, 4, 4, 4, 5, -1, -1, 3],
+        [5, -1, -1, 3, 4, 4, 4, 5, -1, -1, -1, -1, 3, 4, 4, 4, 5, -1, -1, 3],
+        [8, -1, -1, 6, 7, 7, 7, 8, -1, -1, -1, -1, 6, 7, 7, 7, 8, -1, -1, 6]
+        ],
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        ]
+    ]
+
+matriz_fase_B=[
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 6, 7, 7, 7, 7, 7, 7, 7, 8],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 16],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 16],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 16],
+        [10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, 9, 9, -1, -1, 9, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, 9, 9, -1, -1, 9, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, 9, 9, -1, -1, 9, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 16],
+        [10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 16],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, 9, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, 13, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+    ],
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [0, 1, 1, 1, 1, 1, 1, 1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [3, 4, 4, 4, 4, 4, 4, 4, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [6, 7, 7, 7, 7, 7, 7, 7, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 2],
+        [0, 1, 1, 1, 2, -1, -1, 0, 2, -1, -1, 3, 4, 4, 4, 4, 4, 4, 4, 5],
+        [3, 4, 4, 4, 5, -1, -1, 3, 5, -1, -1, 3, 4, 4, 4, 4, 4, 4, 4, 5],
+        [3, 4, 4, 4, 5, -1, -1, 6, 8, -1, -1, 6, 7, 7, 7, 7, 7, 7, 7, 8],
+        [6, 7, 7, 7, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [0, 1, 1, 1, 1, 1, 1, 1, 2, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 2],
+        [6, 7, 7, 7, 7, 7, 7, 7, 8, -1, -1, 6, 7, 7, 7, 7, 7, 7, 7, 8]
+    ],
+    [
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+    ]
+    ]
+
 matriz_fase_A=[
     [
     [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
@@ -1058,37 +1203,58 @@ tile_list_1=tileList(pygame.image.load("tileset1.png").convert(),40)
 tile_list_2=tileList(pygame.image.load("tileset2.png").convert(),40)
 tile_list_3=tileList(pygame.image.load("tileset3.png").convert(),40)
 #Botões e Seqüênciamentos das Fases
+#D
+mapa_fase_D = mapaLimitavel(mouse,player,matriz_fase_D, tile_list_1,40)
+fase_D = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_D)
+botao_D=pyTreeBee.linkedButton(linkedMusic(fase_D,"Future Gladiator.mp3",-1, 0.0),din_12,[""],190,400,pygame.Rect(0,0,36,40),0,44,tile_list_1[7])
+botao_D.setEach_Text([""],["Maria 3"],[""])
+botao_D.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
+botao_D=lockedButton(botao_D,'save_state_D')
+#C
+mapa_fase_C = mapaLimitavel(mouse,player,matriz_fase_C, tile_list_2,40)
+fase_C = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_C)
+botao_C=pyTreeBee.linkedButton(linkedMusic(fase_C,"Future Gladiator.mp3",-1, 0.0),din_12,[""],140,400,pygame.Rect(0,0,36,40),0,44,tile_list_2[7])
+botao_C.setEach_Text([""],["Maria 2"],[""])
+botao_C.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
+botao_C=lockedButton(botao_C,'save_state_C')
+#B
+mapa_fase_B = mapaLimitavel(mouse,player,matriz_fase_B, tile_list_1,40)
+fase_B = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_B)
+botao_B=pyTreeBee.linkedButton(linkedMusic(fase_B,"Future Gladiator.mp3",-1, 0.0),din_12,[""],90,400,pygame.Rect(0,0,36,40),0,44,tile_list_1[7])
+botao_B.setEach_Text([""],["Maria 1"],[""])
+botao_B.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
+botao_B=lockedButton(botao_B,'save_state_B')
 #A
 mapa_fase_A = mapaLimitavel(mouse,player,matriz_fase_A, tile_list_1,40)
-fase_A = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_A)
-botao_A=pyTreeBee.linkedButton(linkedMusic(fase_A,"Future Gladiator.mp3",-1, 0.0),din_12,[""],40,500,pygame.Rect(0,0,36,40),0,44,tile_list_1[4])
+fase_A = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_A,botao_B)
+botao_A=pyTreeBee.linkedButton(linkedMusic(fase_A,"Future Gladiator.mp3",-1, 0.0),din_12,[""],40,400,pygame.Rect(0,0,36,40),0,44,tile_list_1[7])
 botao_A.setEach_Text([""],["PÂNCREAS DELGADO"],[""])
 botao_A.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
-botao_A=lockedButton(botao_A,'6')
+botao_A=lockedButton(botao_A,'save_state_A')
 #5
 mapa_fase_5 = mapaLimitavel(mouse,player,matriz_fase_5, tile_list_3,40)
 fase_5 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_5)
 botao_5=pyTreeBee.linkedButton(None,din_12,[""],428,301,pygame.Rect(0,0,324,260),0,0,pygame.image.load("stage5.png").convert())
 botao_5.setAll_BarSize((0,0))
-botao_5=lockedButton(botao_5,'5')
+botao_5=lockedButton(botao_5,'save_state_5')
 #4
 mapa_fase_4 = mapaLimitavel(mouse,player,matriz_fase_4, tile_list_3,40,botao_5)
 fase_4 = pyTreeBee.dynamicScreen((800,600),60,(78,133,154),mapa_fase_4)
 botao_4=pyTreeBee.linkedButton(linkedMusic(fase_4,"Future Gladiator.mp3",-1, 0.0),din_12,[""],158,206,pygame.Rect(0,0,260,166),0,0,pygame.image.load("stage4.png").convert())
 botao_4.setAll_BarSize((0,0))
-botao_4=lockedButton(botao_4,'4')
+botao_4=lockedButton(botao_4,'save_state_4')
 #3
 mapa_fase_3 = mapaLimitavel(mouse,player,matriz_fase_3, tile_list_2,40,botao_4)
 fase_3 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_3)
 botao_3=pyTreeBee.linkedButton(linkedMusic(fase_3,"Heroic Age.mp3",-1, 0.0),din_12,[""],533,113,pygame.Rect(0,0,230,144),0,0,pygame.image.load("stage3.png").convert())
 botao_3.setAll_BarSize((0,0))
-botao_3=lockedButton(botao_3,'3')
+botao_3=lockedButton(botao_3,'save_state_3')
 #2
 mapa_fase_2 = mapaLimitavel(mouse,player,matriz_fase_2, tile_list_1,40,botao_3,botao_A)
 fase_2 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_2)
 botao_2=pyTreeBee.linkedButton(linkedMusic(fase_2,"Volatile Reaction.mp3",-1, 0.0),din_12,[""],323,50,pygame.Rect(0,0,202,120),0,0,pygame.image.load("stage2.png").convert())
 botao_2.setAll_BarSize((0,0))
-botao_2=lockedButton(botao_2,'2')
+botao_2=lockedButton(botao_2,'save_state_2')
 #1
 mapa_fase_1 = mapaLimitavel(mouse,player,matriz_fase_1, tile_list_0,40,botao_2)
 fase_1 = pyTreeBee.dynamicScreen((800,600), 60,(78,133,154),mapa_fase_1)
@@ -1110,6 +1276,49 @@ for n in range(8):
     exec 'enemy'+str(n+2)+'=pygame.image.load("inimigo0'+str(n+2)+'sheet.png")'
 '''
 enemy10=pygame.image.load("inimigo10sheet.png")
+
+
+mov_C_A_1=[(0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (-1, 0), (0, -1),
+          (0, -1), (0, -1), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (0, 1), (0, 1), (0, 1),
+          (1, 0), (1, 0), (1, 0), (1, 0), (0, -1), (0, -1), (0, -1), (0, -1)]#(1,12)
+mov_C_A_2=[(0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0),
+           (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (0, -1), (0, -1), (0, -1), (0, -1)]#(1,12)
+mov_C_B_1=[(0, -1), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (1, 0), (1, 0), (0, -1), (0, -1),
+           (0, -1), (-1, 0), (-1, 0), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (1, 0), (1, 0), (0, -1)]#(2,12)
+mov_C_B_2=[(0, -1), (0, -1), (0, -1), (0, -1), (-1, 0), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (1, 0),
+           (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (0, -1), (0, -1),
+           (0, -1), (-1, 0), (-1, 0), (-1, 0), (0, -1)]#(2,12)
+mov_C_C=[(0, -1), (0, -1), (0, -1), (0, -1), (-1, 0), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (0, -1), (0, -1), (0, -1), (0, -1)]#(8,12)
+mov_C_D=[(0, -1), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (1, 0), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (0, -1), (0, -1),
+         (0, -1), (-1, 0), (-1, 0), (-1, 0), (-1, 0), (0, -1)]#(9,12)
+mov_C_E= [(0, -1), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (0, -1),
+          (0, -1), (0, -1), (-1, 0), (-1, 0), (0, -1), (0, -1), (0, -1), (0, -1)]#(10,12)
+mov_C_F=[(0, -1), (0, -1), (0, -1), (0, -1), (1, 0), (1, 0), (0, -1), (0, -1), (0, -1),
+         (1, 0), (0, -1), (0, -1), (0, -1), (-1, 0), (-1, 0), (-1, 0), (0, -1)]#(11,12)
+mov_C_G=[(0, -1), (0, -1), (0, -1), (0, -1), (-1, 0), (-1, 0), (-1, 0), (-1, 0),
+         (0, -1), (0, -1), (0, -1), (-1, 0), (-1, 0), (-1, 0), (0, -1), (0, -1), (0, -1), (0, -1)]#(17,12)
+mov_C_H_1=[(0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (1, 0), (0, -1), (0, -1),
+          (0, -1), (-1, 0), (-1, 0), (-1, 0), (-1, 0), (-1, 0), (-1, 0), (-1, 0), (-1, 0), (0, -1)]#(18,12)
+mov_C_H_2=[(0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (-1, 0), (-1, 0), (-1, 0),
+           (-1, 0), (-1, 0), (-1, 0), (-1, 0), (-1, 0), (0, -1), (0, -1), (0, -1), (0, -1)]#(18,12)
+mov_C_H_3=[(0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (-1, 0), (-1, 0),
+           (-1, 0), (0, -1), (0, -1), (0, -1), (-1, 0), (-1, 0), (-1, 0), (-1, 0), (0, -1)]#(18,12)
+
+mov_B_A=[(1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0),
+         (0, 1), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0)]#(0,1)
+mov_B_B=[(1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (0, -1),
+         (0, -1), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0)]#(0,5)
+mov_B_C_1=[(1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (0, -1), (1, 0),
+         (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0)]#(0,10)
+mov_B_C_2=[(1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0),
+           (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (-1, 0), (-1, 0), (-1, 0), (-1, 0)]#(0,10)
+mov_B_D= [(0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (-1, 0),
+          (-1, 0), (-1, 0), (0, 1), (0, 1), (0, 1), (0, 1), (1, 0), (1, 0), (1, 0),
+          (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0)]#(9,12)
+mov_B_E=[(0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1), (0, -1),
+         (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0), (1, 0)]#(10,12)
+
+
 mov_A_A=[(1,0),(1,0),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(1,0),(1,0),(1,0),
            (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),
            (0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),(0,-1),
@@ -1208,7 +1417,41 @@ accelx3.setAll_BarSize((-10,-10))
 
 game_over_music=("Steel and Seething.mp3",1,0.0)
 ###>>>FASES<<<###
-###fase A (extra)###
+###fase C (extra)### !!!!!!!!!!!!!!!!!!!!!!PRECISA BALANCEAMENTO!!!!!!!!!!!
+#parei aqui: testar as tragetórias dos spawns(mapa 2 da maria)
+#mapa_fase_C.addSpawn( (0,1) , [120] , [800] , (0,0) , [enemy1] , [(20,20)] , [8] , [True] , [1] , [0.5] , [120] ,[False],[0], [mov_B_A] , [(1,0)] ,[5], [20])
+#mapa_fase_C.addSpawn( (0,10) , [120,120] , [800,800] , (0,0) , [enemy1,enemy1] , [(20,20),(20,20)] , [8,8] , [True,True] , [1,1] , [0.5,0.5] , [120,120] ,[False,False],[0,0], [mov_B_C_1,mov_B_C_2] , [(1,0),(1,0)] ,[5,5], [5,5])
+#mapa_fase_C.addTarget(player,(8,1),(0,0))
+#mapa_fase_C.addTarget(player,(9,1),(0,0))
+#mapa_fase_C.addTarget(player,(10,1),(0,0))
+#mapa_fase_C.addTarget(player,(11,1),(0,0))
+
+
+#fase_C.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)
+#fase_C.addItem(controlesExtras(fase_C))
+#fase_C.addItem(gameOver(fase_C,game_over,mapa_fase_C,game_over_music))
+#fase_C.addItem(winnerScreen(fase_C,winner_scr,mapa_fase_C))#332=quantidade de inimigos
+
+###fase B (extra)### !!!!!!!!!!!!!!!!!!!!!!PRECISA BALANCEAMENTO!!!!!!!!!!!
+
+mapa_fase_B.addSpawn( (0,1) , [120] , [800] , (0,0) , [enemy1] , [(20,20)] , [8] , [True] , [1] , [0.5] , [120] ,[False],[0], [mov_B_A] , [(1,0)] ,[5], [20])
+mapa_fase_B.addSpawn( (0,5) , [120] , [800] , (0,0) , [enemy1] , [(20,20)] , [8] , [True] , [1] , [0.5] , [120] ,[False],[0], [mov_B_B] , [(1,0)] ,[5], [20])
+mapa_fase_B.addSpawn( (0,10) , [120,120] , [800,800] , (0,0) , [enemy1,enemy1] , [(20,20),(20,20)] , [8,8] , [True,True] , [1,1] , [0.5,0.5] , [120,120] ,[False,False],[0,0], [mov_B_C_1,mov_B_C_2] , [(1,0),(1,0)] ,[5,5], [5,5])
+mapa_fase_B.addSpawn( (9,12) , [120] , [1] , (0,0) , [enemy1] , [(20,20)] , [8] , [True] , [1] , [0.5] , [120] ,[False],[0], [mov_B_D] , [(1,0)] ,[5], [5])
+mapa_fase_B.addSpawn( (10,12) , [120] , [800] , (0,0) , [enemy1] , [(20,20)] , [8] , [True] , [1] , [0.5] , [120] ,[False],[0], [mov_B_E] , [(1,0)] ,[5], [20])
+mapa_fase_B.addTarget(player,(19,2),(0,0))
+mapa_fase_B.addTarget(player,(19,3),(0,0))
+mapa_fase_B.addTarget(player,(19,4),(0,0))
+mapa_fase_B.addTarget(player,(19,9),(0,0))
+mapa_fase_B.addTarget(player,(19,10),(0,0))
+
+
+fase_B.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)
+fase_B.addItem(controlesExtras(fase_B))
+fase_B.addItem(gameOver(fase_B,game_over,mapa_fase_B,game_over_music))
+fase_B.addItem(winnerScreen(fase_B,winner_scr,mapa_fase_B))#332=quantidade de inimigos
+
+##fase A (extra)### !!!!!!!!!!!!!!!!!!!!!!PRECISA BALANCEAMENTO!!!!!!!!!!!
 
 mapa_fase_A.addSpawn( (0,9) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_A_C,mov_A_C,mov_A_C,mov_A_C,mov_A_C,mov_A_C,mov_A_C,mov_A_C,mov_A_C,mov_A_C] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[5,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
 mapa_fase_A.addSpawn( (0,10) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (1,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_A_B,mov_A_B,mov_A_B,mov_A_B,mov_A_B,mov_A_B,mov_A_B,mov_A_B,mov_A_B,mov_A_B] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[5,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
@@ -1218,12 +1461,12 @@ mapa_fase_A.addTarget(player,(19,10),(-1,0))
 mapa_fase_A.addTarget(player,(19,11),(-1,0))
 
 fase_A.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)
-fase_A.addItem(controlesExtras(fase_2))
-fase_A.addItem(gameOver(fase_2,game_over,mapa_fase_2,game_over_music))
-fase_A.addItem(winnerScreen(fase_2,winner_scr,mapa_fase_2))#332=quantidade de inimigos
+fase_A.addItem(controlesExtras(fase_A))
+fase_A.addItem(gameOver(fase_A,game_over,mapa_fase_A,game_over_music))
+fase_A.addItem(winnerScreen(fase_A,winner_scr,mapa_fase_A))#332=quantidade de inimigos
 
-###fase 4###
-#pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,mana,quantidades):
+###fase 4### !!!!!!!!!!!!!!!!!!!!!!PRECISA BALANCEAMENTO!!!!!!!!!!!
+
 #mov_4_A_1= andar pela borda,mov_4_A_2=descola da borda
 mapa_fase_4.addSpawn((1, 12),[120,120,120,120,120,120,120,120,120,120] , [5000,(8*pow(10,13))-(8*pow(10,3)),800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_4_A_1,mov_4_A_2,mov_4_A_1,mov_4_A_2,mov_4_A_1,mov_4_A_2,mov_4_A_1,mov_4_A_2,mov_4_A_1,mov_4_A_2] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [10,20,15,10,20,15,30,15,20,1])
 #mov_4_B_1,mov_4_B_2
@@ -1253,7 +1496,8 @@ fase_4.addItem(controlesExtras(fase_4))
 fase_4.addItem(gameOver(fase_4,game_over,mapa_fase_4,game_over_music))
 fase_4.addItem(winnerScreen(fase_4,winner_scr,mapa_fase_4))
 
-###fase 3###
+###fase 3### !!!!!!!!!!!!!!!!!!!!!!PRECISA BALANCEAMENTO!!!!!!!!!!!
+
 mapa_fase_3.addSpawn( (0,11), [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
 mapa_fase_3.addSpawn( (19,11), [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,1] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])
 mapa_fase_3.addTarget(player,(9,9),(0,0))
@@ -1275,9 +1519,8 @@ fase_3.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,acce
 fase_3.addItem(controlesExtras(fase_3))
 fase_3.addItem(gameOver(fase_3,game_over,mapa_fase_3,game_over_music))
 fase_3.addItem(winnerScreen(fase_3,winner_scr,mapa_fase_3))#332=quantidade de inimigos
-#fase_3.addItem(animacaoSprite(pygame.image.load('fontedavida.png'),(160,160),6,False,(40*8,40*5)))
 
-###fase 2###
+###fase 2### balanceada (OK)
 mapa_fase_2.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
 mapa_fase_2.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
 mapa_fase_2.addTarget(player,(19,3),(0,0))
@@ -1287,8 +1530,8 @@ fase_2.addItem(controlesExtras(fase_2))
 fase_2.addItem(gameOver(fase_2,game_over,mapa_fase_2,game_over_music))
 fase_2.addItem(winnerScreen(fase_2,winner_scr,mapa_fase_2))#332=quantidade de inimigos
 
-###fase 1###
-mapa_fase_1.addSpawn( (0,6), [120,120,120,120] , [800,800,800,800], (0,0), [enemy3,enemy4,enemy6,enemy8],[(25,25),(22,22),(25,25),(22,22)],[8,8,8,8,8,8,8,8,8,8],[True,False,True,False],[1,1,1,1],[0.5,0.5,0.5,0.5],[100,100,100,100],[False,True,False,True],[0,0,0,0],[mov_1_A,mov_1_B,mov_1_A,mov_1_B],[(1,0),(1,0),(1,0),(1,0)],[50,50,75,75],[1,1,1,1])
+###fase 1### balanceada (OK)
+mapa_fase_1.addSpawn( (0,6), [120,120,120,120] , [500,1000,2200,4000], (0,0), [enemy3,enemy4,enemy6,enemy8],[(25,25),(22,22),(25,25),(22,22)],[8,8,8,8,8,8,8,8,8,8],[True,False,True,False],[30,30,30,30],[0.5,0.5,0.5,0.5],[400,400,2000,1350],[False,True,False,True],[0,0,0,0],[mov_1_A,mov_1_B,mov_1_A,mov_1_B],[(1,0),(1,0),(1,0),(1,0)],[15,50,75,75],[1,1,1,1])
 mapa_fase_1.addTarget(player,(19,6),(0,0))
 fase_1.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
 
@@ -1300,7 +1543,7 @@ fase_1.addItem(winnerScreen(fase_1,winner_scr,mapa_fase_1))#332=quantidade de in
 
 ###seleção de fases###
 
-selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1,botao_2,botao_3,botao_4,botao_5,botao_A)
+selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_1,botao_2,botao_3,botao_4,botao_5,botao_A,botao_B,botao_C,botao_D)
 selecao_fase.setImage(pygame.image.load("stageselect.png").convert(),(0,0))
 selecao_fase.setMusic("Teller of the Tales.mp3",-1, 0.0)
 ###tela options###
@@ -1391,7 +1634,7 @@ voltar_para_inicio.setAll_BarSize((-6,-6))
 tela_options.addItem(voltar_para_inicio)
 tela_staff.addItem(voltar_para_inicio)
 tela_tutorial.addItem(voltar_para_inicio)
-voltar_para_inicio_musica=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),din_12,[""],655,530,pygame.Rect(0,0,130-12,60-12),0,0)
+voltar_para_inicio_musica=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),din_12,[""],27,530,pygame.Rect(0,0,130-12,60-12),0,0)#655,530 para ficar no canto inferior direito
 voltar_para_inicio_musica.setEach_Image(img_voltar_1,img_voltar_2,img_voltar_3)
 voltar_para_inicio_musica.setAll_BarSize((-6,-6))
 selecao_fase.addItem(voltar_para_inicio_musica)
@@ -1414,7 +1657,7 @@ selecao_fase.addItem(voltar_selecao)
 #fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,din_12,["Voltar"],600,530,pygame.Rect(0,0,50,20),0,0))
 ### loading save ###
 
-load_fases_liberadas=[botao_2,botao_3,botao_4,botao_5,botao_A]
+load_fases_liberadas=[botao_2,botao_3,botao_4,botao_5,botao_A,botao_B]
 
 def saveAll(save=True):
     global load_fases_liberadas    
@@ -1428,14 +1671,14 @@ try:
 except:
     pass
 ###início dos ciclos###
-time.sleep(0.25)
+time.sleep(0.1)
 pyTreeBee.treeBeeStart(tela_inicial)
 
 loading=dinB_22.render("SAVING...",True,(255,255,255))
 temporarydisplay.fill((0,0,0))
 temporarydisplay.blit(loading,(370,278))
 pygame.display.update()
-time.sleep(0.25)
+time.sleep(0.1)
 ### dumping save ###
 saveAll()
 
