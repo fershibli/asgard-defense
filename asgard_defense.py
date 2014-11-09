@@ -1,6 +1,6 @@
 # -*- coding: cp1252 -*-
 import pyTreeBee,pygame,sys,os,time, pygame.mixer, copy
-import shelve
+import cPickle as pickle
 from pygame.locals import*
 infoObject = pygame.display.Info()
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
@@ -29,11 +29,6 @@ class hiddenStages(object):
         self.added=[False]*len(self.stages)
     def unlockStage(self,number):
 '''
-def readSave():
-    shelf = shelve.open('data_ages')
-    for key in shelf.keys():
-        print(repr(key), repr(shelf[key]))
-
 class deleteSave(object):
     def __init__(self,tela):
         self.tela=tela
@@ -56,16 +51,16 @@ class lockedButton(object):
     def unlockButton(self):#na vitoria
         self.unlocked=True
     def stateLoad(self):#no inicio        
-        arq=shelve.open('data_ages')
-        self.unlocked = arq[self.id_str]
+        arq=open('Data\game'+self.id_str+'.ages','rb')
+        self.unlocked=pickle.load(arq)
         arq.close
     def stateClear(self):
         self.unlocked=False
         self.stateDump()
     def stateDump(self):#no fim
-        arq=shelve.open('data_ages')
-        arq[self.id_str]=self.unlocked
-        arq.close
+        arq=open('Data\game'+self.id_str+'.ages','wb')
+        pickle.dump(self.unlocked,arq)
+        arq.close 
 
 class linkedMusic(object):
     def __init__(self, link, music, repeat, start_time):
