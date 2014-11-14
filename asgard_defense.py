@@ -328,20 +328,21 @@ class torreGuerreiro(object):
                     except:
                         pass
                     '''
-                    try:
-                        if mapa[0][self.y+e][self.x+i].piece!=None:
-                            if mapa[0][self.y+e][self.x+i].piece.fly==self.fly or self.fly:
-                                if self.sprite.y!=1: self.sprite.setLine(1)
-                                self.aim=mapa[0][self.y+e][self.x+i]
-                    except:
-                        pass
+                    if self.y+e>=0 and self.y+e<len(mapa[0]) and self.x+i>=0 and self.x+i<len(mapa[0][0]):
+                        try:
+                            if mapa[0][self.y+e][self.x+i].piece!=None:
+                                if mapa[0][self.y+e][self.x+i].piece.fly==self.fly or self.fly:
+                                    if self.sprite.y!=1: self.sprite.setLine(1)
+                                    self.aim=mapa[0][self.y+e][self.x+i]
+                        except:
+                            pass
         else:            
             if frame_atual%self.vel==0:
                 try:
                     self.aim.piece.hp-=self.atk*self.dmg_types[self.aim.piece.type]
                     if self.aim.piece.hp<=0:
                         self.player.score+=self.aim.piece.hpmax/100
-                        self.player.counter+=1
+                        self.player.kill_counter+=1
                         self.player.mana+=self.aim.piece.mana
                         self.aim.addPiece(None)
                         self.aim=None
@@ -357,6 +358,18 @@ class accelGame(object):
     def linkReply(self,prevscr):
         prevscr.fps=self.fps
         return prevscr
+
+class accelKey(object):
+    def __init__(self,fps,key):
+        self.link=accelGame(fps)
+        self.key=key
+    def keyControls(self,event):
+        retorno=False
+        if event.type==KEYUP:
+            if event.key==self.key:
+                retorno=self.link
+        return retorno
+    def blitOn(self,scr):pass
 
 class charSelected(object):
     def __init__(self,mouse,sprite,size,nextsprite,rewind,atk,vel,rng,voador,tipo,mana):
@@ -502,6 +515,7 @@ class lifeTarget(object):
                     around=mapa[0][self.pos[1]+y][self.pos[0]+x]
                     if around.piece!=None:
                         self.player.life-=around.piece.atk
+                        self.player.damage_counter+=1
                         around.piece=None
                         
         else:
@@ -509,6 +523,7 @@ class lifeTarget(object):
             if point.piece!=None:
                 
                 self.player.life-=point.piece.atk
+                self.player.damage_counter+=1
                 point.piece=None
                 
 
@@ -692,7 +707,7 @@ class winnerScreen(object):
         self.score=score
     def blitOn(self,scr):
         global voltar_retry,frame_atual
-        if self.mapa.player.maxlife-self.mapa.player.life+self.mapa.player.counter==self.mapa.qnt_inimigos:
+        if self.mapa.player.damage_counter+self.mapa.player.kill_counter>=self.mapa.qnt_inimigos:
             self.tela.fps=60
             if frame_atual%120==0:
                 if self.music:
@@ -736,12 +751,14 @@ class statusPlayer(object):
         self.mana=mana
         self.initialmana=mana
         self.score=0
-        self.counter=0
+        self.kill_counter=0
+        self.damage_counter=0
     def setZero(self):
         self.life=self.maxlife
         self.mana=self.initialmana
         self.score=0
-        self.counter=0
+        self.kill_counter=0
+        self.damage_counter=0
         
 class volumeControl(object):
     def __init__(self, how_much):
@@ -1414,7 +1431,7 @@ cor_fundo=(0,0,0)#(60,80,110)#(34,57,65)
 #G
 mapa_fase_G = mapaLimitavel(mouse,statusPlayer(50,70),matriz_fase_G, tile_list_C,40)
 fase_G = pyTreeBee.dynamicScreen((800,600),60,cor_fundo,mapa_fase_G)
-botao_G=pyTreeBee.linkedButton(linkedMusic(fase_G,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x+80,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_C[7],(32,32)))
+botao_G=pyTreeBee.linkedButton(linkedMusic(fase_G,"El Magicia.mp3",-1, 0.0),din_12,[""],botoes_extras_x+80,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_C[7],(32,32)))
 botao_G.setEach_Text([""],["RETOMADA DE VALGRIND"],[""])
 botao_G.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
 botao_G=lockedButton(botao_G,'save_state_G')
@@ -1466,7 +1483,7 @@ area_fases_extras.setEach_Image(pygame.image.load("stage61.png").convert(),pygam
 area_fases_extras.setAll_BarSize((0,0))
 area_fases_extras=lockedButton(area_fases_extras,'save_state_1')
 #5
-mapa_fase_5 = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_5, tile_list_4,40,botao_E,botao_F)
+mapa_fase_5 = mapaLimitavel(mouse,statusPlayer(30000,70),matriz_fase_5, tile_list_4,40,botao_E,botao_F)
 fase_5 = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_5)
 botao_5=pyTreeBee.linkedButton(linkedMusic(fase_5,"Epic.mp3",-1,0.0),din_12,[""],426,238,pygame.Rect(0,0,324,260),0,0)
 botao_5.setEach_Image(pygame.image.load("stage51.png").convert(),pygame.image.load("stage52.png").convert(),pygame.image.load("stage52.png").convert())
@@ -1688,6 +1705,10 @@ accelx3=pyTreeBee.linkedButton(accelGame(120),din_12,[""],800-60,520,pygame.Rect
 accelx3.setAll_BarSize((0,0))
 accelx3.setSelect_Sound(accel_som)
 
+tecla_x1=accelKey(60,K_1)
+tecla_x2=accelKey(90,K_2)
+tecla_x3=accelKey(120,K_3)
+
 winner_music=("medieval-fanfare.wav",1,0.0)
 game_over_music=("Funeral March for Brass.mp3",1,0.0)
 ###>>>FASES<<<###
@@ -1718,7 +1739,7 @@ mapa_fase_G.addSpawn((18, 12),[120,120,120,120,120,120,120,120,120,120] ,[fator_
 for x in range(3,17,1):
     mapa_fase_G.addTarget((x,1),(0,0))
 
-fase_G.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)
+fase_G.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)
 fase_G.addItem(controlesExtras(fase_G))
 fase_G.addItem(gameOver(fase_G,game_over,mapa_fase_G,game_over_music))
 fase_G.addItem(winnerScreen(fase_G,winner_scr,mapa_fase_G,blit_score,winner_music))
@@ -1737,10 +1758,10 @@ fase_G.addItem(winnerScreen(fase_G,winner_scr,mapa_fase_G,blit_score,winner_musi
 #mapa_fase_C.addTarget((11,1),(0,0))
 
 
-#fase_C.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)
+#fase_C.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)
 #fase_C.addItem(controlesExtras(fase_C))
 #fase_C.addItem(gameOver(fase_C,game_over,mapa_fase_C,game_over_music))
-#fase_C.addItem(winnerScreen(fase_C,winner_scr,mapa_fase_C))#332=quantidade de inimigos
+#fase_C.addItem(winnerScreen(fase_C,winner_scr,mapa_fase_C))
 
 ###fase B (extra)### !!!!!!!!!!!!!!!!!!!!!!PRECISA BALANCEAMENTO!!!!!!!!!!!
 
@@ -1756,10 +1777,10 @@ mapa_fase_B.addTarget((19,9),(0,0))
 mapa_fase_B.addTarget((19,10),(0,0))
 
 
-fase_B.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)
+fase_B.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)
 fase_B.addItem(controlesExtras(fase_B))
 fase_B.addItem(gameOver(fase_B,game_over,mapa_fase_B,game_over_music))
-fase_B.addItem(winnerScreen(fase_B,winner_scr,mapa_fase_B,blit_score,winner_music))#332=quantidade de inimigos
+fase_B.addItem(winnerScreen(fase_B,winner_scr,mapa_fase_B,blit_score,winner_music))
 
 ##fase A (extra)### !!!!!!!!!!!!!!!!!!!!!!PRECISA BALANCEAMENTO!!!!!!!!!!!
 
@@ -1770,48 +1791,67 @@ mapa_fase_A.addTarget((19,9),(-1,0))
 mapa_fase_A.addTarget((19,10),(-1,0))
 mapa_fase_A.addTarget((19,11),(-1,0))
 
-fase_A.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)
+fase_A.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)
 fase_A.addItem(controlesExtras(fase_A))
 fase_A.addItem(gameOver(fase_A,game_over,mapa_fase_A,game_over_music))
-fase_A.addItem(winnerScreen(fase_A,winner_scr,mapa_fase_A,blit_score,winner_music))#332=quantidade de inimigos
+fase_A.addItem(winnerScreen(fase_A,winner_scr,mapa_fase_A,blit_score,winner_music))
 
 ###fase 5###
 
-#mapa_fase_5.addTarget((8,5),(0,0))
-#mapa_fase_5.addTarget((11,5),(0,0))
-#mapa_fase_5.addTarget((8,8),(0,0))
-#mapa_fase_5.addTarget((11,8),(0,0))
+#pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,mana,quantidades):
+fator_5=8100
+mapa_fase_5.addSpawn( (19,12), [120,120] , [800,(fator_5*5)] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_A] *2, [(1,0),(1,0)] ,[2,6], [50,50])#1,6
+mapa_fase_5.addSpawn( (0,12), [120,120] , [800,(fator_5*5)] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_B] *2, [(1,0),(1,0)] ,[2,6], [50,50])
+mapa_fase_5.addSpawn( (15,1), [120,120] , [fator_5,(fator_5*7)] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_C] *2, [(1,0),(1,0)] ,[2,7], [50,50])#2,8
+mapa_fase_5.addSpawn( (0,4), [120,120] , [fator_5,(fator_5*7)] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_D] *2, [(1,0),(1,0)] ,[2,7], [50,50])
+mapa_fase_5.addSpawn( (15,12), [120,120] , [(fator_5*4),(fator_5*9)] , (0,0) , [enemy5,enemy10] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,15] , [0.5,0.5] , [450,12000] ,[False,False],[2,0], [mov_5_E] *2, [(1,0),(1,0)] ,[4,150], [50,2])#5,10
+mapa_fase_5.addSpawn( (4,1), [120,120] , [(fator_5*4),(fator_5*9)] , (0,0) , [enemy5,enemy10] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,15] , [0.5,0.5] , [450,12000] ,[False,False],[2,0], [mov_5_F] *2, [(1,0),(1,0)] ,[4,150], [50,2])
+mapa_fase_5.addSpawn( (19,1), [120,120] , [(fator_5*2),(fator_5*8)] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_G] *2, [(1,0),(1,0)] ,[3,9], [50,50])#3,9
+mapa_fase_5.addSpawn( (0,1), [120,120] , [(fator_5*2),(fator_5*8)] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_H] *2, [(1,0),(1,0)] ,[3,9], [50,50])
+mapa_fase_5.addSpawn( (19,9), [120,120] , [(fator_5*3),(fator_5*6)] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_I] *2, [(1,0),(1,0)] ,[4,5], [50,50])#4,7
+mapa_fase_5.addSpawn( (4,12), [120,120] , [(fator_5*3),(fator_5*6)] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_J] *2, [(1,0),(1,0)] ,[4,5], [50,50])
 
+mapa_fase_5.addTarget((8,5),(0,0))
+mapa_fase_5.addTarget((11,5),(0,0))
+mapa_fase_5.addTarget((8,8),(0,0))
+mapa_fase_5.addTarget((11,8),(0,0))
 
-#fase_5.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)
-#fase_5.addItem(controlesExtras(fase_5))
-#fase_5.addItem(gameOver(fase_5,game_over,mapa_fase_5,game_over_music))
-#fase_5.addItem(winnerScreen(fase_5,winner_scr,mapa_fase_5,blit_score,winner_music))#332=quantidade de inimigos
+mapa_fase_5.mapa[1][0][0].addPiece(animacaoPerene(animacaoSprite(pygame.image.load('trono.png').convert_alpha(),(80,320),6,False,(40*9,40*3))))
+#mapa_fase_5.mapa[1][4][10].addPiece(bloqueioPerene())
+
+for y in range(6):
+    mapa_fase_5.mapa[1][4+y][9].addPiece(bloqueioPerene())
+    mapa_fase_5.mapa[1][4+y][10].addPiece(bloqueioPerene())
+
+fase_5.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)
+fase_5.addItem(controlesExtras(fase_5))
+fase_5.addItem(gameOver(fase_5,game_over,mapa_fase_5,game_over_music))
+fase_5.addItem(winnerScreen(fase_5,winner_scr,mapa_fase_5,blit_score,winner_music))
 
 ###fase 4###
 #quantidades de cada horda
 #vida de cada horda
 #mana de cada horda
 fator_4=2000
-mapa_fase_4.addSpawn((1, 12),[120]*10 , [fator_4*7  ,fator_4*8,fator_4*13,fator_4*20,fator_4*27,fator_4*33,fator_4*34,fator_4*36,fator_4*37,fator_4*45] , (0,0) , [enemy1,enemy2,enemy2,enemy4,enemy5,enemy6,enemy7,enemy7,enemy8,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(20,20),(22,22),(20,20)] , [8]*10 , [False]*10 , [1,1,1,1,1,1,1,1,1,25] , [0.5]*10 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,True,False,False,False,False,True,False],[0,2,3,1,2,4,3,0,4,0], [mov_4_A_1,mov_4_A_1,mov_4_A_2,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_2] , [(1,0)]*10 ,[2,2,3,4,4,6,5,7,9,150], [10,10,10,10,10,10,10,10,10,1])#10
+mapa_fase_4.addSpawn((1, 12),[120]*10 , [fator_4*7  ,fator_4*8,fator_4*13,fator_4*20,fator_4*27,fator_4*33,fator_4*34,fator_4*36,fator_4*37,fator_4*45] , (0,0) , [enemy1,enemy2,enemy2,enemy4,enemy5,enemy6,enemy7,enemy7,enemy8,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(20,20),(22,22),(20,20)] , [8]*10 , [False]*10 , [1,1,1,1,1,1,1,1,1,25] , [0.5]*10 , [100,180,180,180,450,700,1080,1080,600,16000] ,[False,False,False,True,False,False,False,False,True,False],[0,2,2,1,2,4,3,3,0,0], [mov_4_A_1,mov_4_A_1,mov_4_A_2,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_2] , [(1,0)]*10 ,[1,2,2,4,5,6,7,7,8,150], [10,10,10,10,10,10,10,10,10,1])#10
 
-mapa_fase_4.addSpawn((4, 12),[120]*13 , [fator_4*2  ,fator_4*8,fator_4*11,fator_4*14,fator_4*21,fator_4*25,fator_4*26,fator_4*29,fator_4*31,fator_4*38,fator_4*39,fator_4*41,fator_4*42] , (0,0) , [enemy1,enemy2,enemy2,enemy3,enemy4,enemy5,enemy5,enemy6,enemy6,enemy8,enemy8,enemy9,enemy9] , [(20,20),(25,25),(25,25),(25,25),(22,22),(22,22),(22,22),(25,25),(25,25),(22,22),(22,22),(25,25),(25,25)] , [8]*13 , [False]*13 , [1,1,1,1,1,1,1,1,1,1,1,1,1] , [0.5]*13 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,False,True,False,False,False,False,True,True,False,False],[0,2,3,1,2,4,3,0,4,3,0,4,3], [mov_4_B_1,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1] , [(1,0)]*13 ,[2,2,3,4,4,6,5,7,9,7,8,9,8], [10,10,10,10,10,10,10,10,10,10,10,10,10])#13 hordas
-mapa_fase_4.addSpawn((5, 12),[120]*8  , [fator_4*5  ,fator_4*9,fator_4*16,fator_4*23,fator_4*28,fator_4*32,fator_4*35,fator_4*40] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(25,25)] , [8]*8 , [False]*8 , [1,1,1,1,1,1,1,1] , [0.5]*8 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,True,False,False,False,False],[0,2,3,1,2,4,3,0], [mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C] , [(1,0)]*8 ,[2,2,3,4,4,6,5,7], [10,10,10,10,10,10,10,10])#8
+mapa_fase_4.addSpawn((4, 12),[120]*13 , [fator_4*2  ,fator_4*8,fator_4*11,fator_4*14,fator_4*21,fator_4*25,fator_4*26,fator_4*29,fator_4*31,fator_4*38,fator_4*39,fator_4*41,fator_4*42] , (0,0) , [enemy1,enemy2,enemy2,enemy3,enemy4,enemy5,enemy5,enemy6,enemy6,enemy8,enemy8,enemy9,enemy9] , [(20,20),(25,25),(25,25),(25,25),(22,22),(22,22),(22,22),(25,25),(25,25),(22,22),(22,22),(25,25),(25,25)] , [8]*13 , [False]*13 , [1,1,1,1,1,1,1,1,1,1,1,1,1] , [0.5]*13 , [100,180,180,300,180,450,450,700,700,600,600,1350,1350] ,[False,False,False,False,True,False,False,False,False,True,True,False,False],[0,2,2,3,1,2,2,4,4,0,0,0,0], [mov_4_B_1,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1] , [(1,0)]*13 ,[1,2,2,3,4,5,5,6,6,8,8,9,9], [10,10,10,10,10,10,10,10,10,10,10,10,10])#13 hordas
+mapa_fase_4.addSpawn((5, 12),[120]*8  , [fator_4*5  ,fator_4*9,fator_4*16,fator_4*23,fator_4*28,fator_4*32,fator_4*35,fator_4*40] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(25,25)] , [8]*8 , [False]*8 , [1,1,1,1,1,1,1,1] , [0.5]*8 , [100,180,300,180,450,700,1080,1350] ,[False,False,False,True,False,False,False,False],[0,2,3,1,2,4,3,4], [mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C] , [(1,0)]*8 ,[1,2,3,4,5,6,7,9], [10,10,10,10,10,10,10,10])#8
 
-mapa_fase_4.addSpawn((8, 12),[120]*6  , [800        ,fator_4*9 ,fator_4*19,fator_4*21,fator_4*25,fator_4*41] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25)] , [8]*6 , [False]*6 , [1,1,1,1,1,1] , [0.5]*6 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,True,False,False],[0,2,3,1,2,4],  [mov_4_D,mov_4_D,mov_4_D,mov_4_D,mov_4_D,mov_4_D] , [(1,0)]*6 ,[2,2,3,4,4,6], [10,10,10,10,10,10])#6
-mapa_fase_4.addSpawn((9, 12),[120]*9  , [fator_4*4  ,fator_4*10,fator_4*17,fator_4*22,fator_4*30,fator_4*34,fator_4*36,fator_4*37,fator_4*43] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy6,enemy7,enemy7,enemy8,enemy9] , [(20,20),(25,25),(25,25),(22,22),(25,25),(20,20),(20,20),(22,22),(25,25)] , [8]*9 , [False]*9 , [1,1,1,1,1,1,1,1,1] , [0.5]*9 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,True,False,False,False,True,False],[0,2,3,1,2,4,3,0,4], [mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E] , [(1,0)]*9 ,[2,2,3,4,4,6,5,7,9], [10,10,10,10,10,10,10,10,10])#9
-mapa_fase_4.addSpawn((10, 12),[120]*9 , [fator_4*4  ,fator_4*13,fator_4*18,fator_4*22,fator_4*30,fator_4*34,fator_4*35,fator_4*38,fator_4*43] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy6,enemy7,enemy7,enemy8,enemy9] , [(20,20),(25,25),(25,25),(22,22),(25,25),(20,20),(20,20),(22,22),(25,25)] , [8]*9 , [False]*9 , [1,1,1,1,1,1,1,1,1] , [0.5]*9 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,True,False,False,False,True,False],[0,2,3,1,2,4,3,0,4], [mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F] , [(1,0)]*9 ,[2,2,3,4,4,6,5,7,9], [10,10,10,10,10,10,10,10,10])#9
-mapa_fase_4.addSpawn((11, 12),[120]*6 , [fator_4+400,fator_4*12,fator_4*16,fator_4*24,fator_4*27,fator_4*44] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25)] , [8]*6 , [False]*6 , [1,1,1,1,1,1] , [0.5]*6 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,True,False,False],[0,2,3,1,2,4], [mov_4_G,mov_4_G,mov_4_G,mov_4_G,mov_4_G,mov_4_G] , [(1,0)]*6 ,[2,2,3,4,4,6], [10,10,10,10,10,10])#6
+mapa_fase_4.addSpawn((8, 12),[120]*6  , [800        ,fator_4*9 ,fator_4*19,fator_4*21,fator_4*25,fator_4*41] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25)] , [8]*6 , [False]*6 , [1,1,1,1,1,1] , [0.5]*6 , [100,180,300,180,450,1350] ,[False,False,False,True,False,False],[0,2,3,1,2,4],  [mov_4_D,mov_4_D,mov_4_D,mov_4_D,mov_4_D,mov_4_D] , [(1,0)]*6 ,[1,2,3,4,5,9], [10,10,10,10,10,10])#6
+mapa_fase_4.addSpawn((9, 12),[120]*9  , [fator_4*4  ,fator_4*10,fator_4*17,fator_4*22,fator_4*30,fator_4*34,fator_4*36,fator_4*37,fator_4*43] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy6,enemy7,enemy7,enemy8,enemy9] , [(20,20),(25,25),(25,25),(22,22),(25,25),(20,20),(20,20),(22,22),(25,25)] , [8]*9 , [False]*9 , [1,1,1,1,1,1,1,1,1] , [0.5]*9 , [100,180,300,180,700,1080,1080,600,1350] ,[False,False,False,True,False,False,False,True,False],[0,2,3,1,4,3,3,0,4], [mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E] , [(1,0)]*9 ,[1,2,3,4,6,7,7,8,9], [10,10,10,10,10,10,10,10,10])#9
+mapa_fase_4.addSpawn((10, 12),[120]*9 , [fator_4*4  ,fator_4*13,fator_4*18,fator_4*22,fator_4*30,fator_4*34,fator_4*35,fator_4*38,fator_4*43] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy6,enemy7,enemy7,enemy8,enemy9] , [(20,20),(25,25),(25,25),(22,22),(25,25),(20,20),(20,20),(22,22),(25,25)] , [8]*9 , [False]*9 , [1,1,1,1,1,1,1,1,1] , [0.5]*9 , [100,180,300,180,700,1080,1080,600,1350] ,[False,False,False,True,False,False,False,True,False],[0,2,3,1,4,3,3,0,4], [mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F] , [(1,0)]*9 ,[1,2,3,4,6,7,7,8,9], [10,10,10,10,10,10,10,10,10])#9
+mapa_fase_4.addSpawn((11, 12),[120]*6 , [fator_4+400,fator_4*12,fator_4*16,fator_4*24,fator_4*27,fator_4*44] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25)] , [8]*6 , [False]*6 , [1,1,1,1,1,1] , [0.5]*6 , [100,180,300,180,450,1350] ,[False,False,False,True,False,False],[0,2,3,1,2,4], [mov_4_G,mov_4_G,mov_4_G,mov_4_G,mov_4_G,mov_4_G] , [(1,0)]*6 ,[1,2,3,4,5,9], [10,10,10,10,10,10])#6
 
-mapa_fase_4.addSpawn((14, 12),[120]*8 , [fator_4*6  ,fator_4*12,fator_4*19,fator_4*20,fator_4*28,fator_4*32,fator_4*36,fator_4*40] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(25,25)] , [8]*8 , [False]*8 , [1,1,1,1,1,1,1,1] , [0.5]*8 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,True,False,False,False,False],[0,2,3,1,2,4,3,0], [mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H] , [(1,0)]*8 ,[2,2,3,4,4,6,5,7], [10,10,10,10,10,10,10,10])#8
-mapa_fase_4.addSpawn((15, 12),[120]*13, [fator_4*3  ,fator_4*8,fator_4*11,fator_4*15,fator_4*24,fator_4*26,fator_4*27,fator_4*29,fator_4*31,fator_4*37,fator_4*39,fator_4*42,fator_4*44] , (0,0) , [enemy1,enemy2,enemy2,enemy3,enemy4,enemy5,enemy5,enemy6,enemy6,enemy8,enemy8,enemy9,enemy9] , [(20,20),(25,25),(25,25),(25,25),(22,22),(22,22),(22,22),(25,25),(25,25),(22,22),(22,22),(25,25),(25,25)] , [8]*13 , [False]*13 , [1,1,1,1,1,1,1,1,1,1,1,1,1] , [0.5]*13 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,False,True,False,False,False,False,True,True,False,False],[0,2,3,1,2,4,3,0,4,3,0,4,3], [mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_2,mov_4_I_2,mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_1,mov_4_I_2] , [(1,0)]*13 ,[2,2,3,4,4,6,5,7,9,7,8,9,8], [10,10,10,10,10,10,10,10,10,10,10,10,10])#13
+mapa_fase_4.addSpawn((14, 12),[120]*8 , [fator_4*6  ,fator_4*12,fator_4*19,fator_4*20,fator_4*28,fator_4*32,fator_4*36,fator_4*40] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(25,25)] , [8]*8 , [False]*8 , [1,1,1,1,1,1,1,1] , [0.5]*8 , [100,180,300,180,450,700,1080,1350] ,[False,False,False,True,False,False,False,False],[0,2,3,1,2,4,3,4], [mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H] , [(1,0)]*8 ,[1,2,3,4,5,6,7,9], [10,10,10,10,10,10,10,10])#8
+mapa_fase_4.addSpawn((15, 12),[120]*13, [fator_4*3  ,fator_4*8,fator_4*11,fator_4*15,fator_4*24,fator_4*26,fator_4*27,fator_4*29,fator_4*31,fator_4*37,fator_4*39,fator_4*42,fator_4*44] , (0,0) , [enemy1,enemy2,enemy2,enemy3,enemy4,enemy5,enemy5,enemy6,enemy6,enemy8,enemy8,enemy9,enemy9] , [(20,20),(25,25),(25,25),(25,25),(22,22),(22,22),(22,22),(25,25),(25,25),(22,22),(22,22),(25,25),(25,25)] , [8]*13 , [False]*13 , [1,1,1,1,1,1,1,1,1,1,1,1,1] , [0.5]*13 , [100,180,180,300,180,450,450,700,700,600,600,1350,1350] ,[False,False,False,False,True,False,False,False,False,True,True,False,False],[0,2,2,3,1,2,2,4,4,0,0,0,0], [mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_2,mov_4_I_2,mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_1,mov_4_I_2] , [(1,0)]*13 ,[1,2,2,3,4,5,5,6,6,8,8,9,9], [10,10,10,10,10,10,10,10,10,10,10,10,10])#13
 
-mapa_fase_4.addSpawn((18, 12),[120]*10 ,[fator_4*7  ,fator_4*10,fator_4*11,fator_4*23,fator_4*25,fator_4*33,fator_4*34,fator_4*35,fator_4*38,fator_4*45] , (0,0) , [enemy1,enemy2,enemy2,enemy4,enemy5,enemy6,enemy7,enemy7,enemy8,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(20,20),(22,22),(20,20)] , [8]*10 , [False]*10 , [1,1,1,1,1,1,1,1,1,25] , [0.5]*10 , [100,180,300,180,450,700,1080,600,1350,12000] ,[False,False,False,True,False,False,False,False,True,False],[0,2,3,1,2,4,3,0,4,0], [mov_4_J_1,mov_4_J_2,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_2] , [(1,0)]*10 ,[2,2,3,4,4,6,5,7,9,150], [10,10,10,10,10,10,10,10,10,1])#10
+mapa_fase_4.addSpawn((18, 12),[120]*10 ,[fator_4*7  ,fator_4*10,fator_4*11,fator_4*23,fator_4*25,fator_4*33,fator_4*34,fator_4*35,fator_4*38,fator_4*45] , (0,0) , [enemy1,enemy2,enemy2,enemy4,enemy5,enemy6,enemy7,enemy7,enemy8,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(20,20),(22,22),(20,20)] , [8]*10 , [False]*10 , [1,1,1,1,1,1,1,1,1,25] , [0.5]*10 , [100,180,180,180,450,700,1080,1080,600,13500] ,[False,False,False,True,False,False,False,False,True,False],[0,2,2,1,2,4,3,3,0,0], [mov_4_J_1,mov_4_J_2,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_2] , [(1,0)]*10 ,[1,2,2,4,5,6,7,7,8,150], [10,10,10,10,10,10,10,10,10,1])#10
 
 for x in range(3,17,1):
     mapa_fase_4.addTarget((x,1),(0,0))
 
-fase_4.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)
+fase_4.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)
 fase_4.addItem(controlesExtras(fase_4))
 fase_4.addItem(gameOver(fase_4,game_over,mapa_fase_4,game_over_music))
 fase_4.addItem(winnerScreen(fase_4,winner_scr,mapa_fase_4,blit_score,winner_music))
@@ -1819,8 +1859,8 @@ fase_4.addItem(winnerScreen(fase_4,winner_scr,mapa_fase_4,blit_score,winner_musi
 
 ###fase 3### balanceada(OK)
 
-mapa_fase_3.addSpawn( (0,11), [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,14000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,3,1,0,2,1,4,3,0], [mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [30,20,10,15,10,20,20,30,10,1])
-mapa_fase_3.addSpawn( (19,11), [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,14000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,3,1,0,2,1,4,3,0], [mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [30,20,10,15,10,20,20,30,10,1])
+mapa_fase_3.addSpawn( (0,11), [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [False]*10 , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,200,550,800,1280,700,1650,14000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,3,1,0,2,1,4,3,0], [mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A,mov_3_A] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [30,20,10,15,10,20,20,30,10,1])
+mapa_fase_3.addSpawn( (19,11), [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [False]*10 , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,200,550,800,1280,700,1650,14000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,3,1,0,2,1,4,3,0], [mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B,mov_3_B] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [30,20,10,15,10,20,20,30,10,1])
 mapa_fase_3.addTarget((9,9),(0,0))
 mapa_fase_3.addTarget((10,9),(0,0))
 mapa_fase_3.mapa[1][7][9].addPiece(animacaoPerene(animacaoSprite(pygame.image.load('fontedavida.png').convert_alpha(),(160,160),6,False,(40*8,40*5))))
@@ -1836,14 +1876,14 @@ mapa_fase_3.mapa[1][8][10].addPiece(bloqueioPerene())
 mapa_fase_3.mapa[1][6][11].addPiece(bloqueioPerene())
 mapa_fase_3.mapa[1][7][11].addPiece(bloqueioPerene())
 
-fase_3.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)
+fase_3.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)
 fase_3.addItem(controlesExtras(fase_3))
 fase_3.addItem(gameOver(fase_3,game_over,mapa_fase_3,game_over_music))
-fase_3.addItem(winnerScreen(fase_3,winner_scr,mapa_fase_3,blit_score,winner_music))#332=quantidade de inimigos
+fase_3.addItem(winnerScreen(fase_3,winner_scr,mapa_fase_3,blit_score,winner_music))
 
 ###fase 2### balanceada (OK)
-mapa_fase_2.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
-mapa_fase_2.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [True,True,True,False,False,True,True,False,True,True] , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [120,200,400,220,550,800,1280,700,1550,15000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
+mapa_fase_2.addSpawn( (0,3) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [False]*10 , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [100,200,400,200,550,800,1280,600,1550,13000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A,mov_2_A] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[1,1,1,1,1,1,1,1,1,1]
+mapa_fase_2.addSpawn( (0,2) , [120,120,120,120,120,120,120,120,120,120] , [800,800,800,800,800,800,800,800,800,800] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy8,enemy9,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(22,22),(25,25),(20,20)] , [8,8,8,8,8,8,8,8,8,8] , [False]*10 , [1,1,1,1,1,1,1,1,1,15] , [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5] , [100,200,400,200,550,800,1280,600,1550,13000] ,[False,False,False,True,False,False,False,True,False,False],[0,2,1,0,3,4,0,4,2,0], [mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B,mov_2_B] , [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)] ,[2,2,3,4,4,6,5,7,9,150], [20,20,15,10,20,15,30,15,20,1])#[0,0,0,0,0,0,0,0,0,0]
 mapa_fase_2.addTarget((19,3),(0,0))
 mapa_fase_2.addTarget((19,2),(0,0))
 
@@ -1879,19 +1919,19 @@ mapa_fase_2.mapa[1][8][11].addPiece(bloqueioPerene())
 mapa_fase_2.mapa[1][9][11].addPiece(bloqueioPerene())
 mapa_fase_2.mapa[1][9][10].addPiece(bloqueioPerene())
 
-fase_2.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
+fase_2.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
 fase_2.addItem(controlesExtras(fase_2))
 fase_2.addItem(gameOver(fase_2,game_over,mapa_fase_2,game_over_music))
-fase_2.addItem(winnerScreen(fase_2,winner_scr,mapa_fase_2,blit_score,winner_music))#332=quantidade de inimigos
+fase_2.addItem(winnerScreen(fase_2,winner_scr,mapa_fase_2,blit_score,winner_music))
 
 ###fase 1### balanceada (OK)
-mapa_fase_1.addSpawn( (0,6), [120,120,120,120] , [400,1000,2000,3800], (0,0), [enemy3,enemy4,enemy6,enemy8],[(25,25),(22,22),(25,25),(22,22)],[8,8,8,8,8,8,8,8,8,8],[True,False,True,False],[1,1,1,1],[0.5,0.5,0.5,0.5],[400,400,2000,1350],[False,True,False,True],[0,0,0,0],[mov_1_A,mov_1_B,mov_1_A,mov_1_B],[(1,0),(1,0),(1,0),(1,0)],[50,50,75,0],[1,1,1,1])
+mapa_fase_1.addSpawn( (0,6), [120,120,120,120] , [400,1000,2000,3800], (0,0), [enemy3,enemy4,enemy6,enemy8],[(25,25),(22,22),(25,25),(22,22)],[8,8,8,8,8,8,8,8,8,8],[True,False,True,False],[1,1,1,1],[0.5,0.5,0.5,0.5],[400,400,2000,1250],[False,True,False,True],[0,0,0,0],[mov_1_A,mov_1_B,mov_1_A,mov_1_B],[(1,0),(1,0),(1,0),(1,0)],[50,50,75,200],[1,1,1,1])
 mapa_fase_1.addTarget((19,6),(0,0))
-fase_1.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
+fase_1.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
 
 fase_1.addItem(controlesExtras(fase_1))
 fase_1.addItem(gameOver(fase_1,game_over,mapa_fase_1,game_over_music))
-fase_1.addItem(winnerScreen(fase_1,winner_scr,mapa_fase_1,blit_score,winner_music))#332=quantidade de inimigos
+fase_1.addItem(winnerScreen(fase_1,winner_scr,mapa_fase_1,blit_score,winner_music))
 
 ###>>>TELAS<<<###
 
@@ -2029,7 +2069,7 @@ selecao_fase.addItem(voltar_selecao)
 load_fases_liberadas=[area_fases_extras,botao_2,botao_3,botao_4,botao_5,botao_A,botao_B,botao_C,botao_D,botao_E,botao_F,botao_G]
 
 def saveAll(save=True):
-    global load_fases_liberadas    
+    global load_fases_liberadas
     for liberada in load_fases_liberadas:
         if save: liberada.stateDump()
         else: liberada.stateLoad();
