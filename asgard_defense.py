@@ -45,7 +45,42 @@ class deleteSave(object):
         for liberada in load_fases_liberadas:
             liberada.stateClear()
         return self.tela
-    
+
+class unlockerLink(object):
+    def __init__(self,link,lock):
+        self.link=link
+        self.lock=lock
+    def linkReply(self,prevscr):
+        self.lock.unlocked=True
+        self.lock.stateDump()
+        return self.link
+
+class congratulouGame(object):
+    def __init__(self,vitoria_comum, vitoria_congratulada):
+        self.victory=vitoria_comum
+        self.congratulations=vitoria_congratulada
+        self.unlocked=False
+    def blitOn(self,scr):pass
+    def keyControls(self,event):
+        retorno=False
+        if self.unlocked:
+            retorno=self.victory
+        else:
+            retorno=self.congratulations
+        return retorno
+    def stateLoad(self):
+        arq=open('Data\game data.ages','rb')
+        self.unlocked=pickle.load(arq)
+        arq.close
+    def stateClear(self):
+        self.unlocked=False
+        self.stateDump()
+    def stateDump(self):
+        arq=open('Data\game data.ages','wb')
+        pickle.dump(self.unlocked,arq)
+        arq.close 
+        
+
 class lockedButton(object):
     def __init__(self,linkedButton,id_str):
         self.linkedButton=linkedButton
@@ -1409,6 +1444,12 @@ game_over=pyTreeBee.dynamicScreen((800,600), 30,(100,0,0))
 game_over.setImage(pygame.image.load('gameover.png').convert_alpha(),(0,0))
 winner_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255),blit_score)
 winner_scr.setImage(pygame.image.load('vitoria.png').convert_alpha(),(0,0))
+very_winner_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255),blit_score)
+very_winner_scr.setImage(pygame.image.load('vitoria.png').convert_alpha(),(0,0))
+congratulations_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255))
+congratulations_scr.setImage(pygame.image.load('congratulations.png').convert(),(0,0))
+congratulado=congratulouGame(winner_scr, very_winner_scr)
+scr_intermediaria=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255),congratulado)
 #loading dos tiles
 def tileList(tile_set,size):
     tile_list=[]
@@ -1826,7 +1867,7 @@ for y in range(6):
 fase_5.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)
 fase_5.addItem(controlesExtras(fase_5))
 fase_5.addItem(gameOver(fase_5,game_over,mapa_fase_5,game_over_music))
-fase_5.addItem(winnerScreen(fase_5,winner_scr,mapa_fase_5,blit_score,winner_music))
+fase_5.addItem(winnerScreen(fase_5,scr_intermediaria,mapa_fase_5,blit_score,winner_music))
 
 ###fase 4###
 #quantidades de cada horda
@@ -2059,6 +2100,11 @@ voltar_selecao.setEach_Image(cir_fases_1,cir_fases_2,cir_fases_3)
 voltar_selecao.setAll_BarSize((-12,-12))
 game_over.addItem(voltar_menu,voltar_selecao,voltar_retry)
 winner_scr.addItem(voltar_menu,voltar_selecao,voltar_retry)
+seguir_congratulation=pyTreeBee.linkedButton(unlockerLink(congratulations_scr,congratulado),din_12,[""],375,450,pygame.Rect(0,0,80-25,80-25),0,0)
+seguir_congratulation.setEach_Image(cir_fases_1,cir_fases_2,cir_fases_3)
+seguir_congratulation.setAll_BarSize((-12,-12))
+very_winner_scr.addItem(seguir_congratulation)
+congratulations_scr.addItem(voltar_para_inicio_musica)
 '''
 voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
 selecao_fase.addItem(voltar_selecao)
@@ -2066,7 +2112,7 @@ selecao_fase.addItem(voltar_selecao)
 #fase_1.addItem(pyTreeBee.linkedButton(selecao_fase,din_12,["Voltar"],600,530,pygame.Rect(0,0,50,20),0,0))
 ### loading save ###
 
-load_fases_liberadas=[area_fases_extras,botao_2,botao_3,botao_4,botao_5,botao_A,botao_B,botao_C,botao_D,botao_E,botao_F,botao_G]
+load_fases_liberadas=[congratulado,area_fases_extras,botao_2,botao_3,botao_4,botao_5,botao_A,botao_B,botao_C,botao_D,botao_E,botao_F,botao_G]
 
 def saveAll(save=True):
     global load_fases_liberadas
@@ -2081,6 +2127,7 @@ except:
     pass
 ###início dos ciclos###
 time.sleep(0.1)
+
 pyTreeBee.treeBeeStart(tela_inicial)
 
 loading=dinB_22.render("SAVING...",True,(255,255,255))
