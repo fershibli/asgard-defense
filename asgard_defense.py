@@ -766,9 +766,10 @@ class linkedZero(object):
         self.tela=tela
     def setMapa(self,mapa):
         self.mapa=mapa
-    def linkReply(self,scr):        
+    def linkReply(self,scr):
+        global voltar_retry_pause, voltar_menu_pause, voltar_selecao_pause
         pygame.mouse.set_visible(True)
-        voltar_retry.link=linkedMusic(self.tela,self.tela.stored_music,-1,0.0)
+        voltar_retry_pause.link=linkedMusic(self.tela,self.tela.stored_music,-1,0.0)
         self.mapa.setZero(self.tela)
         self.tela.linkcalled=self.link
 
@@ -848,21 +849,6 @@ class estruturaPause(object):
         return retorno
 
 
-img_voltar_1=pygame.image.load("botao_voltar1.png").convert_alpha()
-img_voltar_2=pygame.image.load("botao_voltar2.png").convert_alpha()
-img_voltar_3=pygame.image.load("botao_voltar3.png").convert_alpha()
-
-cir_voltar_1=pygame.image.load("botao_menu1.png").convert_alpha()
-cir_voltar_2=pygame.image.load("botao_menu2.png").convert_alpha()
-cir_voltar_3=pygame.image.load("botao_menu3.png").convert_alpha()
-
-cir_fases_1=pygame.image.load("botao_avancar1.png").convert_alpha()
-cir_fases_2=pygame.image.load("botao_avancar2.png").convert_alpha()
-cir_fases_3=pygame.image.load("botao_avancar3.png").convert_alpha()
-
-cir_retry_1=pygame.image.load("botao_retry1.png").convert_alpha()
-cir_retry_2=pygame.image.load("botao_retry2.png").convert_alpha()
-cir_retry_3=pygame.image.load("botao_retry3.png").convert_alpha()
 
 config_pause=estruturaPause()
 tela_pause=pyTreeBee.dynamicScreen((800,600),30,(0,0,0),config_pause)
@@ -880,7 +866,7 @@ class controlesExtras(object):
             self.primeira_vez=False
         frame_atual+=self.frame_skip
     def keyControls(self,event):
-        global tela_pause, config_pause
+        global tela_pause, config_pause,voltar_retry_pause
         retorno=False
         if event.type==KEYUP:
             if event.key==K_ESCAPE:
@@ -1496,13 +1482,13 @@ tile_list_A=tileList(pygame.image.load("tilesetA.png").convert(),40)#[1]
 tile_list_B=tileList(pygame.image.load("tilesetB.png").convert(),40)#[18]
 tile_list_C=tileList(pygame.image.load("tileset3_old.png").convert(),40)
 #Botões e Seqüênciamentos das Fases
-botoes_extras_x=6
+botoes_extras_x=26
 botoes_extras_y=450
 cor_fundo=(0,0,0)#(60,80,110)#(34,57,65)
 #G
 mapa_fase_G = mapaLimitavel(mouse,statusPlayer(50,70),matriz_fase_G, tile_list_C,40)
 fase_G = pyTreeBee.dynamicScreen((800,600),60,cor_fundo,mapa_fase_G)
-botao_G=pyTreeBee.linkedButton(linkedMusic(fase_G,"El Magicia.mp3",-1, 0.0),din_12,[""],botoes_extras_x+80,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_C[7],(32,32)))
+botao_G=pyTreeBee.linkedButton(linkedMusic(fase_G,"El Magicia.mp3",-1, 0.0),din_12,[""],botoes_extras_x,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_C[7],(32,32)))
 botao_G.setEach_Text([""],["RETOMADA DE VALGRIND"],[""])
 botao_G.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
 botao_G=lockedButton(botao_G,'save_state_G')
@@ -1516,7 +1502,7 @@ botao_F=lockedButton(botao_F,'save_state_F')
 #E
 mapa_fase_E = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_E, tile_list_A,40)
 fase_E = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_E)
-botao_E=pyTreeBee.linkedButton(linkedMusic(fase_E,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_A[1],(32,32)))
+botao_E=pyTreeBee.linkedButton(linkedMusic(fase_E,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x+80,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_A[1],(32,32)))
 botao_E.setEach_Text([""],["SANTUÁRIO DA FREYA"],[""])
 botao_E.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
 botao_E=lockedButton(botao_E,'save_state_E')
@@ -1524,28 +1510,28 @@ botao_E=lockedButton(botao_E,'save_state_E')
 mapa_fase_D = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_D, tile_list_1,40)
 fase_D = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_D)
 botao_D=pyTreeBee.linkedButton(linkedMusic(fase_D,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x+80,botoes_extras_y,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_1[7],(32,32)))
-botao_D.setEach_Text([""],["Maria 3"],[""])
+botao_D.setEach_Text([""],["VALE DOS VIKINGS"],[""])
 botao_D.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
 botao_D=lockedButton(botao_D,'save_state_D')
 #C
 mapa_fase_C = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_C, tile_list_2,40)
 fase_C = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_C)
 botao_C=pyTreeBee.linkedButton(linkedMusic(fase_C,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x+120,botoes_extras_y,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_2[7],(32,32)))
-botao_C.setEach_Text([""],["Marble Plateau"],[""])
+botao_C.setEach_Text([""],["HALL DOS BERSERKERS"],[""])
 botao_C.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
 botao_C=lockedButton(botao_C,'save_state_C')
 #B
 mapa_fase_B = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_B, tile_list_1,40)
 fase_B = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_B)
 botao_B=pyTreeBee.linkedButton(linkedMusic(fase_B,"The Complex.mp3",-1, 0.0),din_12,[""],botoes_extras_x+40,botoes_extras_y,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_1[7],(32,32)))
-botao_B.setEach_Text([""],["Floresta das Valquírias"],[""])
+botao_B.setEach_Text([""],["FLORESTA DAS VALQUÍRIAS"],[""])
 botao_B.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
 botao_B=lockedButton(botao_B,'save_state_B')
 #A
 mapa_fase_A = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_A, tile_list_1,40)
 fase_A = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_A)
 botao_A=pyTreeBee.linkedButton(linkedMusic(fase_A,"Movement Proposition.mp3",-1, 0.0),din_12,[""],botoes_extras_x,botoes_extras_y,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_1[7],(32,32)))
-botao_A.setEach_Text([""],["Passagem Delgada"],[""])
+botao_A.setEach_Text([""],["PLANÍCIE DAS ARQUEIRAS"],[""])
 botao_A.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
 botao_A=lockedButton(botao_A,'save_state_A')
 #FASE EXTRAS TEXTO
@@ -1895,16 +1881,16 @@ fase_A.addItem(winnerScreen(fase_A,winner_scr,mapa_fase_A,blit_score,winner_musi
 
 #pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,mana,quantidades):
 fator_5=8100
-mapa_fase_5.addSpawn( (19,12), [120,120] , [800,(fator_5*5)] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_A] *2, [(1,0),(1,0)] ,[2,6], [50,50])#1,6
-mapa_fase_5.addSpawn( (0,12), [120,120] , [800,(fator_5*5)] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_B] *2, [(1,0),(1,0)] ,[2,6], [50,50])
-mapa_fase_5.addSpawn( (15,1), [120,120] , [fator_5,(fator_5*7)] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_C] *2, [(1,0),(1,0)] ,[2,7], [50,50])#2,8
-mapa_fase_5.addSpawn( (0,4), [120,120] , [fator_5,(fator_5*7)] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_D] *2, [(1,0),(1,0)] ,[2,7], [50,50])
-mapa_fase_5.addSpawn( (15,12), [120,120] , [(fator_5*4),(fator_5*9)] , (0,0) , [enemy5,enemy10] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,15] , [0.5,0.5] , [450,12000] ,[False,False],[2,0], [mov_5_E] *2, [(1,0),(1,0)] ,[4,150], [50,2])#5,10
-mapa_fase_5.addSpawn( (4,1), [120,120] , [(fator_5*4),(fator_5*9)] , (0,0) , [enemy5,enemy10] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,15] , [0.5,0.5] , [450,12000] ,[False,False],[2,0], [mov_5_F] *2, [(1,0),(1,0)] ,[4,150], [50,2])
-mapa_fase_5.addSpawn( (19,1), [120,120] , [(fator_5*2),(fator_5*8)] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_G] *2, [(1,0),(1,0)] ,[3,9], [50,50])#3,9
-mapa_fase_5.addSpawn( (0,1), [120,120] , [(fator_5*2),(fator_5*8)] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_H] *2, [(1,0),(1,0)] ,[3,9], [50,50])
-mapa_fase_5.addSpawn( (19,9), [120,120] , [(fator_5*3),(fator_5*6)] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_I] *2, [(1,0),(1,0)] ,[4,5], [50,50])#4,7
-mapa_fase_5.addSpawn( (4,12), [120,120] , [(fator_5*3),(fator_5*6)] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_J] *2, [(1,0),(1,0)] ,[4,5], [50,50])
+mapa_fase_5.addSpawn( (19,12), [120,120] , [800,38800] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_A] *2, [(1,0),(1,0)] ,[2,6], [50,50])#1,6
+mapa_fase_5.addSpawn( (0,12), [120,120] , [800,38800] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_B] *2, [(1,0),(1,0)] ,[2,6], [50,50])
+mapa_fase_5.addSpawn( (15,1), [120,120] , [8700,54200] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_C] *2, [(1,0),(1,0)] ,[2,7], [50,50])#2,8
+mapa_fase_5.addSpawn( (0,4), [120,120] , [8700,54200] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_D] *2, [(1,0),(1,0)] ,[2,7], [50,50])
+mapa_fase_5.addSpawn( (15,12), [120,120,240] , [31200,69500,72500] , (0,0,0) , [enemy5,enemy10,enemy10] , [(22,22),(20,20),(20,20)] , [8,8,8] , [False, False, False] , [1,10,20] , [0.5,0.5,0.25] , [450,12000,10000] ,[False,False,False],[0,0,0], [mov_5_E] *3, [(1,0),(1,0),(1,0)] ,[4,200,200], [50,1,2])#5,10,10
+mapa_fase_5.addSpawn( (4,1), [120,120,240] , [31200,69500,72500] , (0,0,0) , [enemy5,enemy10,enemy10] , [(22,22),(20,20),(20,20)] , [8,8,8] , [False, False, False] , [1,10,20] , [0.5,0.5,0.25] , [450,12000,10000] ,[False,False,False],[0,0,0], [mov_5_F] *3, [(1,0),(1,0),(1,0)] ,[4,200,200], [50,1,2])#5,10,10
+mapa_fase_5.addSpawn( (19,1), [120,120] , [16000,61300] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_G] *2, [(1,0),(1,0)] ,[3,9], [50,50])#3,9
+mapa_fase_5.addSpawn( (0,1), [120,120] , [16000,61300] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_H] *2, [(1,0),(1,0)] ,[3,9], [50,50])
+mapa_fase_5.addSpawn( (19,9), [120,120] , [23900,46900] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_I] *2, [(1,0),(1,0)] ,[4,5], [50,50])#4,7
+mapa_fase_5.addSpawn( (4,12), [120,120] , [23900,46900] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_J] *2, [(1,0),(1,0)] ,[4,5], [50,50])
 
 mapa_fase_5.addTarget((8,5),(0,0))
 mapa_fase_5.addTarget((11,5),(0,0))
@@ -1928,20 +1914,20 @@ fase_5.addItem(winnerScreen(fase_5,scr_intermediaria,mapa_fase_5,blit_score,winn
 #vida de cada horda
 #mana de cada horda
 fator_4=2000
-mapa_fase_4.addSpawn((1, 12),[120]*10 , [fator_4*7  ,fator_4*8,fator_4*13,fator_4*20,fator_4*27,fator_4*33,fator_4*34,fator_4*36,fator_4*37,fator_4*45] , (0,0) , [enemy1,enemy2,enemy2,enemy4,enemy5,enemy6,enemy7,enemy7,enemy8,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(20,20),(22,22),(20,20)] , [8]*10 , [False]*10 , [1,1,1,1,1,1,1,1,1,25] , [0.5]*10 , [100,180,180,180,450,700,1080,1080,600,16000] ,[False,False,False,True,False,False,False,False,True,False],[0,2,2,1,2,4,3,3,0,0], [mov_4_A_1,mov_4_A_1,mov_4_A_2,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_2] , [(1,0)]*10 ,[1,2,2,4,5,6,7,7,8,150], [10,10,10,10,10,10,10,10,10,1])#10
+mapa_fase_4.addSpawn((1, 12),[120]*10 , [fator_4*7  ,fator_4*8,fator_4*13,fator_4*20,fator_4*27,fator_4*33,fator_4*34,fator_4*36,fator_4*37,fator_4*45] , (0,0) , [enemy1,enemy2,enemy2,enemy4,enemy5,enemy6,enemy7,enemy7,enemy8,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(20,20),(22,22),(20,20)] , [8]*10 , [False]*10 , [1,1,1,1,1,1,1,1,1,25] , [0.5]*10 , [100,180,180,180,600,850,1200,1200,600,15000] ,[False,False,False,True,False,False,False,False,True,False],[0,2,2,1,2,4,3,3,0,0], [mov_4_A_1,mov_4_A_1,mov_4_A_2,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_1,mov_4_A_2] , [(1,0)]*10 ,[1,2,2,4,5,6,7,7,8,150], [10,10,10,10,10,10,10,10,10,1])#10
 
-mapa_fase_4.addSpawn((4, 12),[120]*13 , [fator_4*2  ,fator_4*8,fator_4*11,fator_4*14,fator_4*21,fator_4*25,fator_4*26,fator_4*29,fator_4*31,fator_4*38,fator_4*39,fator_4*41,fator_4*42] , (0,0) , [enemy1,enemy2,enemy2,enemy3,enemy4,enemy5,enemy5,enemy6,enemy6,enemy8,enemy8,enemy9,enemy9] , [(20,20),(25,25),(25,25),(25,25),(22,22),(22,22),(22,22),(25,25),(25,25),(22,22),(22,22),(25,25),(25,25)] , [8]*13 , [False]*13 , [1,1,1,1,1,1,1,1,1,1,1,1,1] , [0.5]*13 , [100,180,180,300,180,450,450,700,700,600,600,1350,1350] ,[False,False,False,False,True,False,False,False,False,True,True,False,False],[0,2,2,3,1,2,2,4,4,0,0,0,0], [mov_4_B_1,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1] , [(1,0)]*13 ,[1,2,2,3,4,5,5,6,6,8,8,9,9], [10,10,10,10,10,10,10,10,10,10,10,10,10])#13 hordas
-mapa_fase_4.addSpawn((5, 12),[120]*8  , [fator_4*5  ,fator_4*9,fator_4*16,fator_4*23,fator_4*28,fator_4*32,fator_4*35,fator_4*40] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(25,25)] , [8]*8 , [False]*8 , [1,1,1,1,1,1,1,1] , [0.5]*8 , [100,180,300,180,450,700,1080,1350] ,[False,False,False,True,False,False,False,False],[0,2,3,1,2,4,3,4], [mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C] , [(1,0)]*8 ,[1,2,3,4,5,6,7,9], [10,10,10,10,10,10,10,10])#8
+mapa_fase_4.addSpawn((4, 12),[120]*13 , [fator_4*2  ,fator_4*8,fator_4*11,fator_4*14,fator_4*21,fator_4*25,fator_4*26,fator_4*29,fator_4*31,fator_4*38,fator_4*39,fator_4*41,fator_4*42] , (0,0) , [enemy1,enemy2,enemy2,enemy3,enemy4,enemy5,enemy5,enemy6,enemy6,enemy8,enemy8,enemy9,enemy9] , [(20,20),(25,25),(25,25),(25,25),(22,22),(22,22),(22,22),(25,25),(25,25),(22,22),(22,22),(25,25),(25,25)] , [8]*13 , [False]*13 , [1,1,1,1,1,1,1,1,1,1,1,1,1] , [0.5]*13 , [100,180,180,380,180,600,600,850,850,600,600,1600,1600] ,[False,False,False,False,True,False,False,False,False,True,True,False,False],[0,2,2,3,1,2,2,4,4,0,0,0,0], [mov_4_B_1,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1,mov_4_B_2,mov_4_B_1] , [(1,0)]*13 ,[1,2,2,3,4,5,5,6,6,8,8,9,9], [10,10,10,10,10,10,10,10,10,10,10,10,10])#13 hordas
+mapa_fase_4.addSpawn((5, 12),[120]*8  , [fator_4*5  ,fator_4*9,fator_4*16,fator_4*23,fator_4*28,fator_4*32,fator_4*35,fator_4*40] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(25,25)] , [8]*8 , [False]*8 , [1,1,1,1,1,1,1,1] , [0.5]*8 , [100,180,380,180,600,850,1200,1600] ,[False,False,False,True,False,False,False,False],[0,2,3,1,2,4,3,4], [mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C,mov_4_C] , [(1,0)]*8 ,[1,2,3,4,5,6,7,9], [10,10,10,10,10,10,10,10])#8
 
-mapa_fase_4.addSpawn((8, 12),[120]*6  , [800        ,fator_4*9 ,fator_4*19,fator_4*21,fator_4*25,fator_4*41] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25)] , [8]*6 , [False]*6 , [1,1,1,1,1,1] , [0.5]*6 , [100,180,300,180,450,1350] ,[False,False,False,True,False,False],[0,2,3,1,2,4],  [mov_4_D,mov_4_D,mov_4_D,mov_4_D,mov_4_D,mov_4_D] , [(1,0)]*6 ,[1,2,3,4,5,9], [10,10,10,10,10,10])#6
-mapa_fase_4.addSpawn((9, 12),[120]*9  , [fator_4*4  ,fator_4*10,fator_4*17,fator_4*22,fator_4*30,fator_4*34,fator_4*36,fator_4*37,fator_4*43] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy6,enemy7,enemy7,enemy8,enemy9] , [(20,20),(25,25),(25,25),(22,22),(25,25),(20,20),(20,20),(22,22),(25,25)] , [8]*9 , [False]*9 , [1,1,1,1,1,1,1,1,1] , [0.5]*9 , [100,180,300,180,700,1080,1080,600,1350] ,[False,False,False,True,False,False,False,True,False],[0,2,3,1,4,3,3,0,4], [mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E] , [(1,0)]*9 ,[1,2,3,4,6,7,7,8,9], [10,10,10,10,10,10,10,10,10])#9
-mapa_fase_4.addSpawn((10, 12),[120]*9 , [fator_4*4  ,fator_4*13,fator_4*18,fator_4*22,fator_4*30,fator_4*34,fator_4*35,fator_4*38,fator_4*43] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy6,enemy7,enemy7,enemy8,enemy9] , [(20,20),(25,25),(25,25),(22,22),(25,25),(20,20),(20,20),(22,22),(25,25)] , [8]*9 , [False]*9 , [1,1,1,1,1,1,1,1,1] , [0.5]*9 , [100,180,300,180,700,1080,1080,600,1350] ,[False,False,False,True,False,False,False,True,False],[0,2,3,1,4,3,3,0,4], [mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F] , [(1,0)]*9 ,[1,2,3,4,6,7,7,8,9], [10,10,10,10,10,10,10,10,10])#9
-mapa_fase_4.addSpawn((11, 12),[120]*6 , [fator_4+400,fator_4*12,fator_4*16,fator_4*24,fator_4*27,fator_4*44] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25)] , [8]*6 , [False]*6 , [1,1,1,1,1,1] , [0.5]*6 , [100,180,300,180,450,1350] ,[False,False,False,True,False,False],[0,2,3,1,2,4], [mov_4_G,mov_4_G,mov_4_G,mov_4_G,mov_4_G,mov_4_G] , [(1,0)]*6 ,[1,2,3,4,5,9], [10,10,10,10,10,10])#6
+mapa_fase_4.addSpawn((8, 12),[120]*6  , [800        ,fator_4*9 ,fator_4*19,fator_4*21,fator_4*25,fator_4*41] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25)] , [8]*6 , [False]*6 , [1,1,1,1,1,1] , [0.5]*6 , [100,180,380,180,600,1600] ,[False,False,False,True,False,False],[0,2,3,1,2,4],  [mov_4_D,mov_4_D,mov_4_D,mov_4_D,mov_4_D,mov_4_D] , [(1,0)]*6 ,[1,2,3,4,5,9], [10,10,10,10,10,10])#6
+mapa_fase_4.addSpawn((9, 12),[120]*9  , [fator_4*4  ,fator_4*10,fator_4*17,fator_4*22,fator_4*30,fator_4*34,fator_4*36,fator_4*37,fator_4*43] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy6,enemy7,enemy7,enemy8,enemy9] , [(20,20),(25,25),(25,25),(22,22),(25,25),(20,20),(20,20),(22,22),(25,25)] , [8]*9 , [False]*9 , [1,1,1,1,1,1,1,1,1] , [0.5]*9 , [100,180,380,180,850,1200,1200,600,1600] ,[False,False,False,True,False,False,False,True,False],[0,2,3,1,4,3,3,0,4], [mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E,mov_4_E] , [(1,0)]*9 ,[1,2,3,4,6,7,7,8,9], [10,10,10,10,10,10,10,10,10])#9
+mapa_fase_4.addSpawn((10, 12),[120]*9 , [fator_4*4  ,fator_4*13,fator_4*18,fator_4*22,fator_4*30,fator_4*34,fator_4*35,fator_4*38,fator_4*43] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy6,enemy7,enemy7,enemy8,enemy9] , [(20,20),(25,25),(25,25),(22,22),(25,25),(20,20),(20,20),(22,22),(25,25)] , [8]*9 , [False]*9 , [1,1,1,1,1,1,1,1,1] , [0.5]*9 , [100,180,380,180,850,1200,1200,600,1600] ,[False,False,False,True,False,False,False,True,False],[0,2,3,1,4,3,3,0,4], [mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F,mov_4_F] , [(1,0)]*9 ,[1,2,3,4,6,7,7,8,9], [10,10,10,10,10,10,10,10,10])#9
+mapa_fase_4.addSpawn((11, 12),[120]*6 , [fator_4+400,fator_4*12,fator_4*16,fator_4*24,fator_4*27,fator_4*44] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25)] , [8]*6 , [False]*6 , [1,1,1,1,1,1] , [0.5]*6 , [100,180,380,180,600,1600] ,[False,False,False,True,False,False],[0,2,3,1,2,4], [mov_4_G,mov_4_G,mov_4_G,mov_4_G,mov_4_G,mov_4_G] , [(1,0)]*6 ,[1,2,3,4,5,9], [10,10,10,10,10,10])#6
 
-mapa_fase_4.addSpawn((14, 12),[120]*8 , [fator_4*6  ,fator_4*12,fator_4*19,fator_4*20,fator_4*28,fator_4*32,fator_4*36,fator_4*40] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(25,25)] , [8]*8 , [False]*8 , [1,1,1,1,1,1,1,1] , [0.5]*8 , [100,180,300,180,450,700,1080,1350] ,[False,False,False,True,False,False,False,False],[0,2,3,1,2,4,3,4], [mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H] , [(1,0)]*8 ,[1,2,3,4,5,6,7,9], [10,10,10,10,10,10,10,10])#8
-mapa_fase_4.addSpawn((15, 12),[120]*13, [fator_4*3  ,fator_4*8,fator_4*11,fator_4*15,fator_4*24,fator_4*26,fator_4*27,fator_4*29,fator_4*31,fator_4*37,fator_4*39,fator_4*42,fator_4*44] , (0,0) , [enemy1,enemy2,enemy2,enemy3,enemy4,enemy5,enemy5,enemy6,enemy6,enemy8,enemy8,enemy9,enemy9] , [(20,20),(25,25),(25,25),(25,25),(22,22),(22,22),(22,22),(25,25),(25,25),(22,22),(22,22),(25,25),(25,25)] , [8]*13 , [False]*13 , [1,1,1,1,1,1,1,1,1,1,1,1,1] , [0.5]*13 , [100,180,180,300,180,450,450,700,700,600,600,1350,1350] ,[False,False,False,False,True,False,False,False,False,True,True,False,False],[0,2,2,3,1,2,2,4,4,0,0,0,0], [mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_2,mov_4_I_2,mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_1,mov_4_I_2] , [(1,0)]*13 ,[1,2,2,3,4,5,5,6,6,8,8,9,9], [10,10,10,10,10,10,10,10,10,10,10,10,10])#13
+mapa_fase_4.addSpawn((14, 12),[120]*8 , [fator_4*6  ,fator_4*12,fator_4*19,fator_4*20,fator_4*28,fator_4*32,fator_4*36,fator_4*40] , (0,0) , [enemy1,enemy2,enemy3,enemy4,enemy5,enemy6,enemy7,enemy9] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(25,25)] , [8]*8 , [False]*8 , [1,1,1,1,1,1,1,1] , [0.5]*8 , [100,180,380,180,600,850,1200,1600] ,[False,False,False,True,False,False,False,False],[0,2,3,1,2,4,3,4], [mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H,mov_4_H] , [(1,0)]*8 ,[1,2,3,4,5,6,7,9], [10,10,10,10,10,10,10,10])#8
+mapa_fase_4.addSpawn((15, 12),[120]*13, [fator_4*3  ,fator_4*8,fator_4*11,fator_4*15,fator_4*24,fator_4*26,fator_4*27,fator_4*29,fator_4*31,fator_4*37,fator_4*39,fator_4*42,fator_4*44] , (0,0) , [enemy1,enemy2,enemy2,enemy3,enemy4,enemy5,enemy5,enemy6,enemy6,enemy8,enemy8,enemy9,enemy9] , [(20,20),(25,25),(25,25),(25,25),(22,22),(22,22),(22,22),(25,25),(25,25),(22,22),(22,22),(25,25),(25,25)] , [8]*13 , [False]*13 , [1,1,1,1,1,1,1,1,1,1,1,1,1] , [0.5]*13 , [100,180,180,380,180,600,600,850,850,600,600,1600,1600] ,[False,False,False,False,True,False,False,False,False,True,True,False,False],[0,2,2,3,1,2,2,4,4,0,0,0,0], [mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_2,mov_4_I_2,mov_4_I_1,mov_4_I_2,mov_4_I_1,mov_4_I_1,mov_4_I_2] , [(1,0)]*13 ,[1,2,2,3,4,5,5,6,6,8,8,9,9], [10,10,10,10,10,10,10,10,10,10,10,10,10])#13
 
-mapa_fase_4.addSpawn((18, 12),[120]*10 ,[fator_4*7  ,fator_4*10,fator_4*11,fator_4*23,fator_4*25,fator_4*33,fator_4*34,fator_4*35,fator_4*38,fator_4*45] , (0,0) , [enemy1,enemy2,enemy2,enemy4,enemy5,enemy6,enemy7,enemy7,enemy8,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(20,20),(22,22),(20,20)] , [8]*10 , [False]*10 , [1,1,1,1,1,1,1,1,1,25] , [0.5]*10 , [100,180,180,180,450,700,1080,1080,600,13500] ,[False,False,False,True,False,False,False,False,True,False],[0,2,2,1,2,4,3,3,0,0], [mov_4_J_1,mov_4_J_2,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_2] , [(1,0)]*10 ,[1,2,2,4,5,6,7,7,8,150], [10,10,10,10,10,10,10,10,10,1])#10
+mapa_fase_4.addSpawn((18, 12),[120]*10 ,[fator_4*7  ,fator_4*10,fator_4*11,fator_4*23,fator_4*25,fator_4*33,fator_4*34,fator_4*35,fator_4*38,fator_4*45] , (0,0) , [enemy1,enemy2,enemy2,enemy4,enemy5,enemy6,enemy7,enemy7,enemy8,enemy10] , [(20,20),(25,25),(25,25),(22,22),(22,22),(25,25),(20,20),(20,20),(22,22),(20,20)] , [8]*10 , [False]*10 , [1,1,1,1,1,1,1,1,1,25] , [0.5]*10 , [100,180,180,180,600,850,1200,1200,600,15000] ,[False,False,False,True,False,False,False,False,True,False],[0,2,2,1,2,4,3,3,0,0], [mov_4_J_1,mov_4_J_2,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_1,mov_4_J_2] , [(1,0)]*10 ,[1,2,2,4,5,6,7,7,8,150], [10,10,10,10,10,10,10,10,10,1])#10
 
 for x in range(3,17,1):
     mapa_fase_4.addTarget((x,1),(0,0))
@@ -2108,6 +2094,13 @@ fadeIn(tela_inicial,tela_inicial,[botao_start,(500+identa_botoes_x,300+identa_bo
 ###botões de voltar adicionados às telas anteriores###
 
 voltar_som=pygame.mixer.Sound("sword-sheath.wav")
+
+
+img_voltar_1=pygame.image.load("botao_voltar1.png").convert_alpha()
+img_voltar_2=pygame.image.load("botao_voltar2.png").convert_alpha()
+img_voltar_3=pygame.image.load("botao_voltar3.png").convert_alpha()
+
+
 voltar_para_inicio=pyTreeBee.linkedButton(tela_inicial,din_12,[""],655,530,pygame.Rect(0,0,130-12,60-12),0,0)
 voltar_para_inicio.setEach_Image(img_voltar_1,img_voltar_2,img_voltar_3)
 voltar_para_inicio.setAll_BarSize((-6,-6))
@@ -2126,6 +2119,27 @@ voltar_para_inicio_musica.setSound_Time(0.2)
 
 selecao_fase.addItem(voltar_para_inicio_musica)
 
+cir_voltar_1=pygame.image.load("botao_menu1.png").convert_alpha()
+cir_voltar_2=pygame.image.load("botao_menu2.png").convert_alpha()
+cir_voltar_3=pygame.image.load("botao_menu3.png").convert_alpha()
+
+cir_fases_1=pygame.image.load("botao_avancar1.png").convert_alpha()
+cir_fases_2=pygame.image.load("botao_avancar2.png").convert_alpha()
+cir_fases_3=pygame.image.load("botao_avancar3.png").convert_alpha()
+
+cir_retry_1=pygame.image.load("botao_retry1.png").convert_alpha()
+cir_retry_2=pygame.image.load("botao_retry2.png").convert_alpha()
+cir_retry_3=pygame.image.load("botao_retry3.png").convert_alpha()
+
+voltar_retry_pause=pyTreeBee.linkedButton(None,din_12,[""],220,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_retry_pause.setEach_Image(cir_retry_1,cir_retry_2,cir_retry_3)
+voltar_retry_pause.setAll_BarSize((-12,-12))
+voltar_menu_pause=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),din_12,[""],375,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_menu_pause.setEach_Image(cir_voltar_1,cir_voltar_2,cir_voltar_3)
+voltar_menu_pause.setAll_BarSize((-12,-12))
+voltar_selecao_pause=pyTreeBee.linkedButton(selecao_fase,din_12,[""],530,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_selecao_pause.setEach_Image(cir_fases_1,cir_fases_2,cir_fases_3)
+voltar_selecao_pause.setAll_BarSize((-12,-12))
 
 voltar_retry=pyTreeBee.linkedButton(None,din_12,[""],220,450,pygame.Rect(0,0,80-25,80-25),0,0)
 voltar_retry.setEach_Image(cir_retry_1,cir_retry_2,cir_retry_3)
@@ -2143,10 +2157,6 @@ seguir_congratulation.setEach_Image(cir_fases_1,cir_fases_2,cir_fases_3)
 seguir_congratulation.setAll_BarSize((-12,-12))
 very_winner_scr.addItem(seguir_congratulation)
 congratulations_scr.addItem(voltar_para_inicio_musica)
-
-voltar_retry_pause=
-voltar_menu_pause=
-voltar_selecao_pause=
 '''
 voltar_selecao.link=fadeOut(tela_inicial,tela_inicial,[botao_start,(500,300),10],[botao_options,(500,380),15],[botao_staff,(500,460),20])
 selecao_fase.addItem(voltar_selecao)
