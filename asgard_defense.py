@@ -6,7 +6,7 @@ infoObject = pygame.display.Info()
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
 temporarydisplay=pygame.display.set_mode((800,600))
 dinB_22=pygame.font.Font("DIN-Black.otf",22)
-#dinB_50=pygame.font.Font("DIN-Black.otf",50)
+dinB_72=pygame.font.Font("DIN-Black.otf",72)
 dinBd_32=pygame.font.Font("DIN-Bold.otf",32)
 
 loading=dinB_22.render("LOADING...",True,(255,255,255))
@@ -760,18 +760,18 @@ class winnerScreen(object):
     def keyControls(self,event):pass
 
 class linkedZero(object):
-    def __init__(self, link, tela):
+    def __init__(self, link, music=None):
         self.link=link
+        self.music=music
+        self.tela=None
         self.mapa=None
-        self.tela=tela
-    def setMapa(self,mapa):
-        self.mapa=mapa
     def linkReply(self,scr):
         global voltar_retry_pause, voltar_menu_pause, voltar_selecao_pause
-        pygame.mouse.set_visible(True)
-        voltar_retry_pause.link=linkedMusic(self.tela,self.tela.stored_music,-1,0.0)
+        if self.music:
+            pygame.mixer.music.load(self.music[0])
+            pygame.mixer.music.play(self.music[1], self.music[2])
         self.mapa.setZero(self.tela)
-        self.tela.linkcalled=self.link
+        return self.link
 
 class gameOver(object):
     def __init__(self,tela,link,mapa,music=None):
@@ -837,9 +837,7 @@ class escritorDireto(object):
 class estruturaPause(object):
     def __init__(self):
         self.link=False
-    def blitOn(self,scr):
-        pygame.mouse.set_visible(True)
-        scr.blit(dinB_22.render("PAUSE",True,(255,255,255)),(370,278))
+    def blitOn(self,scr):pass
     def keyControls(self,event):
         retorno=False
         if event.type==KEYUP:
@@ -852,10 +850,12 @@ class estruturaPause(object):
 
 config_pause=estruturaPause()
 tela_pause=pyTreeBee.dynamicScreen((800,600),30,(0,0,0),config_pause)
+tela_pause.setTitle("Asgard Defense")
 
 class controlesExtras(object):
     def __init__(self,tela, pausavel, mapa=None):
         self.tela=tela
+        self.mapa=mapa
         self.frame_skip=1
         self.pausavel=pausavel
         self.primeira_vez=True
@@ -866,13 +866,24 @@ class controlesExtras(object):
             self.primeira_vez=False
         frame_atual+=self.frame_skip
     def keyControls(self,event):
-        global tela_pause, config_pause,voltar_retry_pause
+        global tela_pause, config_pause,voltar_retry_pause, voltar_menu_pause, voltar_selecao_pause
         retorno=False
         if event.type==KEYUP:
             if event.key==K_ESCAPE:
                 self.tela.storedlink=None
                 self.tela.running=False
             if self.pausavel and event.key==K_SPACE:
+                pygame.mouse.set_visible(True)
+                voltar_retry_pause.link.mapa=self.mapa
+                voltar_menu_pause.link.mapa=self.mapa
+                voltar_selecao_pause.link.mapa=self.mapa
+                
+                voltar_retry_pause.link.tela=self.tela
+                voltar_menu_pause.link.tela=self.tela
+                voltar_selecao_pause.link.tela=self.tela
+                
+                voltar_retry_pause.link.link=self.tela
+                voltar_retry_pause.link.music=(self.tela.stored_music,-1,0.0)
                 config_pause.link=self.tela
                 retorno=tela_pause
                 pygame.mixer.music.pause()
@@ -1457,15 +1468,20 @@ matriz_fase_1=[
 mouse=quadradoControlavel()
 blit_score=blitScore()
 game_over=pyTreeBee.dynamicScreen((800,600), 30,(100,0,0))
+game_over.setTitle("Asgard Defense")
 game_over.setImage(pygame.image.load('gameover.png').convert_alpha(),(0,0))
 winner_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255),blit_score)
+winner_scr.setTitle("Asgard Defense")
 winner_scr.setImage(pygame.image.load('vitoria.png').convert_alpha(),(0,0))
 very_winner_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255),blit_score)
+very_winner_scr.setTitle("Asgard Defense")
 very_winner_scr.setImage(pygame.image.load('vitoria.png').convert_alpha(),(0,0))
 congratulations_scr=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255))
+congratulations_scr.setTitle("Asgard Defense")
 congratulations_scr.setImage(pygame.image.load('congratulations.png').convert(),(0,0))
 congratulado=congratulouGame(winner_scr, very_winner_scr)
 scr_intermediaria=pyTreeBee.dynamicScreen((800,600), 30,(100,100,255),congratulado)
+scr_intermediaria.setTitle("Asgard Defense")
 #loading dos tiles
 def tileList(tile_set,size):
     tile_list=[]
@@ -1488,6 +1504,7 @@ cor_fundo=(0,0,0)#(60,80,110)#(34,57,65)
 #G
 mapa_fase_G = mapaLimitavel(mouse,statusPlayer(50,70),matriz_fase_G, tile_list_C,40)
 fase_G = pyTreeBee.dynamicScreen((800,600),60,cor_fundo,mapa_fase_G)
+fase_G.setTitle("Asgard Defense")
 botao_G=pyTreeBee.linkedButton(linkedMusic(fase_G,"El Magicia.mp3",-1, 0.0),din_12,[""],botoes_extras_x,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_C[7],(32,32)))
 botao_G.setEach_Text([""],["RETOMADA DE VALGRIND"],[""])
 botao_G.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
@@ -1495,6 +1512,7 @@ botao_G=lockedButton(botao_G,'save_state_G')
 #F
 mapa_fase_F = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_F, tile_list_B,40)
 fase_F = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_F)
+fase_F.setTitle("Asgard Defense")
 botao_F=pyTreeBee.linkedButton(linkedMusic(fase_F,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x+40,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_B[19],(32,32)))
 botao_F.setEach_Text([""],["SALA DO TESOURO"],[""])
 botao_F.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
@@ -1502,6 +1520,7 @@ botao_F=lockedButton(botao_F,'save_state_F')
 #E
 mapa_fase_E = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_E, tile_list_A,40)
 fase_E = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_E)
+fase_E.setTitle("Asgard Defense")
 botao_E=pyTreeBee.linkedButton(linkedMusic(fase_E,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x+80,botoes_extras_y+56,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_A[1],(32,32)))
 botao_E.setEach_Text([""],["SANTUÁRIO DA FREYA"],[""])
 botao_E.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
@@ -1509,6 +1528,7 @@ botao_E=lockedButton(botao_E,'save_state_E')
 #D
 mapa_fase_D = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_D, tile_list_1,40)
 fase_D = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_D)
+fase_D.setTitle("Asgard Defense")
 botao_D=pyTreeBee.linkedButton(linkedMusic(fase_D,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x+80,botoes_extras_y,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_1[7],(32,32)))
 botao_D.setEach_Text([""],["VALE DOS VIKINGS"],[""])
 botao_D.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
@@ -1516,6 +1536,7 @@ botao_D=lockedButton(botao_D,'save_state_D')
 #C
 mapa_fase_C = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_C, tile_list_2,40)
 fase_C = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_C)
+fase_C.setTitle("Asgard Defense")
 botao_C=pyTreeBee.linkedButton(linkedMusic(fase_C,"Future Gladiator.mp3",-1, 0.0),din_12,[""],botoes_extras_x+120,botoes_extras_y,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_2[7],(32,32)))
 botao_C.setEach_Text([""],["HALL DOS BERSERKERS"],[""])
 botao_C.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
@@ -1523,6 +1544,7 @@ botao_C=lockedButton(botao_C,'save_state_C')
 #B
 mapa_fase_B = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_B, tile_list_1,40)
 fase_B = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_B)
+fase_B.setTitle("Asgard Defense")
 botao_B=pyTreeBee.linkedButton(linkedMusic(fase_B,"The Complex.mp3",-1, 0.0),din_12,[""],botoes_extras_x+40,botoes_extras_y,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_1[7],(32,32)))
 botao_B.setEach_Text([""],["FLORESTA DAS VALQUÍRIAS"],[""])
 botao_B.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
@@ -1530,6 +1552,7 @@ botao_B=lockedButton(botao_B,'save_state_B')
 #A
 mapa_fase_A = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_A, tile_list_1,40)
 fase_A = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_A)
+fase_A.setTitle("Asgard Defense")
 botao_A=pyTreeBee.linkedButton(linkedMusic(fase_A,"Movement Proposition.mp3",-1, 0.0),din_12,[""],botoes_extras_x,botoes_extras_y,pygame.Rect(0,0,28,32),0,36,pygame.transform.scale(tile_list_1[7],(32,32)))
 botao_A.setEach_Text([""],["PLANÍCIE DAS ARQUEIRAS"],[""])
 botao_A.setEach_BarSize((-2,-3),(-2,-5),(-2,-7))
@@ -1540,8 +1563,9 @@ area_fases_extras.setEach_Image(pygame.image.load("stage61.png").convert(),pygam
 area_fases_extras.setAll_BarSize((0,0))
 area_fases_extras=lockedButton(area_fases_extras,'save_state_1')
 #5
-mapa_fase_5 = mapaLimitavel(mouse,statusPlayer(30000,70),matriz_fase_5, tile_list_4,40,botao_E,botao_F)
+mapa_fase_5 = mapaLimitavel(mouse,statusPlayer(100,70),matriz_fase_5, tile_list_4,40,botao_E,botao_F)
 fase_5 = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_5)
+fase_5.setTitle("Asgard Defense")
 botao_5=pyTreeBee.linkedButton(linkedMusic(fase_5,"Epic.mp3",-1,0.0),din_12,[""],426,238,pygame.Rect(0,0,324,260),0,0)
 botao_5.setEach_Image(pygame.image.load("stage51.png").convert(),pygame.image.load("stage52.png").convert(),pygame.image.load("stage52.png").convert())
 botao_5.setAll_BarSize((0,0))
@@ -1549,6 +1573,7 @@ botao_5=lockedButton(botao_5,'save_state_5')
 #4
 mapa_fase_4 = mapaLimitavel(mouse,statusPlayer(50,70),matriz_fase_4, tile_list_3,40,botao_5,botao_G)
 fase_4 = pyTreeBee.dynamicScreen((800,600),60,cor_fundo,mapa_fase_4)
+fase_4.setTitle("Asgard Defense")
 botao_4=pyTreeBee.linkedButton(linkedMusic(fase_4,"Future Gladiator.mp3",-1, 0.0),din_12,[""],158,206,pygame.Rect(0,0,260,166),0,0)
 botao_4.setEach_Image(pygame.image.load("stage41.png").convert(),pygame.image.load("stage42.png").convert(),pygame.image.load("stage42.png").convert())
 botao_4.setAll_BarSize((0,0))
@@ -1556,6 +1581,7 @@ botao_4=lockedButton(botao_4,'save_state_4')
 #3
 mapa_fase_3 = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_3, tile_list_2,40,botao_4,botao_C)
 fase_3 = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_3)
+fase_3.setTitle("Asgard Defense")
 botao_3=pyTreeBee.linkedButton(linkedMusic(fase_3,"Volatile Reaction.mp3",-1, 0.0),din_12,[""],539,93,pygame.Rect(0,0,230,144),0,0)
 botao_3.setEach_Image(pygame.image.load("stage31.png").convert(),pygame.image.load("stage32.png").convert(),pygame.image.load("stage32.png").convert())
 botao_3.setAll_BarSize((0,0))
@@ -1563,6 +1589,7 @@ botao_3=lockedButton(botao_3,'save_state_3')
 #2
 mapa_fase_2 = mapaLimitavel(mouse,statusPlayer(30,70),matriz_fase_2, tile_list_1,40,area_fases_extras,botao_3,botao_A,botao_B,botao_D)
 fase_2 = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_2)
+fase_2.setTitle("Asgard Defense")
 botao_2=pyTreeBee.linkedButton(linkedMusic(fase_2,"Heroic Age.mp3",-1, 0.0),din_12,[""],323,50,pygame.Rect(0,0,202,120),0,0)
 botao_2.setEach_Image(pygame.image.load("stage21.png").convert(),pygame.image.load("stage22.png").convert(),pygame.image.load("stage22.png").convert())
 botao_2.setAll_BarSize((0,0))
@@ -1570,6 +1597,7 @@ botao_2=lockedButton(botao_2,'save_state_2')
 #1
 mapa_fase_1 = mapaLimitavel(mouse,statusPlayer(1,35),matriz_fase_1, tile_list_0,40,botao_2)
 fase_1 = pyTreeBee.dynamicScreen((800,600), 60,cor_fundo,mapa_fase_1)
+fase_1.setTitle("Asgard Defense")
 botao_1=pyTreeBee.linkedButton(linkedMusic(fase_1,"Lord of the Land.mp3",-1, 0.0),din_12,[""],24,43,pygame.Rect(0,0,284,72),0,0)
 botao_1.setEach_Image(pygame.image.load("stage11.png").convert(),pygame.image.load("stage12.png").convert(),pygame.image.load("stage12.png").convert())
 botao_1.setAll_BarSize((0,0))
@@ -1885,8 +1913,8 @@ mapa_fase_5.addSpawn( (19,12), [120,120] , [800,38800] , (0,0) , [enemy1,enemy6]
 mapa_fase_5.addSpawn( (0,12), [120,120] , [800,38800] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_B] *2, [(1,0),(1,0)] ,[2,6], [50,50])
 mapa_fase_5.addSpawn( (15,1), [120,120] , [8700,54200] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_C] *2, [(1,0),(1,0)] ,[2,7], [50,50])#2,8
 mapa_fase_5.addSpawn( (0,4), [120,120] , [8700,54200] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_D] *2, [(1,0),(1,0)] ,[2,7], [50,50])
-mapa_fase_5.addSpawn( (15,12), [120,120,240] , [31200,69500,72500] , (0,0,0) , [enemy5,enemy10,enemy10] , [(22,22),(20,20),(20,20)] , [8,8,8] , [False, False, False] , [1,10,20] , [0.5,0.5,0.25] , [450,12000,10000] ,[False,False,False],[0,0,0], [mov_5_E] *3, [(1,0),(1,0),(1,0)] ,[4,200,200], [50,1,2])#5,10,10
-mapa_fase_5.addSpawn( (4,1), [120,120,240] , [31200,69500,72500] , (0,0,0) , [enemy5,enemy10,enemy10] , [(22,22),(20,20),(20,20)] , [8,8,8] , [False, False, False] , [1,10,20] , [0.5,0.5,0.25] , [450,12000,10000] ,[False,False,False],[0,0,0], [mov_5_F] *3, [(1,0),(1,0),(1,0)] ,[4,200,200], [50,1,2])#5,10,10
+mapa_fase_5.addSpawn( (15,12), [120,120,240] , [31200,69700,72500] , (0,0,0) , [enemy5,enemy10,enemy10] , [(22,22),(20,20),(20,20)] , [8,8,8] , [False, False, False] , [1,10,20] , [0.5,0.5,0.25] , [450,12000,10000] ,[False,False,False],[0,0,0], [mov_5_E] *3, [(1,0),(1,0),(1,0)] ,[4,200,200], [50,1,2])#5,10,10
+mapa_fase_5.addSpawn( (4,1), [120,120,240] , [31200,69700,72500] , (0,0,0) , [enemy5,enemy10,enemy10] , [(22,22),(20,20),(20,20)] , [8,8,8] , [False, False, False] , [1,10,20] , [0.5,0.5,0.25] , [450,12000,10000] ,[False,False,False],[0,0,0], [mov_5_F] *3, [(1,0),(1,0),(1,0)] ,[4,200,200], [50,1,2])#5,10,10
 mapa_fase_5.addSpawn( (19,1), [120,120] , [16000,61300] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_G] *2, [(1,0),(1,0)] ,[3,9], [50,50])#3,9
 mapa_fase_5.addSpawn( (0,1), [120,120] , [16000,61300] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_H] *2, [(1,0),(1,0)] ,[3,9], [50,50])
 mapa_fase_5.addSpawn( (19,9), [120,120] , [23900,46900] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_I] *2, [(1,0),(1,0)] ,[4,5], [50,50])#4,7
@@ -2018,23 +2046,27 @@ fase_1.addItem(winnerScreen(fase_1,winner_scr,mapa_fase_1,blit_score,winner_musi
 ###seleção de fases###
 
 selecao_fase = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),area_fases_extras,botao_1,botao_2,botao_3,botao_4,botao_5,botao_A,botao_B,botao_C,botao_D,botao_E,botao_F,botao_G)
+selecao_fase.setTitle("Asgard Defense")
 selecao_fase.setImage(pygame.image.load("stageselect.png").convert(),(0,0))
 selecao_fase.setMusic("Teller of the Tales.mp3",-1, 0.0)
 ###tela options###
 texto_confirmacao=pyTreeBee.linkedButton(None,dinB_22,["      TENS CERTEZA DE QUE É SÁBIO", "APAGAR TODO O VOSSO PROGRESSO?"],210,220,pygame.Rect(0,0,0,0),0,0)
 texto_confirmacao.setAll_TextColor((255,255,255))
 tela_confirma_exclusao=pyTreeBee.dynamicScreen((800,600),60,(0,0,0),texto_confirmacao)
-botao_apagar=pyTreeBee.linkedButton(tela_confirma_exclusao,din_12,[""],400-(280/2)+12,350,pygame.Rect(0,0,280-12,60-12),0,0)
+tela_confirma_exclusao.setTitle("Asgard Defense")
+botao_apagar=pyTreeBee.linkedButton(tela_confirma_exclusao,din_12,[""],400-(280/2)+12,400,pygame.Rect(0,0,280-12,60-12),0,0)
 botao_apagar.setEach_Image(pygame.image.load('botao_apagar1.png').convert_alpha(),pygame.image.load('botao_apagar2.png').convert_alpha(),pygame.image.load('botao_apagar3.png').convert_alpha())
 botao_apagar.setAll_BarSize((-6,-6))
 
-texto_volume=escritorDireto(dinBd_32.render("VOLUME",True,(255,255,255)),(342,105))
-escreve_volume=renderVolume(dinB_22,(255,255,255),(384,115+62),100)
-aumenta_volume=pyTreeBee.linkedButton(volumeControl(+0.02),dinB_22,[""],500-26,162,pygame.Rect(0,0,60,60),15,5,pygame.image.load("botao_mais.png").convert_alpha())
-diminui_volume=pyTreeBee.linkedButton(volumeControl(-0.02),dinB_22,[""],300-26,162,pygame.Rect(0,0,60,60),15,5,pygame.image.load("botao_menos.png").convert_alpha())
+margem_volume_y=100
+texto_volume=escritorDireto(dinBd_32.render("VOLUME",True,(255,255,255)),(342,105+margem_volume_y))
+escreve_volume=renderVolume(dinB_22,(255,255,255),(384,115+62+margem_volume_y),100)
+aumenta_volume=pyTreeBee.linkedButton(volumeControl(+0.02),dinB_22,[""],500-26,162+margem_volume_y,pygame.Rect(0,0,60,60),15,5,pygame.image.load("botao_mais.png").convert_alpha())
+diminui_volume=pyTreeBee.linkedButton(volumeControl(-0.02),dinB_22,[""],300-26,162+margem_volume_y,pygame.Rect(0,0,60,60),15,5,pygame.image.load("botao_menos.png").convert_alpha())
 
-tela_options=pyTreeBee.dynamicScreen((800,600),60,(0,0,0),botao_apagar,texto_volume,escreve_volume,aumenta_volume,diminui_volume)
-tela_pause.addItem(texto_volume,escreve_volume,aumenta_volume,diminui_volume)
+tela_options=pyTreeBee.dynamicScreen((800,600),60,(0,0,0),botao_apagar,texto_volume,escreve_volume,aumenta_volume,diminui_volume,escritorDireto(dinB_72.render("OPTIONS",True,(200,200,200)),(260,50)))
+tela_options.setTitle("Asgard Defense")
+tela_pause.addItem(texto_volume,escreve_volume,aumenta_volume,diminui_volume,escritorDireto(dinB_72.render("PAUSE",True,(200,200,200)),(295,50)))
 
 confirma_sim=pyTreeBee.linkedButton(deleteSave(tela_options),din_12,[""],250,300,pygame.Rect(0,0,130-12,60-12),0,0)
 confirma_sim.setEach_Image(pygame.image.load('botao_sim1.png').convert_alpha(),pygame.image.load('botao_sim2.png').convert_alpha(),pygame.image.load('botao_sim3.png').convert_alpha())
@@ -2045,9 +2077,11 @@ confirma_nao.setAll_BarSize((-6,-6))
 tela_confirma_exclusao.addItem(confirma_sim,confirma_nao)
 ###tela staff###
 tela_staff=pyTreeBee.dynamicScreen((800,600),60,(0,0,0))
+tela_staff.setTitle("Asgard Defense")
 tela_staff.setImage(pygame.image.load("credits.png").convert(),(0,0))
 ###tela tutorial###
 tela_tutorial=pyTreeBee.dynamicScreen((800,600),60,(0,0,0))
+tela_tutorial.setTitle("Asgard Defense")
 tela_tutorial.setImage(pygame.image.load("tutorial.png").convert(),(0,0))
 ###tela inicial###
 #> letreiro
@@ -2087,6 +2121,7 @@ botao_staff.setAll_BarSize((-10,-10))
 botao_staff.setEach_Sound(hover_som,selected_som)
 #> tela
 tela_inicial = pyTreeBee.dynamicScreen((800,600),60,(200,255,200),botao_start,botao_options,botao_staff,botao_tutorial)#,pescoco,cabeca,olho,espada
+tela_inicial.setTitle("Asgard Defense")
 tela_inicial.setImage(pygame.image.load("Abertura Nova.png").convert(),(0,0))
 tela_inicial.addItem(controlesExtras(tela_inicial,False))
 fadeIn(tela_inicial,tela_inicial,[botao_start,(500+identa_botoes_x,300+identa_botoes_y),10],[botao_options,(500+identa_botoes_x,380+identa_botoes_y),15],[botao_tutorial,(500+identa_botoes_x,460+identa_botoes_y),20],[botao_staff,(500+identa_botoes_x,540+identa_botoes_y),25])#[pescoco,(500,500),40],[cabeca,(0,0),40],[espada,(0,600),100]
@@ -2131,15 +2166,16 @@ cir_retry_1=pygame.image.load("botao_retry1.png").convert_alpha()
 cir_retry_2=pygame.image.load("botao_retry2.png").convert_alpha()
 cir_retry_3=pygame.image.load("botao_retry3.png").convert_alpha()
 
-voltar_retry_pause=pyTreeBee.linkedButton(None,din_12,[""],220,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_retry_pause=pyTreeBee.linkedButton(linkedZero(None),din_12,[""],220,450,pygame.Rect(0,0,80-25,80-25),0,0)
 voltar_retry_pause.setEach_Image(cir_retry_1,cir_retry_2,cir_retry_3)
 voltar_retry_pause.setAll_BarSize((-12,-12))
-voltar_menu_pause=pyTreeBee.linkedButton(linkedMusic(tela_inicial,"Five Armies.mp3", -1, 0.0),din_12,[""],375,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_menu_pause=pyTreeBee.linkedButton(linkedZero(tela_inicial,("Five Armies.mp3", -1, 0.0)),din_12,[""],375,450,pygame.Rect(0,0,80-25,80-25),0,0)
 voltar_menu_pause.setEach_Image(cir_voltar_1,cir_voltar_2,cir_voltar_3)
 voltar_menu_pause.setAll_BarSize((-12,-12))
-voltar_selecao_pause=pyTreeBee.linkedButton(selecao_fase,din_12,[""],530,450,pygame.Rect(0,0,80-25,80-25),0,0)
+voltar_selecao_pause=pyTreeBee.linkedButton(linkedZero(selecao_fase),din_12,[""],530,450,pygame.Rect(0,0,80-25,80-25),0,0)
 voltar_selecao_pause.setEach_Image(cir_fases_1,cir_fases_2,cir_fases_3)
 voltar_selecao_pause.setAll_BarSize((-12,-12))
+tela_pause.addItem(voltar_retry_pause,voltar_menu_pause,voltar_selecao_pause)
 
 voltar_retry=pyTreeBee.linkedButton(None,din_12,[""],220,450,pygame.Rect(0,0,80-25,80-25),0,0)
 voltar_retry.setEach_Image(cir_retry_1,cir_retry_2,cir_retry_3)
