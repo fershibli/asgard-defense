@@ -369,11 +369,15 @@ class torreGuerreiro(object):
                                 if mapa[0][self.y+e][self.x+i].piece.fly==self.fly or self.fly:
                                     if self.sprite.y!=1: self.sprite.setLine(1)
                                     self.aim=mapa[0][self.y+e][self.x+i]
+                                    if self.aim.piece.pos[0]>=self.x: self.sprite.invert[0]=True
+                                    else: self.sprite.invert[0]=False
                         except:
                             pass
         else:            
             if frame_atual%self.vel==0:
                 try:
+                    if self.aim.piece.pos[0]>=self.x: self.sprite.invert[0]=True
+                    else: self.sprite.invert[0]=False
                     self.aim.piece.hp-=self.atk*self.dmg_types[self.aim.piece.type]
                     if self.aim.piece.hp<=0:
                         self.player.score+=self.aim.piece.hpmax/100
@@ -1911,14 +1915,14 @@ fase_A.addItem(winnerScreen(fase_A,winner_scr,mapa_fase_A,blit_score,winner_musi
 fator_5=8100
 mapa_fase_5.addSpawn( (19,12), [120,120] , [800,38800] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_A] *2, [(1,0),(1,0)] ,[2,6], [50,50])#1,6
 mapa_fase_5.addSpawn( (0,12), [120,120] , [800,38800] , (0,0) , [enemy1,enemy6] , [(20,20),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [100,700] ,[False,False],[0,4], [mov_5_B] *2, [(1,0),(1,0)] ,[2,6], [50,50])
-mapa_fase_5.addSpawn( (15,1), [120,120] , [8700,54200] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_C] *2, [(1,0),(1,0)] ,[2,7], [50,50])#2,8
-mapa_fase_5.addSpawn( (0,4), [120,120] , [8700,54200] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,False],[2,0], [mov_5_D] *2, [(1,0),(1,0)] ,[2,7], [50,50])
+mapa_fase_5.addSpawn( (15,1), [120,120] , [8700,54200] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,True],[2,0], [mov_5_C] *2, [(1,0),(1,0)] ,[2,7], [50,50])#2,8
+mapa_fase_5.addSpawn( (0,4), [120,120] , [8700,54200] , (0,0) , [enemy2,enemy8] , [(25,25),(22,22)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,600] ,[False,True],[2,0], [mov_5_D] *2, [(1,0),(1,0)] ,[2,7], [50,50])
 mapa_fase_5.addSpawn( (15,12), [120,120,240] , [31200,69700,72500] , (0,0,0) , [enemy5,enemy10,enemy10] , [(22,22),(20,20),(20,20)] , [8,8,8] , [False, False, False] , [1,10,20] , [0.5,0.5,0.25] , [450,12000,10000] ,[False,False,False],[0,0,0], [mov_5_E] *3, [(1,0),(1,0),(1,0)] ,[4,200,200], [50,1,2])#5,10,10
 mapa_fase_5.addSpawn( (4,1), [120,120,240] , [31200,69700,72500] , (0,0,0) , [enemy5,enemy10,enemy10] , [(22,22),(20,20),(20,20)] , [8,8,8] , [False, False, False] , [1,10,20] , [0.5,0.5,0.25] , [450,12000,10000] ,[False,False,False],[0,0,0], [mov_5_F] *3, [(1,0),(1,0),(1,0)] ,[4,200,200], [50,1,2])#5,10,10
 mapa_fase_5.addSpawn( (19,1), [120,120] , [16000,61300] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_G] *2, [(1,0),(1,0)] ,[3,9], [50,50])#3,9
 mapa_fase_5.addSpawn( (0,1), [120,120] , [16000,61300] , (0,0) , [enemy3,enemy9] , [(25,25),(25,25)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [300,1350] ,[False,False],[3,4], [mov_5_H] *2, [(1,0),(1,0)] ,[3,9], [50,50])
-mapa_fase_5.addSpawn( (19,9), [120,120] , [23900,46900] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_I] *2, [(1,0),(1,0)] ,[4,5], [50,50])#4,7
-mapa_fase_5.addSpawn( (4,12), [120,120] , [23900,46900] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[False,False],[1,3], [mov_5_J] *2, [(1,0),(1,0)] ,[4,5], [50,50])
+mapa_fase_5.addSpawn( (19,9), [120,120] , [23900,46900] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[True,False],[1,3], [mov_5_I] *2, [(1,0),(1,0)] ,[4,5], [50,50])#4,7
+mapa_fase_5.addSpawn( (4,12), [120,120] , [23900,46900] , (0,0) , [enemy4,enemy7] , [(22,22),(20,20)] , [8,8] , [False]*2 , [1,1] , [0.5,0.5] , [180,1080] ,[True,False],[1,3], [mov_5_J] *2, [(1,0),(1,0)] ,[4,5], [50,50])
 
 mapa_fase_5.addTarget((8,5),(0,0))
 mapa_fase_5.addTarget((11,5),(0,0))
