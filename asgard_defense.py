@@ -2,6 +2,7 @@
 import pyTreeBee,pygame,sys,os,time, pygame.mixer, copy
 import cPickle as pickle
 from pygame.locals import*
+
 infoObject = pygame.display.Info()
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
 temporarydisplay=pygame.display.set_mode((800,600))
@@ -37,6 +38,16 @@ pygame.mixer.init()
 pygame.mixer.music.load("Five Armies.mp3")
 pygame.mixer.music.play(-1, 0.0)
 pygame.mixer.music.set_volume(5)
+
+
+def blit_alpha(target, source, location, opacity):
+    x = location[0]
+    y = location[1]
+    temp = pygame.Surface((source.get_width(), source.get_height())).convert()
+    temp.blit(target, (-x, -y))
+    temp.blit(source, (0, 0))
+    temp.set_alpha(opacity)        
+    target.blit(temp, location)
 
 class deleteSave(object):
     def __init__(self,tela):
@@ -479,7 +490,19 @@ class quadradoControlavel(object):
     def blitOn(self,screen):
         if self.dentro:
             if self.char_sprite!=None:
-                screen.blit(self.char_sprite.subsurface(((0,0),self.char_size)),((self.x*self.size)-(self.char_size[0]/2)+(self.size/2),(self.y*self.size)-(self.char_size[1]*3/4)+(self.size/2)-5) )
+                chromakey=(9,99,9)
+                rng_circle=pygame.Surface((self.rng*self.size*2,self.rng*self.size*2))
+                rng_circle.fill(chromakey)
+                rng_circle.set_colorkey(chromakey)
+                pygame.draw.circle(rng_circle, (255, 0, 0), (self.rng*self.size, self.rng*self.size), self.rng*40, 0)
+                rng_circle.set_alpha(100)
+                
+                char_image=self.char_sprite.subsurface(((0,0),self.char_size))
+                char_pos=((self.x*self.size)-(self.char_size[0]/2)+(self.size/2),(self.y*self.size)-(self.char_size[1]*3/4)+(self.size/2)-5)
+                circle_pos=((self.x*self.size)+(self.size//2)-(self.rng*self.size),(self.y*self.size)+(self.size//2)-(self.rng*self.size))
+                
+                screen.blit(rng_circle,circle_pos)
+                blit_alpha(screen,char_image, char_pos,200)
             screen.blit(self.sprite.getNextImage(),(self.x*self.size,self.y*self.size))
     def keyControls(self,event,mapa,alingment,player):
         if event.type==MOUSEMOTION:
