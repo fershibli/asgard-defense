@@ -97,17 +97,22 @@ class lockedButton(object):
         self.linkedButton=linkedButton
         self.unlocked=False
         self.id_str=str(id_str)
+        self.linkedButton.setAlphaBar([0,0,0])
+        self.linkedButton.setAlpha([155,155,155])
     def blitOn(self,scr):
-        if self.unlocked: self.linkedButton.blitOn(scr)
+        #if self.unlocked: self.linkedButton.blitOn(scr)
+        self.linkedButton.blitOn(scr)
     def keyControls(self,event):
         retorno=False
         if self.unlocked: retorno=self.linkedButton.keyControls(event)
         return retorno
     def unlockButton(self):#na vitoria
         self.unlocked=True
+        self.linkedButton.setAlpha([255,255,255])
     def stateLoad(self):#no inicio        
         arq=open('Data\game'+self.id_str+'.ages','rb')
         self.unlocked=pickle.load(arq)
+        if self.unlocked: self.linkedButton.setAlpha([255,255,255])
         arq.close
     def stateClear(self):
         self.unlocked=False
@@ -490,16 +495,19 @@ class quadradoControlavel(object):
     def blitOn(self,screen):
         if self.dentro:
             if self.char_sprite!=None:
+                char_image=self.char_sprite.subsurface(((0,0),self.char_size))
+                char_pos=((self.x*self.size)-(self.char_size[0]/2)+(self.size/2),(self.y*self.size)-(self.char_size[1]*3/4)+(self.size/2)-5)
+                circle_pos=((self.x*self.size)+(self.size//2)-(self.rng*self.size),(self.y*self.size)+(self.size//2)-(self.rng*self.size))
+                
                 chromakey=(9,99,9)
                 rng_circle=pygame.Surface((self.rng*self.size*2,self.rng*self.size*2))
                 rng_circle.fill(chromakey)
                 rng_circle.set_colorkey(chromakey)
+                pygame.draw.circle(rng_circle, (255, 0, 0), (self.rng*self.size, self.rng*self.size), self.rng*40, 2)
+                screen.blit(rng_circle,circle_pos)
                 pygame.draw.circle(rng_circle, (255, 0, 0), (self.rng*self.size, self.rng*self.size), self.rng*40, 0)
                 rng_circle.set_alpha(100)
                 
-                char_image=self.char_sprite.subsurface(((0,0),self.char_size))
-                char_pos=((self.x*self.size)-(self.char_size[0]/2)+(self.size/2),(self.y*self.size)-(self.char_size[1]*3/4)+(self.size/2)-5)
-                circle_pos=((self.x*self.size)+(self.size//2)-(self.rng*self.size),(self.y*self.size)+(self.size//2)-(self.rng*self.size))
                 
                 screen.blit(rng_circle,circle_pos)
                 blit_alpha(screen,char_image, char_pos,200)
@@ -1788,6 +1796,7 @@ tecla_viking=charTyped(mouse,K_q,viking_image,(60,50),6,False,25,22,2,False,viki
 tecla_arqueiro=charTyped(mouse,K_w,arqueiro_image,(50,50),5,False,35,30,3,True,arqueiro_diferenciador,50)
 tecla_berserker=charTyped(mouse,K_e,berserker_image,(70,70),5,False,15,5,1,False,berserker_diferenciador,50)
 tecla_valquiria=charTyped(mouse,K_r,valquiria_image,(80,80),4,False,25,12,2,True,valquiria_diferenciador,75)
+
 
 pick_som=pygame.mixer.Sound("bow.wav")
 botao_viking = pyTreeBee.linkedButton(viking_click,dinB_12,[""],0,520,pygame.Rect(0,0,80,80),0,-15,pygame.image.load("menubot_1.png").convert())
