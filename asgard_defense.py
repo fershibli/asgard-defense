@@ -653,6 +653,7 @@ class mapaLimitavel(object):
         self.selecao=mouse
         self.qnt_inimigos=0
         self.menu=pygame.image.load("menubot_fundo.png").convert()
+        self.pause=False
     def desenhaMapa(self):
         for z in range(len(self.mapa)):
             for y in range(len(self.mapa[z])):
@@ -686,7 +687,7 @@ class mapaLimitavel(object):
         for z in range(len(self.mapa)):                                
             for y in range(len(self.mapa[z])):
                 for x in range(len(self.mapa[z][y])):
-                    if self.mapa[z][y][x].piece!=None:
+                    if self.mapa[z][y][x].piece!=None and self.pause==False:
                         try:
                             self.mapa[z][y][x].piece.movimentoPadrao(self.mapa,self.size)
                         except:
@@ -744,11 +745,16 @@ class mapaLimitavel(object):
         screen.blit(din_12.render("MANA:",True,(255,255,255)),(680,0))
         screen.blit(dinB_22.render(str(self.player.mana),True,(10,125,255)),(680,10))
         screen.blit(self.menu,(0,520))
-        self.selecao.blitOn(screen)
+        if self.pause==False: self.selecao.blitOn(screen)
         
         
     def keyControls(self,event):
-        self.selecao.keyControls(event,self.mapa, self.alingment,self.player)
+        if event.type==KEYUP:
+            if event.key==K_p:
+                if self.pause: self.pause=False
+                else: self.pause=True
+                pygame.mouse.set_visible(self.pause)
+        if self.pause==False: self.selecao.keyControls(event,self.mapa, self.alingment,self.player)
         return False
 
 class blitScore(object):
@@ -777,7 +783,7 @@ class winnerScreen(object):
         self.score=score
     def blitOn(self,scr):
         global voltar_retry,frame_atual
-        if self.mapa.player.damage_counter+self.mapa.player.kill_counter>=self.mapa.qnt_inimigos:
+        if self.mapa.player.damage_counter+self.mapa.player.kill_counter>=self.mapa.qnt_inimigos and self.mapa.player.life>0:
             self.tela.fps=60
             if frame_atual%120==0:
                 if self.music:
@@ -814,10 +820,14 @@ class gameOver(object):
         self.link=link
         self.mapa=mapa
         self.music=music
+        self.actived=False
     def blitOn(self,scr):
         global voltar_retry, frame_atual
-        if self.mapa.player.life<=0:
+        if self.mapa.player.life<=0 or self.actived:
             self.tela.fps=60
+            if self.actived==False:
+                frame_atual=0
+                self.actived=True
             if frame_atual%90==0:
                 if self.music:
                     pygame.mixer.music.load(self.music[0])
