@@ -751,8 +751,8 @@ class mapaLimitavel(object):
     def keyControls(self,event):
         if event.type==KEYUP:
             if event.key==K_p:
-                if self.pause: self.pause=False
-                else: self.pause=True
+                if self.pause: self.pause=False; pygame.mixer.music.unpause()
+                else: self.pause=True; pygame.mixer.music.pause()
                 pygame.mouse.set_visible(self.pause)
         if self.pause==False: self.selecao.keyControls(event,self.mapa, self.alingment,self.player)
         return False
@@ -909,7 +909,9 @@ class controlesExtras(object):
         if self.primeira_vez:
             frame_atual=1
             self.primeira_vez=False
-        frame_atual+=self.frame_skip
+        if self.mapa==None:
+            frame_atual+=self.frame_skip
+        elif self.mapa.pause==False: frame_atual+=self.frame_skip
     def keyControls(self,event):
         global tela_pause, config_pause,voltar_retry_pause, voltar_menu_pause, voltar_selecao_pause
         retorno=False
