@@ -476,6 +476,7 @@ class quadradoControlavel(object):
         self.sprite=animacaoSprite(pygame.image.load(dir_image+"selecao4.png").convert_alpha(),(40,40),9,True)
         self.buttonup=False
         self.dentro=True
+        self.cor=(0,0,0)
         self.botaodireito=False
         self.botaoesquerdo=False
         self.nullSelection()
@@ -508,9 +509,9 @@ class quadradoControlavel(object):
                 rng_circle=pygame.Surface((self.rng*self.size*2,self.rng*self.size*2))
                 rng_circle.fill(chromakey)
                 rng_circle.set_colorkey(chromakey)
-                pygame.draw.circle(rng_circle, (255, 0, 0), (self.rng*self.size, self.rng*self.size), self.rng*40, 2)
+                pygame.draw.circle(rng_circle, self.cor, (self.rng*self.size, self.rng*self.size), self.rng*40, 2)
                 screen.blit(rng_circle,circle_pos)
-                pygame.draw.circle(rng_circle, (255, 0, 0), (self.rng*self.size, self.rng*self.size), self.rng*40, 0)
+                pygame.draw.circle(rng_circle, self.cor, (self.rng*self.size, self.rng*self.size), self.rng*40, 0)
                 rng_circle.set_alpha(100)
                 
                 
@@ -536,6 +537,10 @@ class quadradoControlavel(object):
                 self.x=alnX+len(mapa[0][self.y])-1
             if self.x<alnX:
                 self.x=alnX
+
+        if mapa[1][self.y][self.x].numID<=8 and mapa[1][self.y][self.x].numID>=0:
+            self.cor=(0,255,0)
+        else: self.cor=(255,0,0)
         if self.botaoesquerdo:
             if self.dentro:
                 if self.char_sprite!=None:
@@ -921,9 +926,6 @@ class controlesExtras(object):
         global tela_pause, config_pause,voltar_retry_pause, voltar_menu_pause, voltar_selecao_pause
         retorno=False
         if event.type==KEYUP:
-            if event.key==K_ESCAPE:
-                self.tela.storedlink=None
-                self.tela.running=False
             if self.pausavel and event.key==K_SPACE:
                 pygame.mouse.set_visible(True)
                 voltar_retry_pause.link.mapa=self.mapa
