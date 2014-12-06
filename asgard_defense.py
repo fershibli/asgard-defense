@@ -3,9 +3,9 @@ import pyTreeBee,pygame,sys,os,time, pygame.mixer, copy
 import cPickle as pickle
 from pygame.locals import*
 
-dir_music=''
-dir_image=''
-dir_fonts=''
+dir_music='Sound\\'
+dir_image='Image\\'
+dir_fonts='Font\\'
 
 infoObject = pygame.display.Info()
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % ((infoObject.current_w//2)-400, (infoObject.current_h//2)-300)
@@ -85,14 +85,14 @@ class congratulouGame(object):
             retorno=self.congratulations
         return retorno
     def stateLoad(self):
-        arq=open('Data\game data.ages','rb')
+        arq=open('Data\\game data.ages','rb')
         self.unlocked=pickle.load(arq)
         arq.close
     def stateClear(self):
         self.unlocked=False
         self.stateDump()
     def stateDump(self):
-        arq=open('Data\game data.ages','wb')
+        arq=open('Data\\game data.ages','wb')
         pickle.dump(self.unlocked,arq)
         arq.close 
         
@@ -650,7 +650,40 @@ class spawnInimigo(object):
                     self.pause=True
         else:
             self.pause=True
-                
+
+class tutorialGame(object):
+    def __init__(self,mapa,font,text_vector,button_vector):
+        self.arrow_img=pygame.image.load(dir_image+'arrow_tuto.png').convert_alpha()
+        self.font=font
+        self.mapa=mapa
+        self.pause=True
+        self.text=text_vector
+        self.button=button_vector
+        self.step=0
+    def blitOn(self,display):
+        if self.mapa.tutorial_flag:
+            self.mapa.tutorial_flag=False
+            self.step=0
+            self.pause=True
+        if self.step<len(self.button):
+            if self.mapa.player.mana>0:
+                for i in range(len(self.text[self.step])):
+                    if self.font.size(self.text[self.step][i])[0]+self.button[self.step].x+self.arrow_img.get_width()>800:
+                        pos_x=self.button[self.step].x - self.font.size(self.text[self.step][i])[0]
+                    else:
+                        pos_x=self.button[self.step].x+self.button[self.step].w#self.arrow_img.get_width()
+                    rendertext=self.font.render(self.text[self.step][i],True,(0,0,0))
+                    display.blit(rendertext,(pos_x,((self.font.get_height()+1)*i)+self.button[self.step].y-self.arrow_img.get_height()))
+                arrow_scaled=pygame.transform.scale(self.arrow_img,(self.button[self.step].w,self.arrow_img.get_height()))
+                display.blit(arrow_scaled,(self.button[self.step].x,self.button[self.step].y-self.arrow_img.get_height()))
+            if self.pause and self.mapa.player.mana>0: self.mapa.pauseGame(); self.pause=not self.pause
+        if not self.pause and self.mapa.player.mana==0: self.mapa.pauseGame(); self.pause=not self.pause
+    def keyControls(self,event):
+        if self.mapa.player.mana>0 and self.step<len(self.button):
+            if event.type==MOUSEBUTTONDOWN:
+                if self.button[self.step].collidepoint(event.pos):
+                    self.step+=1
+
 class mapaLimitavel(object):
     def __init__(self,mouse,player,mapa,imagens,size,*fases_liberadas):
         self.alingment=(0,0)
@@ -664,6 +697,7 @@ class mapaLimitavel(object):
         self.qnt_inimigos=0
         self.menu=pygame.image.load(dir_image+"menubot_fundo.png").convert()
         self.pause=False
+        self.tutorial_flag=False
     def desenhaMapa(self):
         for z in range(len(self.mapa)):
             for y in range(len(self.mapa[z])):
@@ -683,6 +717,8 @@ class mapaLimitavel(object):
                 for bloco in fileira:
                     if bloco.piece!=None:
                         bloco.piece.setZero(self.mapa)
+        self.pause=False
+        self.tutorial_flag=True
         self.player.setZero()
         self.selecao.nullSelection()
     def addSpawn(self,pos,time,pause_time,where,sprites,tamanhos,nextsprites,rewinds,forcas,velocidades,vidas,voador,tipos,movimento,sentidos,manas,quantidades):
@@ -755,16 +791,17 @@ class mapaLimitavel(object):
         screen.blit(din_12.render("MANA:",True,(255,255,255)),(680,0))
         screen.blit(dinB_22.render(str(self.player.mana),True,(10,125,255)),(680,10))
         screen.blit(self.menu,(0,520))
-        if self.pause==False: self.selecao.blitOn(screen)
+        self.selecao.blitOn(screen)
         
-        
+    def pauseGame(self):
+        self.pause = not self.pause
+        pygame.mixer.music.pause() if self.pause else pygame.mixer.music.unpause()
+        pygame.mouse.set_visible(self.pause)        
     def keyControls(self,event):
         if event.type==KEYUP:
             if event.key==K_p:
-                if self.pause: self.pause=False; pygame.mixer.music.unpause()
-                else: self.pause=True; pygame.mixer.music.pause()
-                pygame.mouse.set_visible(self.pause)
-        if self.pause==False: self.selecao.keyControls(event,self.mapa, self.alingment,self.player)
+                self.pauseGame()
+        self.selecao.keyControls(event,self.mapa, self.alingment,self.player)
         return False
 
 class blitScore(object):
@@ -1493,7 +1530,7 @@ matriz_fase_1=[
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, 0, -1, -1, -1, -1, 0, -1, -1, -1, -1, 0, -1, -1, -1, -1, 0, -1, -1],
+        [-1, -1,  0, -1, -1, -1, -1,  0, -1, -1, -1, -1,  0, -1, -1, -1, -1,  0, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
@@ -2096,6 +2133,37 @@ fase_2.addItem(winnerScreen(fase_2,winner_scr,mapa_fase_2,blit_score,winner_musi
 mapa_fase_1.addSpawn( (0,6), [120,120,120,120] , [400,1000,2000,3800], (0,0), [enemy3,enemy4,enemy6,enemy8],[(25,25),(22,22),(25,25),(22,22)],[8,8,8,8,8,8,8,8,8,8],[True,False,True,False],[1,1,1,1],[0.5,0.5,0.5,0.5],[400,400,2000,1250],[False,True,False,True],[0,0,0,0],[mov_1_A,mov_1_B,mov_1_A,mov_1_B],[(1,0),(1,0),(1,0),(1,0)],[50,50,75,200],[1,1,1,1])
 mapa_fase_1.addTarget((19,6),(0,0))
 fase_1.addItem(botao_viking,botao_arqueiro, botao_berserker,botao_valquiria,tecla_viking,tecla_arqueiro,tecla_berserker,tecla_valquiria,tecla_x1,tecla_x2,tecla_x3,accelx1,accelx2,accelx3)#,texto_viking,texto_arqueiro,texto_berserker,texto_valquiria
+
+tutorial_fase_1=tutorialGame(mapa_fase_1,dinB_22,
+             [['Clique no botão do Viking',
+               'para chamar o Viking.'],
+              ['Agora mande-o para uma ',
+               'posição válida do campo de batalha.',
+               'Tente esta.'],
+              ['O próximo inimigo é voador,',
+               'com a sua Mana atual de 50 pontos',
+               'o ideal é escolher a Arqueira'],
+              ['Mande a Arqueira para a posição mais',
+               'próxima possível ao foco da invasão.'],
+              ['Avistamos um inimigo com uma rígida',
+               'carapaça se aproximar, acho que só',
+               'o grande Berserker pode nos ajudar.'],
+              ['Seu machado terá mais glória ao',
+               'enfrentar os inimigos aqui.'],
+              ['Outro inimigo voador, mas agora',
+               'seus 75 pontos de Mana permitem',
+               'chamar a Valquíria ao campo'],
+              ['Não temos muitas escolhas, esta',
+               'é a sua última posição possível.',
+               'Você só tem 1 ponto de Vida, espero que dê tempo.']],
+             [pygame.Rect(0,520,80,80),pygame.Rect(80,240,40,40),
+              pygame.Rect(80,520,80,80),pygame.Rect(280,240,40,40),
+              pygame.Rect(160,520,80,80),pygame.Rect(480,240,40,40),
+              pygame.Rect(240,520,80,80),pygame.Rect(680,240,40,40)]
+             )
+             #6*40 ->2*40, 7*40, 12*40, 17*40
+
+fase_1.addItem(tutorial_fase_1)
 
 fase_1.addItem(controlesExtras(fase_1,True,mapa_fase_1))
 fase_1.addItem(gameOver(fase_1,game_over,mapa_fase_1,game_over_music))
