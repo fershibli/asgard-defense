@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  NAME: AsgardDefense
+  MAIN: asgard_defense.py
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build inside the official Python 2.7 image
+        run: >
+          docker run --rm -v "$PWD":/src -w /src
+          -e NAME -e MAIN -e DEPS="pyinstaller==3.6 pygame==1.9.6" -e PY=python
+          python:2.7.18-buster bash .github/scripts/build.sh linux
+      - uses: actions/upload-artifact@v5
+        with:
+          name: linux
+          path: dist/*.zip
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Python 2.7
+        run: choco install python2 -y --no-progress
+      - name: Build
+        shell: bash
+        env:
+          PY: /c/Python27/python.exe
+          DEPS: "pyinstaller==3.6 pygame==1.9.6"
+        run: bash .github/scripts/build.sh windows
+      - uses: actions/upload-artifact@v5
+        with:
+          name: windows
+          path: dist/*.zip
+  macos:
+    runs-on: macos-latest
+    # Python 2.7 only exists for Intel Macs; this job runs it through Rosetta.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Rosetta and Python 2.7
+        run: |
+          softwareupdate --install-rosetta --agree-to-license || true
+          curl -fsSLo py27.pkg https://www.python.org/ftp/python/2.7.18/python-2.7.18-macosx10.9.pkg
+          sudo installer -pkg py27.pkg -target /
+      - name: Build
+        env:
+          PY: /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
+          DEPS: "pyinstaller==3.6 pygame==1.9.6"
+        run: arch -x86_64 bash .github/scripts/build.sh macos
+      - uses: actions/upload-artifact@v5
+        with:
+          name: macos
+          path: dist/*.zip
+  release:
+    needs: [linux, windows, macos]
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') }}
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
