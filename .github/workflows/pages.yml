@@ -25,6 +25,7 @@ jobs:
       - name: Port the game and build it with pygbag
         run: |
           pip install pygbag
+          command -v ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
           python web/port.py site/asgard
           # the browser build plays .ogg; convert the mp3/aiff tracks it uses
           while IFS= read -r f; do
