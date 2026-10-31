@@ -17,6 +17,12 @@ Developed in 2014 in the 4th semester of Digital Games at **Fatec Sao Caetano do
 
 From `v001` (Aug 2014) to `v035` (Dec 2014), one commit per version, dated from the original files and art exports.
 
+## Play in the browser
+
+**[https://fershibli.github.io/asgard-defense/](https://fershibli.github.io/asgard-defense/)**
+
+Built with [pygbag](https://pygame-web.github.io/) (pygame on WebAssembly) by `.github/workflows/pages.yml`. `web/src/` has Python 3 copies of `asgard_defense.py` and `pyTreeBee.py` made with 2to3, and `web/port.py` does the rest at build time: Python 2 integer division, Windows paths, `.ogg` music, and an asynchronous pyTreeBee main loop so the browser gets a frame after each update. Saves only last while the tab is open.
+
 ## Team - Asgardian AGES
 
 | Name | Role |
@@ -37,6 +43,6 @@ Asgard Defense by Asgardian AGES is licensed under [CC BY-NC-ND 4.0](https://cre
 
 Builds are made by GitHub Actions (`.github/workflows/release.yml`) for macOS, Windows and Linux. Push a tag such as `v1.0` (or run the workflow by hand) and the zipped builds are attached to a GitHub release.
 
-The game is Python 2.7, which GitHub runners no longer ship: Linux builds inside the official `python:2.7` Docker image, Windows installs it with Chocolatey, and macOS uses the Intel installer through Rosetta (that job is allowed to fail).
+The game is Python 2.7, which GitHub runners no longer ship: Linux builds inside the official `python:2.7` Docker image, Windows installs it with Chocolatey, and macOS builds on an Intel runner (`macos-15-intel`) with the official installer (that job is allowed to fail). The macOS build is for Intel Macs.
 
 To play from source: `python2.7 asgard_defense.py`.

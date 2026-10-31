@@ -43,21 +43,20 @@ jobs:
           name: windows
           path: dist/*.zip
   macos:
-    runs-on: macos-latest
-    # Python 2.7 only exists for Intel Macs; this job runs it through Rosetta.
+    # Intel runner: Python 2.7 never shipped for Apple Silicon, and the build should run on Intel Macs.
+    runs-on: macos-15-intel
     continue-on-error: true
     steps:
       - uses: actions/checkout@v5
-      - name: Install Rosetta and Python 2.7
+      - name: Install Python 2.7
         run: |
-          softwareupdate --install-rosetta --agree-to-license || true
           curl -fsSLo py27.pkg https://www.python.org/ftp/python/2.7.18/python-2.7.18-macosx10.9.pkg
           sudo installer -pkg py27.pkg -target /
       - name: Build
         env:
           PY: /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
           DEPS: "pyinstaller==3.6 pygame==1.9.6"
-        run: arch -x86_64 bash .github/scripts/build.sh macos
+        run: bash .github/scripts/build.sh macos
       - uses: actions/upload-artifact@v5
         with:
           name: macos

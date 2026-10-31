@@ -1,0 +1,48 @@
+name: Web (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Port the game and build it with pygbag
+        run: |
+          pip install pygbag
+          python web/port.py site/asgard
+          # the browser build plays .ogg; convert the mp3/aiff tracks it uses
+          while IFS= read -r f; do
+            ffmpeg -loglevel error -y -i "$f" -vn -c:a libvorbis -q:a 2 "site/asgard/${f%.*}.ogg"
+          done < site/asgard/to-ogg.txt
+          rm site/asgard/to-ogg.txt
+          python -m pygbag --build --title "Asgard Defense" site/asgard
+          mv site/asgard/build/web public
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
