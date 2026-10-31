@@ -27,7 +27,7 @@ jobs:
           pip install pygbag
           command -v ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
           python web/port.py site/asgard
-          # the browser build plays .ogg; convert the mp3/aiff tracks it uses
+          # the browser build plays .ogg; convert the mp3/aiff/wav files it uses (pygbag only packs .ogg sound)
           while IFS= read -r f; do
             ffmpeg -nostdin -loglevel error -y -i "$f" -vn -c:a libvorbis -q:a 2 "site/asgard/${f%.*}.ogg"
           done < site/asgard/to-ogg.txt

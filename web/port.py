@@ -8,7 +8,7 @@ original code by hand:
 - Windows paths ('Image\\x.png', 'Data\\game data.ages') become plain names,
   matching the files at the repository root, ignoring case;
 - music and sounds point to .ogg copies (the workflow converts them with
-  ffmpeg), since browsers do not all play mp3/aiff through SDL;
+  ffmpeg), since pygbag only packs .ogg sound;
 - the pyTreeBee main loop becomes asynchronous, so the browser gets a frame
   after each pygame.display.update().
 
@@ -23,7 +23,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'web', 'src')
 OUT = sys.argv[1]
 ASSET_EXT = ('.png', '.jpg', '.wav', '.mp3', '.aiff', '.otf', '.ttf', '.ogg')
-TO_OGG = ('.mp3', '.aiff')
+TO_OGG = ('.mp3', '.aiff', '.wav')
 ROOT_FILES = {n.lower(): n for n in os.listdir(ROOT) if os.path.isfile(os.path.join(ROOT, n))}
 used = set()
 
