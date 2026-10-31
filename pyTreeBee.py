@@ -157,6 +157,12 @@ class linkedButton(object):
         self.wait_sound=0
     def buttonTurnOff(self):
         self.actived=False
+    # Asgard Defense v033+ calls setAlpha/setAlphaBar, but the pyTreeBee version that had
+    # them was not recovered: this rebuilds them (one alpha per state: normal, hover, selected).
+    def setAlpha(self, alpha):
+        self.alpha=list(alpha)
+    def setAlphaBar(self, alpha):
+        self.alpha_bar=list(alpha)
     def moveTo(self, location):
         for r in self.rect:
             r.x=location[0]
@@ -293,7 +299,9 @@ class linkedButton(object):
         self.wait_sound=time
     def blitOn(self, screen):
         try:
-            if self.bar_image[self.state]==None:
+            if getattr(self,'alpha_bar',None) and self.alpha_bar[self.state]==0:
+                pass
+            elif self.bar_image[self.state]==None:
                 screen.fill( self.bar[self.state], pygame.Rect(self.x+self.rect[self.state].x,self.y+self.rect[self.state].y,self.rect[self.state].w,self.rect[self.state].h))
             else:
                 scaled_bar = pygame.transform.scale(self.bar_image[self.state],self.bar_scale[self.state])
@@ -302,6 +310,7 @@ class linkedButton(object):
                 screen.fill( self.background[self.state],pygame.Rect(self.x+self.rect[self.state].x+self.bar_size[self.state][0],self.y+self.rect[self.state].y+self.bar_size[self.state][1],self.rect[self.state].width-2*self.bar_size[self.state][0], self.rect[self.state].height-2*self.bar_size[self.state][1]))
             else:
                 scaled_image = pygame.transform.scale( self.image[self.state],self.scale[self.state])
+                if getattr(self,'alpha',None): scaled_image.set_alpha(self.alpha[self.state])
                 screen.blit( scaled_image,(self.x+self.rect[self.state].x+self.bar_size[self.state][0],self.y+self.rect[self.state].y+self.bar_size[self.state][1]))
         except:
             pass

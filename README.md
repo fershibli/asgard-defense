@@ -17,6 +17,8 @@ Developed in 2014 in the 4th semester of Digital Games at **Fatec Sao Caetano do
 
 From `v001` (Aug 2014) to `v035` (Dec 2014), one commit per version, dated from the original files and art exports.
 
+Only the first `pyTreeBee.py` survived. From `v033` on the game calls `linkedButton.setAlpha()`/`setAlphaBar()` (the locked stage buttons), so those two methods were rebuilt in `pyTreeBee.py`.
+
 ## Play in the browser
 
 **[https://fershibli.github.io/asgard-defense/](https://fershibli.github.io/asgard-defense/)**
